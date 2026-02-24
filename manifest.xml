@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp"
+>
+  <!-- WICHTIG: Diese GUID ist eindeutig für dieses Add-in. Nicht ändern, solange Sie dasselbe Add-in verwenden. -->
+  <Id>c7f2b8e4-3a1d-4f6c-8e9b-5d2a7c3f1e8b</Id>
+
+  <Version>1.0.0</Version>
+  <ProviderName>Eigenes Add-in</ProviderName>
+  <DefaultLocale>de-DE</DefaultLocale>
+
+  <DisplayName DefaultValue="BGH Suche" />
+  <Description DefaultValue="Suche auf bundesgerichtshof.de und füge Texte direkt in Word ein." />
+
+  <!-- Icon-URLs: Ersetzen Sie dies durch Ihre eigene gehostete URL oder lassen Sie die Platzhalter. -->
+  <IconUrl DefaultValue="https://placehold.co/32x32/1a1a5e/ffffff?text=BGH" />
+  <HighResolutionIconUrl DefaultValue="https://placehold.co/64x64/1a1a5e/ffffff?text=BGH" />
+
+  <SupportUrl DefaultValue="https://www.bundesgerichtshof.de" />
+
+  <!-- Domains, die das Add-in öffnen darf (für openBrowserWindow und Navigation) -->
+  <AppDomains>
+    <AppDomain>https://www.bundesgerichtshof.de</AppDomain>
+    <AppDomain>https://juris.bundesgerichtshof.de</AppDomain>
+    <!-- WICHTIG: Ersetzen Sie die folgende Domain durch den Host Ihrer taskpane.html -->
+    <AppDomain>https://IHR-BENUTZERNAME.github.io</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Document" />
+  </Hosts>
+
+  <!--
+    WICHTIG: SourceLocation muss auf Ihre gehostete taskpane.html zeigen (HTTPS!).
+    Ersetzen Sie die URL unten durch Ihre eigene Adresse.
+    Beispiel GitHub Pages: https://IHR-BENUTZERNAME.github.io/klotz/taskpane.html
+    Beispiel lokaler Server (nur für Tests): https://localhost:3000/taskpane.html
+  -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://IHR-BENUTZERNAME.github.io/klotz/taskpane.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <!-- VersionOverrides für Ribbon-Schaltfläche -->
+  <VersionOverrides
+    xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+    xsi:type="VersionOverridesV1_0"
+  >
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+
+          <FunctionFile resid="FunctionFile.Url" />
+
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!-- Schaltfläche im Home-Tab der Ribbon-Leiste -->
+            <OfficeTab id="TabHome">
+              <Group id="BGH.Group">
+                <Label resid="BGH.Group.Label" />
+                <Icon>
+                  <bt:Image size="16"  resid="icon_16" />
+                  <bt:Image size="20"  resid="icon_20" />
+                  <bt:Image size="24"  resid="icon_24" />
+                  <bt:Image size="32"  resid="icon_32" />
+                  <bt:Image size="40"  resid="icon_40" />
+                  <bt:Image size="48"  resid="icon_48" />
+                  <bt:Image size="64"  resid="icon_64" />
+                  <bt:Image size="80"  resid="icon_80" />
+                </Icon>
+
+                <Control xsi:type="Button" id="BGH.Button">
+                  <Label resid="BGH.Button.Label" />
+                  <Supertip>
+                    <Title resid="BGH.Button.Label" />
+                    <Description resid="BGH.Button.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16"  resid="icon_16" />
+                    <bt:Image size="20"  resid="icon_20" />
+                    <bt:Image size="24"  resid="icon_24" />
+                    <bt:Image size="32"  resid="icon_32" />
+                    <bt:Image size="40"  resid="icon_40" />
+                    <bt:Image size="48"  resid="icon_48" />
+                    <bt:Image size="64"  resid="icon_64" />
+                    <bt:Image size="80"  resid="icon_80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>BGH.Taskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <!-- Ersetzen Sie die URLs durch Ihre eigenen gehosteten Icons -->
+        <bt:Image id="icon_16" DefaultValue="https://placehold.co/16x16/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_20" DefaultValue="https://placehold.co/20x20/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_24" DefaultValue="https://placehold.co/24x24/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_32" DefaultValue="https://placehold.co/32x32/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_40" DefaultValue="https://placehold.co/40x40/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_48" DefaultValue="https://placehold.co/48x48/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_64" DefaultValue="https://placehold.co/64x64/1a1a5e/ffffff?text=B" />
+        <bt:Image id="icon_80" DefaultValue="https://placehold.co/80x80/1a1a5e/ffffff?text=B" />
+      </bt:Images>
+
+      <bt:Urls>
+        <!-- WICHTIG: URL durch Ihre eigene ersetzen -->
+        <bt:Url id="Taskpane.Url"
+                DefaultValue="https://IHR-BENUTZERNAME.github.io/klotz/taskpane.html" />
+        <bt:Url id="FunctionFile.Url"
+                DefaultValue="https://IHR-BENUTZERNAME.github.io/klotz/taskpane.html" />
+        <bt:Url id="GetStarted.LearnMoreUrl"
+                DefaultValue="https://www.bundesgerichtshof.de" />
+      </bt:Urls>
+
+      <bt:ShortStrings>
+        <bt:String id="BGH.Group.Label"    DefaultValue="BGH Suche" />
+        <bt:String id="BGH.Button.Label"   DefaultValue="BGH Suche" />
+        <bt:String id="GetStarted.Title"   DefaultValue="BGH Suche starten" />
+      </bt:ShortStrings>
+
+      <bt:LongStrings>
+        <bt:String id="BGH.Button.Tooltip"
+                   DefaultValue="Öffnet die BGH-Suchleiste. Suchen Sie Entscheidungen und fügen Sie Text in Ihr Dokument ein." />
+        <bt:String id="GetStarted.Description"
+                   DefaultValue="BGH Suche geladen. Klicken Sie auf 'BGH Suche' im Home-Tab der Menüleiste." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
