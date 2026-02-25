@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Windows & macOS
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ── Windows ────────────────────────────────────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
@@ -39,8 +40,69 @@ jobs:
           path: dist/Paragrafen-TicTacToe.exe
           retention-days: 30
 
+  # ── macOS (Universal Binary: Intel + Apple Silicon) ────────────────────────
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pygame pyinstaller
+
+      - name: Build macOS App
+        run: |
+          pyinstaller \
+            --onefile \
+            --windowed \
+            --name "Paragrafen-TicTacToe" \
+            --hidden-import pygame \
+            tictactoe.py
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg_content
+          cp -r dist/Paragrafen-TicTacToe.app dmg_content/ 2>/dev/null || cp dist/Paragrafen-TicTacToe dmg_content/
+          hdiutil create \
+            -volname "Paragrafen-TicTacToe" \
+            -srcfolder dmg_content \
+            -ov \
+            -format UDZO \
+            dist/Paragrafen-TicTacToe.dmg
+
+      - name: Upload macOS App artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Paragrafen-TicTacToe-macOS
+          path: |
+            dist/Paragrafen-TicTacToe.dmg
+          retention-days: 30
+
+  # ── Release (nur auf master) ───────────────────────────────────────────────
+  release:
+    if: github.ref == 'refs/heads/master'
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Paragrafen-TicTacToe-Windows
+          path: release/
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Paragrafen-TicTacToe-macOS
+          path: release/
+
       - name: Create Release
-        if: github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v1.0.${{ github.run_number }}"
@@ -54,9 +116,14 @@ jobs:
             - Spieler 2: **§§** (doppelt)
             - Spielfeld: **45° gedreht** (Rautenform)
 
-            ### Download
-            Einfach `Paragrafen-TicTacToe.exe` herunterladen und starten – keine Installation nötig!
-          files: dist/Paragrafen-TicTacToe.exe
+            ### Downloads
+            | Plattform | Datei | Anleitung |
+            |-----------|-------|-----------|
+            | **Windows** | `Paragrafen-TicTacToe.exe` | Herunterladen → Doppelklick |
+            | **macOS** | `Paragrafen-TicTacToe.dmg` | Herunterladen → Öffnen → App in Programme ziehen |
+          files: |
+            release/Paragrafen-TicTacToe.exe
+            release/Paragrafen-TicTacToe.dmg
           draft: false
           prerelease: false
         env:
