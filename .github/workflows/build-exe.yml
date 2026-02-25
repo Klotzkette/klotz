@@ -1,0 +1,63 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches:
+      - "claude/**"
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pygame pyinstaller
+
+      - name: Build EXE
+        run: |
+          pyinstaller `
+            --onefile `
+            --windowed `
+            --name "Paragrafen-TicTacToe" `
+            --hidden-import pygame `
+            tictactoe.py
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Paragrafen-TicTacToe-Windows
+          path: dist/Paragrafen-TicTacToe.exe
+          retention-days: 30
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "Paragrafen Tic-Tac-Toe v1.0.${{ github.run_number }}"
+          body: |
+            ## §  Paragrafen Tic-Tac-Toe  §§
+
+            Ein schönes Tic-Tac-Toe-Spiel mit Paragrafenzeichen statt Kreuz und Kreis.
+
+            - Spieler 1: **§** (einfach)
+            - Spieler 2: **§§** (doppelt)
+            - Spielfeld: **45° gedreht** (Rautenform)
+
+            ### Download
+            Einfach `Paragrafen-TicTacToe.exe` herunterladen und starten – keine Installation nötig!
+          files: dist/Paragrafen-TicTacToe.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
