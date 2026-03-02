@@ -3,12 +3,16 @@ name: Build Windows & macOS
 on:
   push:
     branches:
-      - "claude/**"
-      - master
+      - main
+    tags:
+      - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  # ── Windows ────────────────────────────────────────────────────────────────
+  # -- Windows
   build-windows:
     runs-on: windows-latest
     steps:
@@ -40,7 +44,7 @@ jobs:
           path: dist/Paragrafen-TicTacToe.exe
           retention-days: 30
 
-  # ── macOS (Universal Binary: Intel + Apple Silicon) ────────────────────────
+  # -- macOS (Universal Binary: Intel + Apple Silicon)
   build-macos:
     runs-on: macos-latest
     steps:
@@ -84,9 +88,8 @@ jobs:
             dist/Paragrafen-TicTacToe.dmg
           retention-days: 30
 
-  # ── Release (nur auf master) ───────────────────────────────────────────────
+  # -- Release
   release:
-    if: github.ref == 'refs/heads/master'
     needs: [build-windows, build-macos]
     runs-on: ubuntu-latest
     steps:
@@ -108,19 +111,20 @@ jobs:
           tag_name: "v1.0.${{ github.run_number }}"
           name: "Paragrafen Tic-Tac-Toe v1.0.${{ github.run_number }}"
           body: |
-            ## §  Paragrafen Tic-Tac-Toe  §§
+            ## Paragrafen Tic-Tac-Toe
 
-            Ein schönes Tic-Tac-Toe-Spiel mit Paragrafenzeichen statt Kreuz und Kreis.
+            Ein Tic-Tac-Toe-Spiel mit Paragrafenzeichen.
 
-            - Spieler 1: **§** (einfach)
-            - Spieler 2: **§§** (doppelt)
-            - Spielfeld: **45° gedreht** (Rautenform)
+            - Spieler 1: **S** (einfach)
+            - Spieler 2: **SS** (doppelt)
+            - Spielfeld: **45 Grad gedreht** (Rautenform)
 
             ### Downloads
+
             | Plattform | Datei | Anleitung |
-            |-----------|-------|-----------|
-            | **Windows** | `Paragrafen-TicTacToe.exe` | Herunterladen → Doppelklick |
-            | **macOS** | `Paragrafen-TicTacToe.dmg` | Herunterladen → Öffnen → App in Programme ziehen |
+            |-----------|-------|----------|
+            | **Windows** | `Paragrafen-TicTacToe.exe` | Herunterladen, Doppelklick |
+            | **macOS** | `Paragrafen-TicTacToe.dmg` | Herunterladen, oeffnen, App in Programme ziehen |
           files: |
             release/Paragrafen-TicTacToe.exe
             release/Paragrafen-TicTacToe.dmg
