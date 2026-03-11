@@ -1,31 +1,32 @@
-# Paragrafen Tic-Tac-Toe
+# klotz — Projekte von Klotzkette
 
-Ein Tic-Tac-Toe-Spiel mit Paragrafenzeichen statt Kreuz und Kreis.
+Dieses Repo enthält zwei eigenständige Projekte:
 
-## Features
+---
 
-- Spieler 1: **§** (einfach)
-- Spieler 2: **§§** (doppelt)
-- Spielfeld: **45° gedreht** (Rautenform)
-- Gebaut mit Python und Pygame
+## Text-Transformer — Gen-Z & Bildungssprache (Chrome Extension)
 
-## Installation
+Eine Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten in **Gen-Z Jugendsprache** oder **hochtrabende Bildungssprache** verwandelt — mit behutsamer Drei-Akt-Dramaturgie.
 
-### Fertige Downloads
+**Features:**
+- **Gen-Z Modus** — Slang, Emojis, Füllwörter (200+ Einträge, Glossar 2026)
+- **Bildungssprache Modus** — Fachbegriffe, gehobener Stil, rhetorische Figuren
+- Einstellbare Intensität (dezent bis maximal)
+- One-Click Revert zum Original
 
-Unter [Releases](../../releases) findest du fertige Builds:
+Mehr Infos & Installationsanleitung: [`gen-z-translator/README.md`](gen-z-translator/README.md)
 
-| Plattform | Datei | Anleitung |
-|-----------|-------|----------|
-| **Windows** | `Paragrafen-TicTacToe.exe` | Herunterladen und Doppelklick |
-| **macOS** | `Paragrafen-TicTacToe.dmg` | Herunterladen, öffnen, App in Programme ziehen |
+---
 
-### Aus Quellcode
+## Paragrafen Tic-Tac-Toe
 
-```bash
-pip install pygame
-python tictactoe.py
-```
+Ein Tic-Tac-Toe-Spiel mit Paragrafenzeichen (§ vs §§) auf einem 45°-gedrehten Spielfeld. Gebaut mit Python und Pygame.
+
+Fertige Builds (Windows EXE, macOS DMG) unter [Releases](../../releases).
+
+Mehr Infos: [`paragrafen-tictactoe/README.md`](paragrafen-tictactoe/README.md)
+
+---
 
 ## Lizenz
 
