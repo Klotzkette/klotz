@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Text-Transformer — Gen-Z & Bildungssprache",
   "version": "2.0.0",
-  "description": "Verwandelt deutschen Text in Gen-Z Jugendsprache 💀🔥 oder hochtrabende Bildungssprache 📜🎭 — mit behutsamer Drei-Akt-Dramaturgie à la Yasmina Reza",
+  "description": "Verwandelt deutschen Text in Gen-Z Jugendsprache oder hochtrabende Bildungssprache - mit behutsamer Drei-Akt-Dramaturgie",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -19,7 +19,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["http://*/*", "https://*/*"],
       "js": [
         "js/dictionary.js",
         "js/emojis.js",
