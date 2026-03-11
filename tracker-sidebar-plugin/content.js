@@ -115,12 +115,12 @@
       `Aktive Tracker: ${data.totalTrackers}`,
       `Anfragen: ${data.totalRequests}`,
     ];
-    if (blockedCount > 0) lines.push(`Privat geschuetzt: ${blockedCount}`);
+    if (blockedCount > 0) lines.push(`Tracking unterbunden: ${blockedCount}`);
     lines.push('', '--- Tracker-Liste ---', '');
 
     for (const tracker of data.trackers) {
       const isBlocked = blockedDomains[tracker.hostname];
-      lines.push(`${tracker.name}${isBlocked ? ' [geschuetzt]' : ''}`);
+      lines.push(`${tracker.name}${isBlocked ? ' [Tracking unterbunden]' : ''}`);
       lines.push(`  Firma: ${tracker.company}`);
       lines.push(`  Domain: ${tracker.hostname}`);
       lines.push(`  Kategorie: ${tracker.category}`);
@@ -135,14 +135,14 @@
       const paramCount = Object.keys(tracker.allParams || {}).length;
       if (paramCount > 0) lines.push(`  URL-Parameter (${paramCount}): ${Object.keys(tracker.allParams).join(', ')}`);
 
-      if (isBlocked) lines.push(`  Status: Privatsphaere geschuetzt`);
+      if (isBlocked) lines.push(`  Status: Tracking nicht zugelassen`);
       lines.push('');
     }
 
     const currentHostnames = new Set(data.trackers.map(t => t.hostname));
     for (const hostname of Object.keys(blockedDomains)) {
       if (!currentHostnames.has(hostname)) {
-        lines.push(`${hostname} [geschuetzt]`);
+        lines.push(`${hostname} [Tracking unterbunden]`);
         lines.push('');
       }
     }
@@ -228,19 +228,19 @@
         <div class="ts-stats">
           <span class="ts-stat"><span class="ts-stat-number">${data.totalTrackers}</span> Tracker</span>
           <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Anfragen</span>
-          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-stealth"><span class="ts-stat-number">${blockedCount}</span> gesch&uuml;tzt</span>` : ''}
+          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-stealth"><span class="ts-stat-number">${blockedCount}</span> unterbunden</span>` : ''}
         </div>
       </div>
 
       <div class="ts-block-all-bar">
-        <button class="ts-block-all-btn block" id="ts-block-all">Alle sch&uuml;tzen</button>
-        ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">Alle zulassen</button>` : ''}
+        <button class="ts-block-all-btn block" id="ts-block-all">Tracken nicht zulassen</button>
+        ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">Alle wieder zulassen</button>` : ''}
         <button class="ts-block-all-btn summary" id="ts-show-summary">Zusammenfassung</button>
       </div>
 
       ${hasBlockedAny ? `
         <div class="ts-stealth-banner">
-          <span>Mehr Privatsph&auml;re: ${blockedCount} Tracker k&ouml;nnen dich auf dieser Seite nicht mehr verfolgen</span>
+          <span>${blockedCount} Tracker d&uuml;rfen hier nicht tracken</span>
         </div>
       ` : ''}
     `;
@@ -343,13 +343,13 @@
           <div class="ts-tracker-right">
             <span class="ts-tracker-badge" style="background:${color}">${esc(tracker.category)}</span>
             <span class="ts-tracker-requests">${tracker.requestCount}x</span>
-            <label class="ts-block-toggle" title="${isBlocked ? 'Geschuetzt - klicken zum Zulassen' : 'Aktiv - klicken zum Schuetzen'}">
+            <label class="ts-block-toggle" title="${isBlocked ? 'Tracking unterbunden - klicken zum Zulassen' : 'Trackt dich - klicken zum Unterbinden'}">
               <input type="checkbox" class="ts-block-input" data-hostname="${esc(tracker.hostname)}" ${isBlocked ? 'checked' : ''}>
               <span class="ts-block-slider"></span>
             </label>
           </div>
         </div>
-        ${isBlocked ? '<div class="ts-blocked-label">Privatsph&auml;re gesch&uuml;tzt</div>' : ''}
+        ${isBlocked ? '<div class="ts-blocked-label">Tracking nicht zugelassen</div>' : ''}
         ${dataHtml ? `
           <div class="ts-sent-data">
             <button class="ts-data-toggle">&#9654; Was wird gesendet?</button>
@@ -366,17 +366,17 @@
         <div class="ts-tracker-header">
           <div class="ts-tracker-name-area">
             <div class="ts-tracker-name">${esc(hostname)}</div>
-            <div class="ts-tracker-company">Geschuetzt</div>
+            <div class="ts-tracker-company">Tracking unterbunden</div>
           </div>
           <div class="ts-tracker-right">
-            <span class="ts-tracker-badge" style="background:#4caf50">Geschuetzt</span>
-            <label class="ts-block-toggle" title="Geschuetzt - klicken zum Zulassen">
+            <span class="ts-tracker-badge" style="background:#e07a3a">Unterbunden</span>
+            <label class="ts-block-toggle" title="Tracking unterbunden - klicken zum Zulassen">
               <input type="checkbox" class="ts-block-input" data-hostname="${esc(hostname)}" checked>
               <span class="ts-block-slider"></span>
             </label>
           </div>
         </div>
-        <div class="ts-blocked-label">Privatsph&auml;re gesch&uuml;tzt &mdash; kann dich nicht verfolgen</div>
+        <div class="ts-blocked-label">Tracking nicht zugelassen</div>
       </div>
     `;
   }
@@ -419,7 +419,11 @@
     }
     if (message.type === 'TRACKER_UPDATE') {
       currentData = message.data;
-      toggleBtn.innerHTML = `<span class="ts-toggle-count">${currentData.totalTrackers}</span>`;
+      // Sync blocked domains from background to always stay current
+      if (message.data.blockedDomains) blockedDomains = message.data.blockedDomains;
+      const blockedCount = Object.keys(blockedDomains).length;
+      const trackerCount = currentData.totalTrackers;
+      toggleBtn.innerHTML = `<span class="ts-toggle-count">${trackerCount + blockedCount}</span>`;
       if (sidebarVisible) requestRender();
     }
   });
@@ -428,7 +432,9 @@
   chrome.runtime.sendMessage({ type: 'GET_TRACKER_DATA' }, (response) => {
     if (response) {
       currentData = response;
-      toggleBtn.innerHTML = `<span class="ts-toggle-count">${response.totalTrackers}</span>`;
+      if (response.blockedDomains) blockedDomains = response.blockedDomains;
+      const blockedCount = Object.keys(blockedDomains).length;
+      toggleBtn.innerHTML = `<span class="ts-toggle-count">${response.totalTrackers + blockedCount}</span>`;
       if (sidebarVisible) renderSidebar(response);
     }
   });

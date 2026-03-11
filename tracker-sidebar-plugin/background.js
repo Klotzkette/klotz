@@ -38,6 +38,8 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   if (details.frameId === 0) {
     tabUrls[details.tabId] = details.url;
     tabTrackers[details.tabId] = {};
+    // Immediately notify new page about blocked domains so UI shows them instantly
+    scheduleUIUpdate(details.tabId);
   }
 });
 
@@ -251,7 +253,8 @@ function getTabSummary(tabId) {
     totalTrackers: trackerList.length,
     totalRequests,
     trackers: trackerList,
-    categories
+    categories,
+    blockedDomains: { ...blockedDomains }
   };
 }
 
