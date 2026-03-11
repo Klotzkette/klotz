@@ -1,4 +1,4 @@
-# Text-Transformer — 23 Modi für deutschen Text
+# Text-Transformer — 24 Modi für deutschen Text
 
 Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten transformiert — mit behutsamer Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung.
 
@@ -30,6 +30,7 @@ Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten tran
 - **Alles kleinschreiben** — großbuchstaben sind überbewertet
 - **Adjektivkiller** — Alle Adjektive streichen
 - **Adjektiv-Überschwemmer** — Die schönsten Adjektive der deutschen Sprache überall einfügen
+- **Vokalentferner** — Ll Vkl ntfrnn (alle Vokale und Umlaute raus)
 - **Gendern (Stern \*)** — Lehrer → Lehrer\*innen
 - **Gendern (Doppelpunkt :)** — Lehrer → Lehrer:innen
 - **Gendern (ausgeschrieben)** — Lehrerinnen und Lehrer

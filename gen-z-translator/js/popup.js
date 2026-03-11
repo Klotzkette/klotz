@@ -221,6 +221,13 @@ const MODE_CONFIG = {
     fillersLabel: 'Füllwörter', btn: 'ALLES KLEIN MACHEN 🔡',
     footer: 'alles klein — v3.0', hasAkt: false,
   },
+  vokalentferner: {
+    theme: 'theme-special', title: 'Vklntfrnr 🕳️',
+    subtitle: 'Ll Vkl rflgn!',
+    replace: 'Alle Vokale und Umlaute entfernen', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'VKLE NTFRNN 🕳️',
+    footer: 'Knsnntn rgrn — v3.0', hasAkt: true,
+  },
   wienerisch: {
     theme: 'theme-dialect', title: 'Wienerisch 🎡',
     subtitle: 'Geh bitte, des is ur leiwand!',

@@ -71,6 +71,8 @@ function doTransform(settings) {
     transformer = new EmojiSprinklerTransformer(settings);
   } else if (mode === 'kleinschreibung') {
     transformer = new KleinschreibungTransformer(settings);
+  } else if (mode === 'vokalentferner') {
+    transformer = new VokalentfernerTransformer(settings);
   } else if (mode.startsWith('gender_')) {
     settings.genderMode = mode.replace('gender_', '');
     transformer = new GenderTransformer(settings);
@@ -83,7 +85,7 @@ function doTransform(settings) {
   const modeNames = {
     genz: '🔥 Gen-Z', formal: '📜 Bildungssprache', politiker: '🏛️ Politiker',
     barock: '🏰 Barock', adjektivkiller: '✂️ Adjektivkiller', adjektivflut: '🌊 Adjektiv-Überschwemmer',
-    emoji: '😊 Emoji-Sprinkler', kleinschreibung: '🔡 Kleinschreibung',
+    emoji: '😊 Emoji-Sprinkler', kleinschreibung: '🔡 Kleinschreibung', vokalentferner: '🕳️ Vokalentferner',
     achtziger: '📼 80er West', ddr: '☭ DDR-Sprech', luther: '✝️ Luther',
     burokrat: '🏢 Bürokrat',
     berlinerisch: '🐻 Berlinern', saechsisch: '🎻 Sächseln',

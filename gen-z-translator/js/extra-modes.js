@@ -634,3 +634,41 @@ class AdjektivUeberschwemmerTransformer {
   _collectTextNodes(root) { return _sharedCollectTextNodes(root); }
   revertAll() { _sharedRevert(this); }
 }
+
+// ==========================================================================
+// VOKALENTFERNER — Alle Vokale (a, e, i, o, u, ä, ö, ü) entfernen
+// ==========================================================================
+class VokalentfernerTransformer {
+  constructor(settings) {
+    this.settings = settings;
+    this.baseIntensity = settings.intensity || 50;
+    this.originalTexts = new Map();
+    this.nodeCount = 0;
+    this.totalNodes = 0;
+  }
+
+  getEscalatedIntensity() {
+    if (this.totalNodes === 0) return this.baseIntensity;
+    const p = this.nodeCount / this.totalNodes;
+    let m = p < 0.3 ? 0.4 + (p / 0.3) * 0.3 : p < 0.7 ? 0.7 + ((p - 0.3) / 0.4) * 0.3 : 1.0;
+    return Math.min(100, Math.round(this.baseIntensity * m));
+  }
+
+  transform(text) {
+    if (!text || text.trim().length < 3) return text;
+    const intensity = this.getEscalatedIntensity();
+
+    // Wortweise: bei niedriger Intensität werden manche Wörter verschont
+    return text.replace(/\b[A-Za-zÄÖÜäöüß]+\b/g, (word) => {
+      if (word.length < 2) return word;
+      if (Math.random() * 100 > intensity) return word;
+      const stripped = word.replace(/[aeiouäöüAEIOUÄÖÜ]/g, '');
+      // Wenn alles Vokale waren (z.B. "au"), mindestens ersten Buchstaben behalten
+      return stripped.length > 0 ? stripped : word[0];
+    });
+  }
+
+  transformDOM(root) { return _sharedTransformDOM(this, root); }
+  _collectTextNodes(root) { return _sharedCollectTextNodes(root); }
+  revertAll() { _sharedRevert(this); }
+}
