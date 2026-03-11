@@ -457,11 +457,47 @@
   border-radius: 2px;
 }
 
+/* Stealth banner */
+.ts-stealth-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.15), rgba(27, 94, 32, 0.15));
+  border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+  font-size: 11px;
+  color: #81c784;
+  line-height: 1.4;
+}
+
+.ts-stealth-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ts-stat-stealth {
+  background: rgba(76, 175, 80, 0.15) !important;
+  color: #81c784 !important;
+}
+
+.ts-stat-stealth .ts-stat-number {
+  color: #4caf50 !important;
+}
+
 /* Blocked label */
 .ts-blocked-label {
   font-size: 10px;
-  color: #e74c3c;
+  color: #81c784;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-tracker-item.blocked {
+  opacity: 0.7;
+  border-left: 3px solid #4caf50;
+  padding-left: 13px;
 }
 
 /* Summary button */

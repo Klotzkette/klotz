@@ -9,18 +9,21 @@
  * Es gibt keinen fetch(), XMLHttpRequest, WebSocket oder sonstigen
  * ausgehenden Netzwerkverkehr durch dieses Plugin.
  */
-importScripts('trackers.js');
+importScripts('trackers.js', 'stealth.js');
 
-// Store tracker data per tab
-const tabTrackers = {};
+// ============================================================
+// State
+// ============================================================
+const tabTrackers = {};   // tabId -> { hostname -> trackerData }
+const tabUrls = {};       // tabId -> pageUrl (cache to avoid async tab lookup)
+let blockedDomains = {};  // hostname -> true
 
-// Store cookies per tab
-const tabCookies = {};
+// Pending UI updates: debounce to avoid spamming content scripts
+const pendingUpdates = {}; // tabId -> timeoutId
 
-// Blocked domains set
-let blockedDomains = {};
-
-// Load blocked domains on startup
+// ============================================================
+// Startup: load persisted blocked domains & apply rules
+// ============================================================
 chrome.storage.local.get(['blockedDomains'], (result) => {
   if (result?.blockedDomains) {
     blockedDomains = result.blockedDomains;
@@ -28,154 +31,187 @@ chrome.storage.local.get(['blockedDomains'], (result) => {
   }
 });
 
-// Clear data when a tab navigates to a new page
-chrome.webNavigation?.onBeforeNavigate?.addListener((details) => {
+// ============================================================
+// Tab URL tracking (avoids expensive chrome.tabs.get in hot path)
+// ============================================================
+chrome.webNavigation.onCommitted.addListener((details) => {
   if (details.frameId === 0) {
+    tabUrls[details.tabId] = details.url;
     tabTrackers[details.tabId] = {};
-    tabCookies[details.tabId] = {};
   }
 });
 
-// Listen to all web requests to detect trackers
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.url) tabUrls[tabId] = changeInfo.url;
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  delete tabTrackers[tabId];
+  delete tabUrls[tabId];
+  if (pendingUpdates[tabId]) {
+    clearTimeout(pendingUpdates[tabId]);
+    delete pendingUpdates[tabId];
+  }
+});
+
+// ============================================================
+// Request interception: detect & record third-party trackers
+// ============================================================
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
     const tabId = details.tabId;
-    if (tabId < 0) return; // Ignore non-tab requests
+    if (tabId < 0) return;
 
-    chrome.tabs.get(tabId, (tab) => {
-      if (chrome.runtime.lastError || !tab?.url) return;
+    const pageUrl = tabUrls[tabId];
+    if (!pageUrl) return;
 
-      const pageUrl = tab.url;
-      const requestUrl = details.url;
+    const requestUrl = details.url;
 
-      // Only track third-party requests
-      if (!isThirdParty(requestUrl, pageUrl)) return;
+    // Fast bail: same base domain = not third-party
+    if (!isThirdParty(requestUrl, pageUrl)) return;
 
-      const trackerInfo = identifyTracker(requestUrl);
-      const requestData = parseRequestData(requestUrl);
+    let hostname;
+    try { hostname = new URL(requestUrl).hostname; } catch { return; }
 
-      // Extract cookies from request headers
-      const cookieHeader = details.requestHeaders?.find(
-        h => h.name.toLowerCase() === 'cookie'
-      );
-      const cookies = cookieHeader ? parseCookieHeader(cookieHeader.value) : {};
+    const trackerInfo = identifyTracker(requestUrl);
+    const requestData = parseRequestData(requestUrl);
 
-      // Extract other tracking-related headers
-      const referer = details.requestHeaders?.find(
-        h => h.name.toLowerCase() === 'referer'
-      )?.value || null;
+    // Extract cookies from request headers
+    const cookieHeader = details.requestHeaders?.find(
+      h => h.name.toLowerCase() === 'cookie'
+    );
+    const cookies = cookieHeader ? parseCookieHeader(cookieHeader.value) : {};
 
-      const hostname = new URL(requestUrl).hostname;
+    // Extract referer
+    const referer = details.requestHeaders?.find(
+      h => h.name.toLowerCase() === 'referer'
+    )?.value || null;
 
-      if (!tabTrackers[tabId]) tabTrackers[tabId] = {};
+    if (!tabTrackers[tabId]) tabTrackers[tabId] = {};
 
-      const entry = {
-        url: requestUrl,
-        hostname: hostname,
-        type: details.type,
-        timestamp: Date.now(),
-        trackerInfo: trackerInfo || {
-          name: hostname,
-          category: "Unbekannt",
-          company: "Unbekannt",
-          domain: hostname
-        },
-        sentData: {
-          urlParams: requestData,
-          cookies: cookies,
-          referer: referer,
-          method: details.method
-        },
-        requestCount: 1
-      };
-
-      // Group by hostname
-      if (tabTrackers[tabId][hostname]) {
-        tabTrackers[tabId][hostname].requests.push(entry);
-        tabTrackers[tabId][hostname].requestCount++;
-        // Merge cookies
-        Object.assign(tabTrackers[tabId][hostname].allCookies, cookies);
-        // Merge URL params
-        Object.assign(tabTrackers[tabId][hostname].allParams, requestData);
-      } else {
-        tabTrackers[tabId][hostname] = {
-          hostname: hostname,
-          trackerInfo: entry.trackerInfo,
-          requests: [entry],
-          requestCount: 1,
-          allCookies: { ...cookies },
-          allParams: { ...requestData },
-          firstSeen: Date.now()
-        };
+    const entry = {
+      url: requestUrl,
+      hostname,
+      type: details.type,
+      timestamp: Date.now(),
+      trackerInfo: trackerInfo || {
+        name: hostname,
+        category: "Unbekannt",
+        company: "Unbekannt",
+        domain: hostname
+      },
+      sentData: {
+        urlParams: requestData,
+        cookies,
+        referer,
+        method: details.method
       }
+    };
 
-      // Notify content script about the update
-      chrome.tabs.sendMessage(tabId, {
-        type: 'TRACKER_UPDATE',
-        data: getTabSummary(tabId)
-      }).catch(() => {});
-    });
+    // Group by hostname
+    const existing = tabTrackers[tabId][hostname];
+    if (existing) {
+      existing.requests.push(entry);
+      existing.requestCount++;
+      Object.assign(existing.allCookies, cookies);
+      Object.assign(existing.allParams, requestData);
+    } else {
+      tabTrackers[tabId][hostname] = {
+        hostname,
+        trackerInfo: entry.trackerInfo,
+        requests: [entry],
+        requestCount: 1,
+        allCookies: { ...cookies },
+        allParams: { ...requestData },
+        receivedCookies: [],
+        firstSeen: Date.now()
+      };
+    }
+
+    // Debounced UI update (max once per 300ms per tab)
+    scheduleUIUpdate(tabId);
   },
   { urls: ["<all_urls>"] },
   ["requestHeaders"]
 );
 
-// Also capture response headers (set-cookie)
+// ============================================================
+// Response interception: capture Set-Cookie headers
+// ============================================================
 chrome.webRequest.onHeadersReceived.addListener(
   (details) => {
     const tabId = details.tabId;
     if (tabId < 0) return;
 
-    const hostname = new URL(details.url).hostname;
+    let hostname;
+    try { hostname = new URL(details.url).hostname; } catch { return; }
 
-    // Check for Set-Cookie headers
     const setCookies = details.responseHeaders?.filter(
       h => h.name.toLowerCase() === 'set-cookie'
-    ) || [];
+    );
+    if (!setCookies?.length) return;
 
-    if (setCookies.length > 0 && tabTrackers[tabId]?.[hostname]) {
-      if (!tabTrackers[tabId][hostname].receivedCookies) {
-        tabTrackers[tabId][hostname].receivedCookies = [];
-      }
-      for (const sc of setCookies) {
-        tabTrackers[tabId][hostname].receivedCookies.push(parseSingleSetCookie(sc.value));
-      }
+    const tracker = tabTrackers[tabId]?.[hostname];
+    if (!tracker) return;
+
+    for (const sc of setCookies) {
+      tracker.receivedCookies.push(parseSingleSetCookie(sc.value));
     }
   },
   { urls: ["<all_urls>"] },
   ["responseHeaders"]
 );
 
-// Parse Cookie header string into object
+// ============================================================
+// Debounced UI updates
+// ============================================================
+function scheduleUIUpdate(tabId) {
+  if (pendingUpdates[tabId]) return; // already scheduled
+  pendingUpdates[tabId] = setTimeout(() => {
+    delete pendingUpdates[tabId];
+    const summary = getTabSummary(tabId);
+    chrome.tabs.sendMessage(tabId, {
+      type: 'TRACKER_UPDATE',
+      data: summary
+    }).catch(() => {});
+  }, 300);
+}
+
+// ============================================================
+// Helpers
+// ============================================================
 function parseCookieHeader(cookieStr) {
   const cookies = {};
   if (!cookieStr) return cookies;
-  cookieStr.split(';').forEach(pair => {
-    const [name, ...rest] = pair.trim().split('=');
-    if (name) {
-      cookies[name.trim()] = rest.join('=').trim();
+  const pairs = cookieStr.split(';');
+  for (let i = 0; i < pairs.length; i++) {
+    const eq = pairs[i].indexOf('=');
+    if (eq > 0) {
+      cookies[pairs[i].substring(0, eq).trim()] = pairs[i].substring(eq + 1).trim();
     }
-  });
+  }
   return cookies;
 }
 
-// Parse a single Set-Cookie header
 function parseSingleSetCookie(value) {
   const parts = value.split(';');
-  const [name, ...rest] = parts[0].split('=');
+  const eq = parts[0].indexOf('=');
   const cookie = {
-    name: name?.trim() || '',
-    value: rest.join('=').trim(),
+    name: eq > 0 ? parts[0].substring(0, eq).trim() : parts[0].trim(),
+    value: eq > 0 ? parts[0].substring(eq + 1).trim() : '',
     attributes: {}
   };
   for (let i = 1; i < parts.length; i++) {
-    const [attrName, ...attrRest] = parts[i].trim().split('=');
-    cookie.attributes[attrName.trim().toLowerCase()] = attrRest.join('=').trim() || true;
+    const aeq = parts[i].indexOf('=');
+    if (aeq > 0) {
+      cookie.attributes[parts[i].substring(0, aeq).trim().toLowerCase()] = parts[i].substring(aeq + 1).trim();
+    } else {
+      cookie.attributes[parts[i].trim().toLowerCase()] = true;
+    }
   }
   return cookie;
 }
 
-// Get summary data for a tab
 function getTabSummary(tabId) {
   const trackers = tabTrackers[tabId] || {};
   const trackerList = Object.values(trackers).map(t => ({
@@ -186,8 +222,8 @@ function getTabSummary(tabId) {
     requestCount: t.requestCount,
     allCookies: t.allCookies,
     allParams: t.allParams,
-    receivedCookies: t.receivedCookies || [],
-    requests: t.requests.map(r => ({
+    receivedCookies: t.receivedCookies,
+    requests: t.requests.slice(-20).map(r => ({ // limit to last 20 requests per tracker
       url: r.url,
       type: r.type,
       method: r.sentData.method,
@@ -198,110 +234,92 @@ function getTabSummary(tabId) {
 
   // Sort: known trackers first, then by request count
   trackerList.sort((a, b) => {
-    if (a.category !== 'Unbekannt' && b.category === 'Unbekannt') return -1;
-    if (a.category === 'Unbekannt' && b.category !== 'Unbekannt') return 1;
+    const aKnown = a.category !== 'Unbekannt' ? 1 : 0;
+    const bKnown = b.category !== 'Unbekannt' ? 1 : 0;
+    if (aKnown !== bKnown) return bKnown - aKnown;
     return b.requestCount - a.requestCount;
   });
 
+  const categories = {};
+  let totalRequests = 0;
+  for (const t of trackerList) {
+    categories[t.category] = (categories[t.category] || 0) + 1;
+    totalRequests += t.requestCount;
+  }
+
   return {
     totalTrackers: trackerList.length,
-    totalRequests: trackerList.reduce((sum, t) => sum + t.requestCount, 0),
+    totalRequests,
     trackers: trackerList,
-    categories: countCategories(trackerList)
+    categories
   };
 }
 
-function countCategories(trackerList) {
-  const cats = {};
-  for (const t of trackerList) {
-    cats[t.category] = (cats[t.category] || 0) + 1;
-  }
-  return cats;
-}
-
-// --- Blocking functionality using declarativeNetRequest ---
-// Strategy: Instead of hard-blocking (which causes errors the website/tracker
-// can detect), we redirect tracker requests to harmless empty data URIs.
-// This way the website gets a valid (but empty) response, preventing crashes
-// and making it invisible to the tracker that it was blocked.
+// ============================================================
+// Stealth Blocking via declarativeNetRequest
+// ============================================================
+// Strategy: Redirect tracker requests to data URIs containing
+// plausible fake data. The tracker receives a valid response with
+// pseudonymized garbage data, so:
+//   - The website doesn't crash (no network errors)
+//   - The tracker can't detect it was blocked (valid response)
+//   - Scripts get stub functions that prevent "undefined" errors
+//   - Pixels get a valid 1x1 GIF
+//   - XHR/fetch gets a valid JSON { status: "ok" }
+//   - iframes get empty HTML
 
 async function updateBlockRules() {
   try {
-    // Get existing dynamic rules
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const removeRuleIds = existingRules.map(r => r.id);
 
-    // Create new rules from blocked domains
     const domains = Object.keys(blockedDomains);
     const addRules = [];
 
-    domains.forEach((domain, index) => {
-      const baseId = (index * 3) + 1;
+    // Resource types grouped by what kind of fake response they need
+    const RESOURCE_GROUPS = [
+      { types: ['script'], stealthType: 'script' },
+      { types: ['image', 'ping'], stealthType: 'image' },
+      { types: ['xmlhttprequest'], stealthType: 'xmlhttprequest' },
+      { types: ['sub_frame'], stealthType: 'sub_frame' },
+      { types: ['stylesheet'], stealthType: 'stylesheet' },
+      { types: ['font', 'media', 'other'], stealthType: 'other' }
+    ];
 
-      // Rule for scripts: redirect to empty JS
-      addRules.push({
-        id: baseId,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: 'data:text/javascript,' }
-        },
-        condition: {
-          urlFilter: `||${domain}`,
-          resourceTypes: ['script']
-        }
-      });
-
-      // Rule for images/pixels: redirect to transparent 1x1 GIF
-      addRules.push({
-        id: baseId + 1,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }
-        },
-        condition: {
-          urlFilter: `||${domain}`,
-          resourceTypes: ['image', 'ping']
-        }
-      });
-
-      // Rule for all other resource types: redirect to empty response
-      addRules.push({
-        id: baseId + 2,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: 'data:text/plain,' }
-        },
-        condition: {
-          urlFilter: `||${domain}`,
-          resourceTypes: [
-            'stylesheet', 'font', 'xmlhttprequest',
-            'media', 'sub_frame', 'other'
-          ]
-        }
+    domains.forEach((domain, domainIdx) => {
+      RESOURCE_GROUPS.forEach((group, groupIdx) => {
+        const ruleId = (domainIdx * RESOURCE_GROUPS.length) + groupIdx + 1;
+        addRules.push({
+          id: ruleId,
+          priority: 1,
+          action: {
+            type: 'redirect',
+            redirect: { url: getStealthRedirectURL(group.stealthType, domain) }
+          },
+          condition: {
+            urlFilter: `||${domain}`,
+            resourceTypes: group.types
+          }
+        });
       });
     });
 
     await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: removeRuleIds,
-      addRules: addRules
+      removeRuleIds,
+      addRules
     });
   } catch (err) {
-    console.error('Error updating block rules:', err);
+    console.error('Tracker Sidebar: Error updating block rules:', err);
   }
 }
 
-// Listen for messages from content script / popup
+// ============================================================
+// Message handling
+// ============================================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_TRACKER_DATA') {
     const tabId = message.tabId || sender.tab?.id;
-    if (tabId) {
-      sendResponse(getTabSummary(tabId));
-    } else {
-      sendResponse({ totalTrackers: 0, totalRequests: 0, trackers: [], categories: {} });
-    }
+    sendResponse(tabId ? getTabSummary(tabId) : { totalTrackers: 0, totalRequests: 0, trackers: [], categories: {} });
     return true;
   }
 
@@ -309,30 +327,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const tabId = message.tabId || sender.tab?.id;
     if (tabId) {
       chrome.tabs.get(tabId, (tab) => {
-        if (chrome.runtime.lastError || !tab?.url) {
-          sendResponse([]);
-          return;
-        }
-        chrome.cookies.getAll({ url: tab.url }, (cookies) => {
-          sendResponse(cookies || []);
-        });
+        if (chrome.runtime.lastError || !tab?.url) { sendResponse([]); return; }
+        chrome.cookies.getAll({ url: tab.url }, (cookies) => sendResponse(cookies || []));
       });
       return true;
     }
+    sendResponse([]);
+    return true;
   }
 
   if (message.type === 'UPDATE_BLOCK_RULES') {
     blockedDomains = message.blockedDomains || {};
     chrome.storage.local.set({ blockedDomains });
-    updateBlockRules().then(() => {
-      sendResponse({ success: true });
-    });
+    updateBlockRules().then(() => sendResponse({ success: true }));
     return true;
   }
-});
-
-// Clean up when tab is closed
-chrome.tabs.onRemoved.addListener((tabId) => {
-  delete tabTrackers[tabId];
-  delete tabCookies[tabId];
 });

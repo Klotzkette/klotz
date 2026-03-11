@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Tracker Sidebar",
-  "version": "1.0.0",
-  "description": "Zeigt alle Tracker, Cookies und Datenflüsse auf jeder Website in einer Sidebar an. Tracker können einzeln oder alle auf einmal blockiert werden.",
+  "version": "1.1.0",
+  "description": "Zeigt alle Tracker, Cookies und Datenflüsse auf jeder Website in einer Sidebar an. Stealth-Modus: Tracker erhalten pseudonymisierte Fake-Daten statt echter Informationen.",
   "permissions": [
     "webRequest",
     "declarativeNetRequest",

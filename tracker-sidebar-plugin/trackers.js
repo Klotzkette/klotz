@@ -3,6 +3,7 @@
  * Diese Liste wird nur lokal im Browser verwendet, um Tracker zu identifizieren.
  * Es findet keinerlei Kommunikation mit externen Servern statt.
  */
+
 // Known tracker domains and their categories
 const TRACKER_DATABASE = {
   // Google
@@ -12,13 +13,13 @@ const TRACKER_DATABASE = {
   "googlesyndication.com": { name: "Google AdSense", category: "Werbung", company: "Google" },
   "doubleclick.net": { name: "DoubleClick", category: "Werbung", company: "Google" },
   "googletagservices.com": { name: "Google Tag Services", category: "Tag Manager", company: "Google" },
-  "google.com/pagead": { name: "Google PageAd", category: "Werbung", company: "Google" },
-  "googleapis.com/maps": { name: "Google Maps", category: "Einbettung", company: "Google" },
+  "pagead2.googlesyndication.com": { name: "Google PageAd", category: "Werbung", company: "Google" },
   "youtube.com": { name: "YouTube", category: "Einbettung", company: "Google" },
   "ytimg.com": { name: "YouTube Images", category: "Einbettung", company: "Google" },
   "gstatic.com": { name: "Google Static", category: "CDN", company: "Google" },
   "recaptcha.net": { name: "reCAPTCHA", category: "Sicherheit", company: "Google" },
   "firebaseinstallations.googleapis.com": { name: "Firebase", category: "Analytics", company: "Google" },
+  "analytics.google.com": { name: "Google Analytics 4", category: "Analytics", company: "Google" },
 
   // Facebook / Meta
   "facebook.com": { name: "Facebook", category: "Social Tracking", company: "Meta" },
@@ -145,28 +146,53 @@ const CATEGORY_COLORS = {
   "Unbekannt": "#9e9e9e"
 };
 
-// Check if a URL matches a known tracker
+// --- Performance: Pre-build a suffix-match lookup table ---
+// Sorted longest-first so more specific domains match before generic ones
+const _TRACKER_DOMAINS_SORTED = Object.keys(TRACKER_DATABASE)
+  .sort((a, b) => b.length - a.length);
+
+// Fast tracker identification using sorted suffix matching + cache
+const _identifyCache = new Map();
+const _CACHE_MAX = 2000;
+
 function identifyTracker(url) {
   try {
     const hostname = new URL(url).hostname;
-    for (const [domain, info] of Object.entries(TRACKER_DATABASE)) {
-      if (hostname.includes(domain) || url.includes(domain)) {
-        return { ...info, domain: hostname };
+    if (_identifyCache.has(hostname)) return _identifyCache.get(hostname);
+
+    let result = null;
+    for (const domain of _TRACKER_DOMAINS_SORTED) {
+      if (hostname === domain || hostname.endsWith('.' + domain)) {
+        result = { ...TRACKER_DATABASE[domain], domain: hostname };
+        break;
       }
     }
-    return null;
+
+    // Cap cache size
+    if (_identifyCache.size >= _CACHE_MAX) _identifyCache.clear();
+    _identifyCache.set(hostname, result);
+    return result;
   } catch {
     return null;
   }
 }
 
-// Check if a request is a third-party request
+// Check if a request is a third-party request (cached base domain extraction)
+const _baseDomainCache = new Map();
+
+function _getBaseDomain(hostname) {
+  if (_baseDomainCache.has(hostname)) return _baseDomainCache.get(hostname);
+  const parts = hostname.split('.');
+  const base = parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+  if (_baseDomainCache.size >= _CACHE_MAX) _baseDomainCache.clear();
+  _baseDomainCache.set(hostname, base);
+  return base;
+}
+
 function isThirdParty(requestUrl, pageUrl) {
   try {
-    const reqHost = new URL(requestUrl).hostname;
-    const pageHost = new URL(pageUrl).hostname;
-    const reqBase = reqHost.split('.').slice(-2).join('.');
-    const pageBase = pageHost.split('.').slice(-2).join('.');
+    const reqBase = _getBaseDomain(new URL(requestUrl).hostname);
+    const pageBase = _getBaseDomain(new URL(pageUrl).hostname);
     return reqBase !== pageBase;
   } catch {
     return true;
@@ -176,6 +202,8 @@ function isThirdParty(requestUrl, pageUrl) {
 // Parse URL parameters to extract sent data
 function parseRequestData(url) {
   try {
+    const qIdx = url.indexOf('?');
+    if (qIdx === -1) return {};
     const urlObj = new URL(url);
     const params = {};
     for (const [key, value] of urlObj.searchParams) {
