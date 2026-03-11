@@ -1,16 +1,9 @@
-// Text-Transformer Engine — Yasmina-Reza-Methode
-// Die Verwandlung geschieht nicht plump, sondern wie in einem Reza-Stück:
-// Akt I:   Fast noch normal. Ein "halt" hier, ein "lowkey" da. Man merkt kaum etwas.
-// Akt II:  Die Fassade bröckelt. Slang mischt sich ins Hochdeutsche. Parenthetische
-//          Kommentare erscheinen, als würde jemand den Text von der Seite kommentieren.
-// Akt III: Kontrollverlust. Emojis, Brainrot, die Sprache kippt endgültig.
-//
-// Der Witz entsteht — wie bei Reza — durch den KONTRAST: formelle Struktur trifft
-// auf Jugendsprache. Der Text WEISS noch, dass er seriös sein wollte.
+// Text-Transformer Engine — Gen-Z / Gen Alpha
+// Kontrast-Komik: Formelle Struktur trifft auf Jugendsprache.
+// Der Text WEISS noch, dass er seriös sein wollte.
 
 /**
- * Parenthetische Kommentare im Reza-Stil.
- * Als würde ein Gen-Z-Chor das Geschehen kommentieren.
+ * Parenthetische Kommentare — Gen-Z-Chor kommentiert das Geschehen.
  */
 const PARENTHETICAL_COMMENTS = {
   // Reaktionen auf sachliche/langweilige Aussagen
@@ -85,20 +78,19 @@ const PARENTHETICAL_COMMENTS = {
   // Meta-Kommentare über die Verwandlung selbst
   meta: [
     ' (was passiert gerade mit diesem Text)',
-    ' (der Text weiß noch nicht was ihm bevorsteht)',
+    ' (stell dir vor das steht da jetzt wirklich)',
     ' (es hat begonnen)',
     ' (die Verwandlung schreitet voran)',
     ' (kein Zurück mehr)',
     ' (wir sind jetzt hier)',
     ' (der Originalautor würde weinen)',
     ' (der Text hat die Kontrolle verloren und das ist okay)',
-    ' (Akt III betritt die Bühne)',
     ' (wir sind im Endgame jetzt)',
   ],
 };
 
 /**
- * Formale Konnektoren die im Akt I stehen bleiben — bewusst, für den Kontrast
+ * Formale Konnektoren bleiben bewusst stehen — für den Kontrast
  * "Nichtsdestotrotz" neben "fr fr" ist Comedy-Gold
  */
 const FORMAL_CONNECTORS_TO_KEEP = [
@@ -109,56 +101,15 @@ const FORMAL_CONNECTORS_TO_KEEP = [
 ];
 
 /**
- * Hauptklasse für die Text-Transformation — Reza-Methode
+ * Hauptklasse für die Gen-Z Text-Transformation
  */
 class GenZTransformer {
   constructor(settings) {
     this.settings = settings;
-    this.baseIntensity = settings.intensity || 50;
+    this.intensity = settings.intensity || 50;
     this.originalTexts = new WeakMap();
     this._originalNodesList = []; // Für revertAll() — WeakMap ist nicht iterierbar
-    this.nodeCount = 0;       // Zählt verarbeitete Nodes
-    this.totalNodes = 0;      // Gesamtzahl der Nodes (für Eskalationsberechnung)
     this.sortedDictionary = null; // Cache
-  }
-
-  /**
-   * Berechnet die effektive Intensität basierend auf Position im Dokument.
-   * Akt I (0-30%):   baseIntensity * 0.3  — fast noch normal
-   * Akt II (30-70%): baseIntensity * 0.7  — die Fassade bröckelt
-   * Akt III (70%+):  baseIntensity * 1.2  — Kontrollverlust (max 100)
-   */
-  getEscalatedIntensity() {
-    if (this.totalNodes === 0) return this.baseIntensity;
-
-    const progress = this.nodeCount / this.totalNodes; // 0.0 bis 1.0
-
-    let multiplier;
-    if (progress < 0.3) {
-      // Akt I — Exposition: fast noch zivilisiert
-      multiplier = 0.3 + (progress / 0.3) * 0.3; // 0.3 → 0.6
-    } else if (progress < 0.7) {
-      // Akt II — Konfrontation: die Fassade bröckelt
-      const aktProgress = (progress - 0.3) / 0.4;
-      multiplier = 0.6 + aktProgress * 0.4; // 0.6 → 1.0
-    } else {
-      // Akt III — Auflösung: Kontrollverlust
-      const aktProgress = (progress - 0.7) / 0.3;
-      multiplier = 1.0 + aktProgress * 0.3; // 1.0 → 1.3
-    }
-
-    return Math.min(100, Math.round(this.baseIntensity * multiplier));
-  }
-
-  /**
-   * Bestimmt den aktuellen Akt (1, 2 oder 3)
-   */
-  getCurrentAkt() {
-    if (this.totalNodes === 0) return 2;
-    const progress = this.nodeCount / this.totalNodes;
-    if (progress < 0.3) return 1;
-    if (progress < 0.7) return 2;
-    return 3;
   }
 
   /**
@@ -175,36 +126,22 @@ class GenZTransformer {
 
   /**
    * Wendet Wörterbuch-Ersetzungen auf einen Text an.
-   * Im Akt I: nur wenige, subtile Ersetzungen.
-   * Im Akt III: aggressiv.
    */
   applyDictionary(text, intensity) {
     if (!this.settings.replace) return text;
 
     let result = text;
     const sorted = this.getSortedDictionary();
-    const akt = this.getCurrentAkt();
 
     for (const entry of sorted) {
-      // Intensitätsbasierte Chance — im Akt I sehr zurückhaltend
       if (Math.random() * 100 > intensity) continue;
 
       const replacements = entry.replacements;
-      let replacement;
-
-      if (akt === 1) {
-        // Akt I: Bevorzuge subtilere Ersetzungen (ohne Emojis, kürzere)
-        const subtle = replacements.filter(r => !r.match(/[\u{1F000}-\u{1FFFF}]/u) && r.length < 15);
-        replacement = subtle.length > 0
-          ? subtle[Math.floor(Math.random() * subtle.length)]
-          : replacements[0]; // Fallback: erstes (meist das subtilste)
-      } else {
-        replacement = replacements[Math.floor(Math.random() * replacements.length)];
-      }
+      const replacement = replacements[Math.floor(Math.random() * replacements.length)];
 
       // Grammar-aware Ersetzung: Endungen erkennen und übertragen
       if (entry.type && typeof GermanGrammar !== 'undefined') {
-        result = GermanGrammar.replaceWithGrammar(result, entry, replacement, akt);
+        result = GermanGrammar.replaceWithGrammar(result, entry, replacement);
       } else {
         result = result.replace(entry.pattern, (match) => {
           if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
@@ -260,34 +197,22 @@ class GenZTransformer {
    * Wählt einen passenden parenthetischen Kommentar
    */
   getParentheticalComment(sentence) {
-    const akt = this.getCurrentAkt();
     const category = this.getSentimentCategory(sentence);
 
-    // Im Akt I: fast keine Kommentare
-    if (akt === 1) return '';
+    // Formale Sätze kriegen häufiger Kommentare — DER Kontrast
+    const chance = category === 'formal' ? 0.35 : 0.2;
+    if (Math.random() > chance * (this.intensity / 100)) return '';
 
-    // Im Akt II: gelegentlich, vor allem bei formalen Sätzen (DAS ist der Reza-Moment)
-    if (akt === 2) {
-      // Formale Sätze kriegen häufiger Kommentare — DER Kontrast
-      const chance = category === 'formal' ? 0.4 : 0.12;
-      if (Math.random() > chance) return '';
-
-      // Bei formalen Sätzen: bevorzuge die "formal"-Kommentare
-      if (category === 'formal' && Math.random() < 0.7) {
-        const pool = PARENTHETICAL_COMMENTS.formal;
-        return pool[Math.floor(Math.random() * pool.length)];
-      }
+    // Bei formalen Sätzen: bevorzuge die "formal"-Kommentare
+    if (category === 'formal' && Math.random() < 0.7) {
+      const pool = PARENTHETICAL_COMMENTS.formal;
+      return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    // Im Akt III: häufiger, wilder, auch Meta-Kommentare
-    if (akt === 3) {
-      if (Math.random() > 0.35) return '';
-
-      // Meta-Kommentare nur im Akt III
-      if (Math.random() < 0.15) {
-        const pool = PARENTHETICAL_COMMENTS.meta;
-        return pool[Math.floor(Math.random() * pool.length)];
-      }
+    // Gelegentlich Meta-Kommentare
+    if (Math.random() < 0.1) {
+      const pool = PARENTHETICAL_COMMENTS.meta;
+      return pool[Math.floor(Math.random() * pool.length)];
     }
 
     const pool = PARENTHETICAL_COMMENTS[category] || PARENTHETICAL_COMMENTS.neutral;
@@ -295,15 +220,11 @@ class GenZTransformer {
   }
 
   /**
-   * Fügt Füllwörter ein — mit Reza-Timing.
-   * Akt I: Nur ein dezentes "halt" oder "irgendwie" — der Leser stutzt kurz.
-   * Akt II: Füllwörter werden dreister, Satzanfänge werden gekapert.
-   * Akt III: Jeder zweite Satz beginnt mit "Digga," oder "Bruh,"
+   * Fügt Füllwörter ein.
    */
   insertFillers(text, intensity) {
     if (!this.settings.fillers) return text;
 
-    const akt = this.getCurrentAkt();
     const sentences = text.split(/(?<=[.!?])\s+/);
 
     const result = sentences.map((sentence, idx) => {
@@ -311,61 +232,23 @@ class GenZTransformer {
 
       let modified = sentence;
 
-      // === AKT I: Nur Mitte-Füllwörter, sehr dezent ===
-      if (akt === 1) {
-        if (Math.random() < (intensity / 100) * 0.2) {
-          // Nur die subtilsten Mitte-Füllwörter
-          const subtleMid = [' halt ', ' irgendwie ', ' oder so ', ' so '];
-          const filler = subtleMid[Math.floor(Math.random() * subtleMid.length)];
-          // Füge nach dem ersten Komma oder nach ~40% des Satzes ein
-          const commaIdx = modified.indexOf(',');
-          if (commaIdx > 5 && commaIdx < modified.length - 5) {
-            modified = modified.slice(0, commaIdx + 1) + filler + modified.slice(commaIdx + 2);
-          }
-        }
-        return modified;
-      }
-
-      // === AKT II: Anfang oder Ende, aber noch mit Manieren ===
-      if (akt === 2) {
-        // Satzanfang (moderater)
-        if (shouldInsertFiller(intensity * 0.6)) {
-          const filler = getRandomFiller('start', intensity);
-          modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
-        }
-
-        // Satzende
-        if (shouldInsertFiller(intensity * 0.4)) {
-          const filler = getRandomFiller('end', intensity);
-          const punctMatch = modified.match(/([.!?]+)$/);
-          if (punctMatch) {
-            modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
-          }
-        }
-
-        return modified;
-      }
-
-      // === AKT III: Volle Breitseite ===
-      // Satzanfang — aggressiv
-      if (shouldInsertFiller(intensity)) {
+      // Satzanfang
+      if (shouldInsertFiller(intensity * 0.7)) {
         const filler = getRandomFiller('start', intensity);
         modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
       }
 
-      // Satzende — aggressiv
-      if (shouldInsertFiller(intensity * 0.8)) {
+      // Satzende
+      if (shouldInsertFiller(intensity * 0.5)) {
         const filler = getRandomFiller('end', intensity);
         const punctMatch = modified.match(/([.!?]+)$/);
         if (punctMatch) {
           modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
-        } else {
-          modified = modified + filler;
         }
       }
 
       // Einschübe zwischen Sätzen
-      if (idx > 0 && Math.random() < 0.25) {
+      if (idx > 0 && Math.random() < 0.15 * (intensity / 100)) {
         modified = getRandomInterjection() + ' ' + modified;
       }
 
@@ -376,13 +259,11 @@ class GenZTransformer {
   }
 
   /**
-   * Fügt parenthetische Kommentare ein — das Herzstück der Reza-Methode.
+   * Fügt parenthetische Kommentare ein.
    * Der Text wird kommentiert, als säße ein Gen-Z-Publikum im Theater.
    */
   insertCommentary(text) {
-    if (!this.settings.fillers) return text; // Kommentare laufen über den Filler-Toggle
-    const akt = this.getCurrentAkt();
-    if (akt === 1) return text; // Im Akt I: Stille. Noch.
+    if (!this.settings.fillers) return text;
 
     // Teile in Sätze und kommentiere selektiv
     const sentences = text.split(/(?<=[.!?])\s+/);
@@ -404,56 +285,30 @@ class GenZTransformer {
   }
 
   /**
-   * Fügt Emoji-Ketten ein.
-   * Akt I: Keine Emojis. (Die Stille vor dem Sturm.)
-   * Akt II: Vereinzelt, kontextuell passend.
-   * Akt III: Emoji-Ketten nach fast jedem Satz.
+   * Fügt kontextuelle Emojis ein.
    */
   insertEmojis(text, intensity) {
     if (!this.settings.emojis) return text;
-    const akt = this.getCurrentAkt();
-
-    // Akt I: Keine Emojis. Der Text wahrt noch die Fassung.
-    if (akt === 1) return text;
-
-    // Emoji-Häufigkeit nach Akt
-    const emojiChance = akt === 2 ? intensity * 0.5 : intensity * 1.2;
 
     return text.replace(/([.!?]+)(\s|$)/g, (match, punct, space, matchIndex) => {
-      if (Math.random() * 100 > emojiChance) return match;
+      if (Math.random() * 100 > intensity) return match;
 
       const contextStart = Math.max(0, matchIndex - 50);
       const beforePunct = text.substring(contextStart, matchIndex);
 
       const emoji = getContextualEmoji(beforePunct);
-
-      // Akt II: Nur einzelne Emojis (dezent)
-      if (akt === 2) {
-        // Erstes Emoji extrahieren (Unicode-sicher mit Segmenter oder Split)
-        const segments = typeof Intl !== 'undefined' && Intl.Segmenter
-          ? [...new Intl.Segmenter('de', { granularity: 'grapheme' }).segment(emoji)].map(s => s.segment)
-          : [...emoji];
-        const firstEmoji = segments[0] || emoji.charAt(0);
-        return punct + ' ' + firstEmoji + (space || ' ');
-      }
-
-      // Akt III: Volle Ketten
       return punct + ' ' + emoji + (space || ' ');
     });
   }
 
   /**
-   * Formal-Slang-Juxtaposition: Der Kern der Reza-Komik.
+   * Formal-Slang-Juxtaposition: Der Kern der Kontrast-Komik.
    * Hält bewusst formelle Wörter und stellt sie neben Slang.
    * "Nichtsdestotrotz, digga" — DIESER Moment.
    */
   insertJuxtapositions(text) {
-    const akt = this.getCurrentAkt();
-    // Nur ab Akt II
-    if (akt === 1) return text;
-
     let result = text;
-    const chance = akt === 2 ? 0.15 : 0.35;
+    const chance = 0.25 * (this.intensity / 100);
 
     // Formale Konnektoren bewusst stehen lassen und Slang-Suffix anhängen
     const juxtapositions = [
@@ -489,32 +344,17 @@ class GenZTransformer {
 
   /**
    * Wendet alle Transformationen in der richtigen Reihenfolge an.
-   * Die Reihenfolge IST die Dramaturgie:
-   * 1. Juxtapositionen (formales bleibt, kriegt aber Slang-Nachbarn)
-   * 2. Wörterbuch (Wörter werden ersetzt)
-   * 3. Füllwörter (Slang-Einschübe)
-   * 4. Kommentare (das Gen-Z-Publikum meldet sich)
-   * 5. Emojis (der finale visuelle Zusammenbruch)
    */
   transform(text) {
     if (!text || text.trim().length < 3) return text;
 
-    const intensity = this.getEscalatedIntensity();
+    const intensity = this.intensity;
     let result = text;
 
-    // 1. Juxtapositionen — Kontrast-Komik aufbauen
     result = this.insertJuxtapositions(result);
-
-    // 2. Wörterbuch-Ersetzungen
     result = this.applyDictionary(result, intensity);
-
-    // 3. Füllwörter
     result = this.insertFillers(result, intensity);
-
-    // 4. Parenthetische Kommentare
     result = this.insertCommentary(result);
-
-    // 5. Emojis
     result = this.insertEmojis(result, intensity);
 
     return result;
@@ -536,25 +376,16 @@ class GenZTransformer {
 
   /**
    * Durchläuft den DOM und transformiert alle Text-Nodes.
-   * ZWEI Durchläufe: Erst zählen (für Eskalationsberechnung), dann transformieren.
-   * Chunked processing: Bei >500 Nodes in Batches, um den Main Thread nicht zu blockieren.
    */
   transformDOM(rootElement) {
     const root = rootElement || document.body;
-
-    // Erster Durchlauf: Nodes sammeln
     const textNodes = this._collectTextNodes(root);
-    this.totalNodes += textNodes.length;
 
-    // Zweiter Durchlauf: Transformieren mit Eskalation
     for (const textNode of textNodes) {
       const original = textNode.textContent;
 
       // Sprach-Check: nur deutsche Texte transformieren
-      if (original.length > 30 && !this._looksGerman(original)) {
-        this.nodeCount++;
-        continue;
-      }
+      if (original.length > 30 && !this._looksGerman(original)) continue;
 
       const transformed = this.transform(original);
 
@@ -567,8 +398,6 @@ class GenZTransformer {
           textNode.parentElement.dataset.genzTransformed = 'true';
         }
       }
-
-      this.nodeCount++;
     }
 
     return textNodes.length;

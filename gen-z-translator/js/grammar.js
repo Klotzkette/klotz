@@ -176,7 +176,7 @@ const GermanGrammar = {
    * Grammar-aware replacement for applyDictionary.
    * Erweitert den Match um Flexionsendungen und überträgt sie auf die Ersetzung.
    */
-  replaceWithGrammar(text, entry, replacement, akt) {
+  replaceWithGrammar(text, entry, replacement) {
     if (!entry.type) {
       // Kein Typ → Standard-Ersetzung wie bisher
       return text.replace(entry.pattern, (match) => {

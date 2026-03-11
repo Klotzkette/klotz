@@ -6,33 +6,9 @@ class DialectTransformer {
   constructor(settings, dialectConfig) {
     this.settings = settings;
     this.dialect = dialectConfig;
-    this.baseIntensity = settings.intensity || 50;
+    this.intensity = settings.intensity || 50;
     this.originalTexts = new WeakMap();
     this._originalNodesList = [];
-    this.nodeCount = 0;
-    this.totalNodes = 0;
-  }
-
-  getEscalatedIntensity() {
-    if (this.totalNodes === 0) return this.baseIntensity;
-    const progress = this.nodeCount / this.totalNodes;
-    let multiplier;
-    if (progress < 0.3) {
-      multiplier = 0.3 + (progress / 0.3) * 0.3;
-    } else if (progress < 0.7) {
-      multiplier = 0.6 + ((progress - 0.3) / 0.4) * 0.4;
-    } else {
-      multiplier = 1.0 + ((progress - 0.7) / 0.3) * 0.3;
-    }
-    return Math.min(100, Math.round(this.baseIntensity * multiplier));
-  }
-
-  getCurrentAkt() {
-    if (this.totalNodes === 0) return 2;
-    const progress = this.nodeCount / this.totalNodes;
-    if (progress < 0.3) return 1;
-    if (progress < 0.7) return 2;
-    return 3;
   }
 
   /**
@@ -42,14 +18,12 @@ class DialectTransformer {
   applyPhonetics(text, intensity) {
     if (!this.dialect.phonetics) return text;
     let result = text;
-    const akt = this.getCurrentAkt();
 
     for (const rule of this.dialect.phonetics) {
       const chance = rule.chance || 1.0;
-      const aktMultiplier = akt === 1 ? 0.3 : akt === 2 ? 0.7 : 1.0;
 
       result = result.replace(rule.pattern, (match, ...args) => {
-        if (Math.random() > chance * aktMultiplier * (intensity / 100)) return match;
+        if (Math.random() > chance * (intensity / 100)) return match;
         if (typeof rule.replacement === 'function') {
           return rule.replacement(match, ...args);
         }
@@ -69,7 +43,6 @@ class DialectTransformer {
   applyVocabulary(text, intensity) {
     if (!this.dialect.vocabulary) return text;
     let result = text;
-    const akt = this.getCurrentAkt();
 
     for (const entry of this.dialect.vocabulary) {
       if (Math.random() * 100 > intensity) continue;
@@ -78,7 +51,7 @@ class DialectTransformer {
       const replacement = replacements[Math.floor(Math.random() * replacements.length)];
 
       if (entry.type && typeof GermanGrammar !== 'undefined') {
-        result = GermanGrammar.replaceWithGrammar(result, entry, replacement, akt);
+        result = GermanGrammar.replaceWithGrammar(result, entry, replacement);
       } else {
         result = result.replace(entry.pattern, (match) => {
           if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
@@ -96,7 +69,6 @@ class DialectTransformer {
    */
   insertFillers(text, intensity) {
     if (!this.settings.fillers || !this.dialect.fillers) return text;
-    const akt = this.getCurrentAkt();
     const fillers = this.dialect.fillers;
     const sentences = text.split(/(?<=[.!?])\s+/);
 
@@ -105,28 +77,22 @@ class DialectTransformer {
       let modified = sentence;
 
       // Satzanfang
-      if (fillers.start && akt >= 2) {
-        const chance = akt === 2 ? 0.15 : 0.35;
-        if (Math.random() < chance * (intensity / 100)) {
-          const filler = fillers.start[Math.floor(Math.random() * fillers.start.length)];
-          modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
-        }
+      if (fillers.start && Math.random() < 0.25 * (intensity / 100)) {
+        const filler = fillers.start[Math.floor(Math.random() * fillers.start.length)];
+        modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
       }
 
       // Satzende
-      if (fillers.end && akt >= 2) {
-        const chance = akt === 2 ? 0.12 : 0.25;
-        if (Math.random() < chance * (intensity / 100)) {
-          const filler = fillers.end[Math.floor(Math.random() * fillers.end.length)];
-          const punctMatch = modified.match(/([.!?]+)$/);
-          if (punctMatch) {
-            modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
-          }
+      if (fillers.end && Math.random() < 0.2 * (intensity / 100)) {
+        const filler = fillers.end[Math.floor(Math.random() * fillers.end.length)];
+        const punctMatch = modified.match(/([.!?]+)$/);
+        if (punctMatch) {
+          modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
         }
       }
 
       // Einschübe zwischen Sätzen
-      if (fillers.interjections && akt === 3 && idx > 0 && Math.random() < 0.2) {
+      if (fillers.interjections && idx > 0 && Math.random() < 0.12 * (intensity / 100)) {
         const interj = fillers.interjections[Math.floor(Math.random() * fillers.interjections.length)];
         modified = interj + ' ' + modified;
       }
@@ -142,7 +108,7 @@ class DialectTransformer {
    */
   transform(text) {
     if (!text || text.trim().length < 3) return text;
-    const intensity = this.getEscalatedIntensity();
+    const intensity = this.intensity;
     let result = text;
 
     result = this.applyVocabulary(result, intensity);
@@ -162,11 +128,10 @@ class DialectTransformer {
   transformDOM(rootElement) {
     const root = rootElement || document.body;
     const textNodes = this._collectTextNodes(root);
-    this.totalNodes += textNodes.length;
 
     for (const textNode of textNodes) {
       const original = textNode.textContent;
-      if (original.length > 30 && !this._looksGerman(original)) { this.nodeCount++; continue; }
+      if (original.length > 30 && !this._looksGerman(original)) continue;
       const transformed = this.transform(original);
       if (transformed !== original) {
         this.originalTexts.set(textNode, original);
@@ -176,7 +141,6 @@ class DialectTransformer {
           textNode.parentElement.dataset.genzTransformed = 'true';
         }
       }
-      this.nodeCount++;
     }
     return textNodes.length;
   }

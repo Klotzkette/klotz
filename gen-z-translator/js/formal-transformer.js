@@ -1,50 +1,14 @@
-// Bildungssprache-Transformer — Reza-Methode (umgekehrt)
-// Statt von oben nach unten: von unten nach oben.
-// Akt I:   Der Text bekommt dezent elaboriertere Vokabeln. Ein "überaus" statt "sehr".
-// Akt II:  Rechtslatein mischt sich ein. Parenthetische Kommentare der Bildungselite.
-//          "Nun, (wie der Kenner weiß)" — der arrogante Jurist übernimmt.
-// Akt III: Vollständige Kanzleisprache. Jeder Satz klingt wie eine Bundestagsrede
-//          gekreuzt mit einer Habilitationsschrift. Quod erat demonstrandum.
+// Bildungssprache-Transformer
+// Elaborierte Vokabeln, Rechtslatein, parenthetische Kommentare der Bildungselite.
+// Kanzleisprache trifft Habilitationsschrift. Quod erat demonstrandum.
 
-/**
- * Bildungssprache-Transformer
- * Gleiche Drei-Akt-Struktur wie der Gen-Z-Transformer
- */
 class FormalTransformer {
   constructor(settings) {
     this.settings = settings;
-    this.baseIntensity = settings.intensity || 50;
+    this.intensity = settings.intensity || 50;
     this.originalTexts = new WeakMap();
     this._originalNodesList = [];
-    this.nodeCount = 0;
-    this.totalNodes = 0;
     this.sortedDictionary = null;
-  }
-
-  getEscalatedIntensity() {
-    if (this.totalNodes === 0) return this.baseIntensity;
-    const progress = this.nodeCount / this.totalNodes;
-
-    let multiplier;
-    if (progress < 0.3) {
-      multiplier = 0.3 + (progress / 0.3) * 0.3;
-    } else if (progress < 0.7) {
-      const aktProgress = (progress - 0.3) / 0.4;
-      multiplier = 0.6 + aktProgress * 0.4;
-    } else {
-      const aktProgress = (progress - 0.7) / 0.3;
-      multiplier = 1.0 + aktProgress * 0.3;
-    }
-
-    return Math.min(100, Math.round(this.baseIntensity * multiplier));
-  }
-
-  getCurrentAkt() {
-    if (this.totalNodes === 0) return 2;
-    const progress = this.nodeCount / this.totalNodes;
-    if (progress < 0.3) return 1;
-    if (progress < 0.7) return 2;
-    return 3;
   }
 
   getSortedDictionary() {
@@ -58,38 +22,21 @@ class FormalTransformer {
 
   /**
    * Wörterbuch-Ersetzungen
-   * Akt I: Nur subtile Aufwertungen (kürzere Ersetzungen bevorzugt)
-   * Akt III: Volle Kanzleisprache
    */
   applyDictionary(text, intensity) {
     if (!this.settings.replace) return text;
 
     let result = text;
     const sorted = this.getSortedDictionary();
-    const akt = this.getCurrentAkt();
 
     for (const entry of sorted) {
       if (Math.random() * 100 > intensity) continue;
 
       const replacements = entry.replacements;
-      let replacement;
+      const replacement = replacements[Math.floor(Math.random() * replacements.length)];
 
-      if (akt === 1) {
-        // Akt I: Bevorzuge die kürzeren, subtileren Varianten
-        const subtle = replacements.filter(r => r.length < 20);
-        replacement = subtle.length > 0
-          ? subtle[Math.floor(Math.random() * subtle.length)]
-          : replacements[0];
-      } else if (akt === 3) {
-        // Akt III: Bevorzuge die längste, elaborierteste Variante
-        replacement = replacements.reduce((a, b) => b.length > a.length ? b : a);
-      } else {
-        replacement = replacements[Math.floor(Math.random() * replacements.length)];
-      }
-
-      // Grammar-aware Ersetzung: Endungen erkennen und übertragen
       if (entry.type && typeof GermanGrammar !== 'undefined') {
-        result = GermanGrammar.replaceWithGrammar(result, entry, replacement, akt);
+        result = GermanGrammar.replaceWithGrammar(result, entry, replacement);
       } else {
         result = result.replace(entry.pattern, (match) => {
           if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
@@ -109,52 +56,20 @@ class FormalTransformer {
   insertFillers(text, intensity) {
     if (!this.settings.fillers) return text;
 
-    const akt = this.getCurrentAkt();
     const sentences = text.split(/(?<=[.!?])\s+/);
 
     const result = sentences.map((sentence, idx) => {
       if (sentence.length < 10) return sentence;
       let modified = sentence;
 
-      // === AKT I: Nur gelegentlich ein "wohlgemerkt" oder "versteht sich" ===
-      if (akt === 1) {
-        if (Math.random() < (intensity / 100) * 0.15) {
-          const subtleEnd = [', versteht sich', ', wohlgemerkt', ', ohne Frage'];
-          const filler = subtleEnd[Math.floor(Math.random() * subtleEnd.length)];
-          const punctMatch = modified.match(/([.!?]+)$/);
-          if (punctMatch) {
-            modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
-          }
-        }
-        return modified;
-      }
-
-      // === AKT II: Anfangs- und Ende-Füllwörter ===
-      if (akt === 2) {
-        if (shouldInsertFormalFiller(intensity * 0.5)) {
-          const filler = getRandomFormalFiller('start', intensity);
-          modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
-        }
-
-        if (shouldInsertFormalFiller(intensity * 0.4)) {
-          const filler = getRandomFormalFiller('end', intensity);
-          const punctMatch = modified.match(/([.!?]+)$/);
-          if (punctMatch) {
-            modified = modified.slice(0, -punctMatch[0].length) + filler + punctMatch[0];
-          }
-        }
-
-        return modified;
-      }
-
-      // === AKT III: Volle Kanzlei ===
-      if (shouldInsertFormalFiller(intensity)) {
+      // Satzanfang
+      if (shouldInsertFormalFiller(intensity * 0.6)) {
         const filler = getRandomFormalFiller('start', intensity);
         modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
       }
 
       // Mitte-Einschübe
-      if (shouldInsertFormalFiller(intensity * 0.5)) {
+      if (shouldInsertFormalFiller(intensity * 0.4)) {
         const filler = getRandomFormalFiller('mid', intensity);
         const commaIdx = modified.indexOf(',');
         if (commaIdx > 5 && commaIdx < modified.length - 5) {
@@ -162,7 +77,8 @@ class FormalTransformer {
         }
       }
 
-      if (shouldInsertFormalFiller(intensity * 0.7)) {
+      // Satzende
+      if (shouldInsertFormalFiller(intensity * 0.5)) {
         const filler = getRandomFormalFiller('end', intensity);
         const punctMatch = modified.match(/([.!?]+)$/);
         if (punctMatch) {
@@ -171,7 +87,7 @@ class FormalTransformer {
       }
 
       // Rechtslatein-Einschübe zwischen Sätzen
-      if (idx > 0 && Math.random() < 0.2) {
+      if (idx > 0 && Math.random() < 0.12 * (intensity / 100)) {
         modified = getRandomFormalInterjection() + ' ' + modified;
       }
 
@@ -186,19 +102,17 @@ class FormalTransformer {
    */
   insertCommentary(text) {
     if (!this.settings.fillers) return text;
-    const akt = this.getCurrentAkt();
-    if (akt === 1) return text;
 
     const sentences = text.split(/(?<=[.!?])\s+/);
     const commented = sentences.map(sentence => {
       if (sentence.length < 20) return sentence;
 
       const category = this.getCommentCategory(sentence);
-      const chance = akt === 2 ? 0.15 : 0.3;
+      const chance = 0.2 * (this.intensity / 100);
       if (Math.random() > chance) return sentence;
 
-      // Im Akt II bei informalen Sätzen häufiger kommentieren (der Kontrast!)
-      if (akt === 2 && category === 'informal' && Math.random() < 0.5) {
+      // Bei informalen Sätzen häufiger kommentieren (der Kontrast!)
+      if (category === 'informal' && Math.random() < 0.5) {
         const pool = FORMAL_PARENTHETICAL.informal;
         const comment = pool[Math.floor(Math.random() * pool.length)];
         const punctMatch = sentence.match(/([.!?]+)$/);
@@ -208,8 +122,8 @@ class FormalTransformer {
         return sentence + comment;
       }
 
-      // Meta-Kommentare nur im Akt III
-      if (akt === 3 && Math.random() < 0.1) {
+      // Gelegentlich Meta-Kommentare
+      if (Math.random() < 0.1) {
         const pool = FORMAL_PARENTHETICAL.meta;
         const comment = pool[Math.floor(Math.random() * pool.length)];
         const punctMatch = sentence.match(/([.!?]+)$/);
@@ -246,14 +160,10 @@ class FormalTransformer {
   /**
    * Informal-Formal-Juxtaposition: Bewusst umgangssprachliche Wörter
    * stehen lassen und mit einem formalen Kommentar versehen.
-   * "cool (oder wie man in gebildeten Kreisen sagt: formidabel)"
    */
   insertJuxtapositions(text) {
-    const akt = this.getCurrentAkt();
-    if (akt === 1) return text;
-
     let result = text;
-    const chance = akt === 2 ? 0.12 : 0.25;
+    const chance = 0.2 * (this.intensity / 100);
 
     const juxtapositions = [
       { find: /\bcool\b/gi, formal: ['– wenn ich es einmal so umgangssprachlich formulieren darf –', ', um es salopp auszudrücken,'] },
@@ -280,7 +190,7 @@ class FormalTransformer {
   transform(text) {
     if (!text || text.trim().length < 3) return text;
 
-    const intensity = this.getEscalatedIntensity();
+    const intensity = this.intensity;
     let result = text;
 
     result = this.insertJuxtapositions(result);
@@ -302,11 +212,10 @@ class FormalTransformer {
   transformDOM(rootElement) {
     const root = rootElement || document.body;
     const textNodes = this._collectTextNodes(root);
-    this.totalNodes += textNodes.length;
 
     for (const textNode of textNodes) {
       const original = textNode.textContent;
-      if (original.length > 30 && !this._looksGerman(original)) { this.nodeCount++; continue; }
+      if (original.length > 30 && !this._looksGerman(original)) continue;
       const transformed = this.transform(original);
 
       if (transformed !== original) {
@@ -317,7 +226,6 @@ class FormalTransformer {
           textNode.parentElement.dataset.genzTransformed = 'true';
         }
       }
-      this.nodeCount++;
     }
 
     return textNodes.length;
