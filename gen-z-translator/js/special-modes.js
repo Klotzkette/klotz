@@ -1,4 +1,4 @@
-// Spezial-Modi: Gender-Modi (Stern, Doppelpunkt, ausgeschrieben, Partizip, Maskulinum)
+// Spezial-Modi: Gender-Modi (Stern, Doppelpunkt, Partizip, Maskulinum)
 // Jeder Modus ist ein eigenständiger Transformer mit transformDOM/revertAll
 
 const _SM_SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','TEXTAREA','INPUT','CODE','PRE','SVG']);
@@ -129,9 +129,6 @@ class GenderTransformer {
         case 'colon':
           result = this._genderWithSymbol(result, noun, ':');
           break;
-        case 'explicit':
-          result = this._genderExplicit(result, noun);
-          break;
         case 'participle':
           result = this._genderParticiple(result, noun);
           break;
@@ -163,17 +160,6 @@ class GenderTransformer {
     // Maskulinum singular: Lehrer → Lehrer*in
     const mRegex = new RegExp('\\b' + this._escapeRegex(noun.m) + '\\b', 'g');
     text = text.replace(mRegex, noun.stem + symbol + 'in');
-    return text;
-  }
-
-  // Gendern explizit: Lehrerinnen und Lehrer
-  _genderExplicit(text, noun) {
-    if (noun.pl) {
-      const plRegex = new RegExp('\\b' + this._escapeRegex(noun.pl) + '\\b', 'g');
-      text = text.replace(plRegex, (noun.fpl || noun.f + 'nen') + ' und ' + noun.pl);
-    }
-    const mRegex = new RegExp('\\b' + this._escapeRegex(noun.m) + '\\b', 'g');
-    text = text.replace(mRegex, noun.f + ' oder ' + noun.m);
     return text;
   }
 

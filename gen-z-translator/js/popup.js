@@ -1,21 +1,5 @@
 // Popup Controller — Click-to-Apply
-// Klick auf Modus → sofort anwenden. Nochmal klicken → deaktivieren.
-// Anderen Modus klicken → alter wird zurückgesetzt, neuer wird angewendet.
-
-const MODE_THEMES = {
-  genz: 'theme-genz',
-  formal: 'theme-formal',
-  fraenkisch: 'theme-dialect',
-  berlinerisch: 'theme-dialect',
-  schwaebisch: 'theme-dialect',
-  gender_star: 'theme-gender',
-  gender_colon: 'theme-gender',
-  gender_participle: 'theme-gender',
-  gender_maskulinum: 'theme-gender',
-  adjektivkiller: 'theme-tool',
-  kleinschreibung: 'theme-tool',
-  vokalentferner: 'theme-tool',
-};
+// Klick auf Modus -> sofort anwenden. Nochmal klicken -> deaktivieren.
 
 let activeMode = null;
 
@@ -25,21 +9,18 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     const mode = btn.dataset.mode;
 
     if (activeMode === mode) {
-      // Gleichen Modus nochmal geklickt → deaktivieren
+      // Gleichen Modus nochmal geklickt -> deaktivieren
       await revertCurrentMode();
       setInactive();
       return;
     }
 
-    // Neuen Modus aktivieren (alter wird im content.js automatisch zurückgesetzt)
+    // Neuen Modus aktivieren
     activeMode = mode;
 
     // UI aktualisieren
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // Theme setzen
-    document.body.className = MODE_THEMES[mode] || 'theme-genz';
 
     // Settings zusammenbauen
     const settings = {
@@ -74,7 +55,6 @@ async function revertCurrentMode() {
 function setInactive() {
   activeMode = null;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.body.className = 'theme-genz';
 }
 
 // === Restore saved state on popup open ===
@@ -83,11 +63,7 @@ chrome.storage.local.get(['genzSettings', 'genzActive'], (data) => {
     const mode = data.genzSettings.mode;
     activeMode = mode;
 
-    // Button als aktiv markieren
     const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
     if (btn) btn.classList.add('active');
-
-    // Theme setzen
-    document.body.className = MODE_THEMES[mode] || 'theme-genz';
   }
 });
