@@ -10,11 +10,19 @@
     }
 
     body {
-      width: 340px;
+      width: 360px;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
       overflow: hidden;
+      transition: background 0.4s ease;
+    }
+
+    body.mode-genz {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body.mode-formal {
+      background: linear-gradient(135deg, #2c3e50 0%, #4a0e0e 100%);
     }
 
     .header {
@@ -23,22 +31,69 @@
     }
 
     .header h1 {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      transition: all 0.3s;
     }
 
     .header .subtitle {
       font-size: 11px;
       opacity: 0.85;
       margin-top: 2px;
+      transition: all 0.3s;
+    }
+
+    /* Mode Selector */
+    .mode-selector {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px;
+      margin-bottom: 10px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .mode-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .mode-btn.active {
+      background: rgba(255,255,255,0.3);
+      border-color: #fff;
+      box-shadow: 0 0 12px rgba(255,255,255,0.2);
+    }
+
+    .mode-btn .mode-icon {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .mode-btn .mode-label {
+      display: block;
+      font-size: 11px;
+      opacity: 0.9;
     }
 
     .controls {
-      padding: 12px 16px;
+      padding: 8px 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .control-row {
@@ -153,16 +208,53 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
 
+    /* Akt-Anzeige */
+    .akt-info {
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+
+    .akt-bar {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 4px;
+    }
+
+    .akt-segment {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .akt-segment .fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    .akt-segment:nth-child(1) .fill { background: rgba(255,255,255,0.5); width: 100%; }
+    .akt-segment:nth-child(2) .fill { background: rgba(255,255,255,0.7); width: 100%; }
+    .akt-segment:nth-child(3) .fill { background: #fff; width: 100%; }
+
+    .akt-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
     /* Action Button */
     .action-btn {
       display: block;
       width: calc(100% - 32px);
-      margin: 4px 16px 14px;
+      margin: 4px 16px 10px;
       padding: 12px;
       font-size: 14px;
       font-weight: 800;
-      color: #764ba2;
-      background: #fff;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -179,30 +271,67 @@
       transform: translateY(0);
     }
 
-    .action-btn.active {
-      background: #00e676;
+    .action-btn#transformBtn {
+      background: #fff;
+    }
+
+    body.mode-genz .action-btn#transformBtn { color: #764ba2; }
+    body.mode-formal .action-btn#transformBtn { color: #4a0e0e; }
+
+    .action-btn#revertBtn {
+      background: #ff5252;
       color: #fff;
     }
 
     .footer {
       text-align: center;
-      padding: 0 16px 12px;
+      padding: 0 16px 10px;
       font-size: 10px;
-      opacity: 0.6;
+      opacity: 0.5;
     }
+
+    /* Emoji-Toggle nur im Gen-Z Modus sichtbar */
+    .genz-only { display: block; }
+    body.mode-formal .genz-only { display: none; }
   </style>
 </head>
-<body>
+<body class="mode-genz">
   <div class="header">
-    <h1>Gen-Z Übersetzer 💀🔥</h1>
-    <div class="subtitle">Mach jeden Text sheesh-würdig</div>
+    <h1 id="headerTitle">Text-Transformer 🎭</h1>
+    <div class="subtitle" id="headerSubtitle">Drei Akte der Verwandlung</div>
+  </div>
+
+  <!-- Modus-Auswahl -->
+  <div class="mode-selector">
+    <button class="mode-btn active" id="modeGenz" data-mode="genz">
+      <span class="mode-icon">💀🔥</span>
+      <span class="mode-label">Gen-Z / Alpha</span>
+    </button>
+    <button class="mode-btn" id="modeFormal" data-mode="formal">
+      <span class="mode-icon">📜⚖️</span>
+      <span class="mode-label">Bildungssprache</span>
+    </button>
+  </div>
+
+  <!-- Akt-Visualisierung -->
+  <div class="akt-info">
+    <div class="akt-bar">
+      <div class="akt-segment"><div class="fill"></div></div>
+      <div class="akt-segment"><div class="fill"></div></div>
+      <div class="akt-segment"><div class="fill"></div></div>
+    </div>
+    <div class="akt-labels">
+      <span id="aktLabel1">Akt I: Subtil</span>
+      <span id="aktLabel2">Akt II: Kontrast</span>
+      <span id="aktLabel3">Akt III: Eskalation</span>
+    </div>
   </div>
 
   <div class="controls">
     <div class="control-row">
       <div>
         <label>Wort-Ersetzung</label>
-        <div class="desc">Normale Wörter durch Slang ersetzen</div>
+        <div class="desc" id="descReplace">Normale Wörter durch Slang ersetzen</div>
       </div>
       <label class="switch">
         <input type="checkbox" id="toggleReplace" checked>
@@ -212,8 +341,8 @@
 
     <div class="control-row">
       <div>
-        <label>Füllwörter</label>
-        <div class="desc">Digga, literally, lowkey einfügen</div>
+        <label id="labelFillers">Füllwörter & Kommentare</label>
+        <div class="desc" id="descFillers">Digga, lowkey + parenthetische Kommentare</div>
       </div>
       <label class="switch">
         <input type="checkbox" id="toggleFillers" checked>
@@ -221,7 +350,7 @@
       </label>
     </div>
 
-    <div class="control-row">
+    <div class="control-row genz-only">
       <div>
         <label>Emoji-Ketten</label>
         <div class="desc">💀😭🔥 nach Sätzen einfügen</div>
@@ -241,10 +370,10 @@
     </div>
   </div>
 
-  <button class="action-btn" id="transformBtn">SEITE TRANSFORMIEREN 🚀</button>
-  <button class="action-btn" id="revertBtn" style="display:none; background:#ff5252; color:#fff;">ZURÜCKSETZEN ↩️</button>
+  <button class="action-btn" id="transformBtn">SEITE TRANSFORMIEREN 🎭</button>
+  <button class="action-btn" id="revertBtn" style="display:none;">ZURÜCKSETZEN ↩️</button>
 
-  <div class="footer">no cap, fr fr - Version 1.0</div>
+  <div class="footer" id="footerText">Drei Akte der Verwandlung — v2.0</div>
 
   <script src="js/popup.js"></script>
 </body>

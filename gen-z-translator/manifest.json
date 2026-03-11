@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Gen-Z Übersetzer - Jugendsprache Transformer",
-  "version": "1.0.0",
-  "description": "Verwandelt jeden deutschen Text in authentische Gen-Z / Gen-Alpha Jugendsprache mit Slang, Füllwörtern und Emoji-Ketten 💀🔥",
+  "name": "Text-Transformer — Gen-Z & Bildungssprache",
+  "version": "2.0.0",
+  "description": "Verwandelt deutschen Text in Gen-Z Jugendsprache 💀🔥 oder hochtrabende Bildungssprache 📜🎭 — mit behutsamer Drei-Akt-Dramaturgie à la Yasmina Reza",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -20,7 +20,16 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["js/dictionary.js", "js/emojis.js", "js/fillers.js", "js/transformer.js", "js/content.js"],
+      "js": [
+        "js/dictionary.js",
+        "js/emojis.js",
+        "js/fillers.js",
+        "js/transformer.js",
+        "js/formal-dictionary.js",
+        "js/formal-fillers.js",
+        "js/formal-transformer.js",
+        "js/content.js"
+      ],
       "css": ["css/overlay.css"],
       "run_at": "document_idle"
     }
