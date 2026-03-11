@@ -16,13 +16,15 @@ const PARENTHETICAL_COMMENTS = {
   // Reaktionen auf sachliche/langweilige Aussagen
   neutral: [
     ' (real talk)',
-    ' (spannend, weiter)',
     ' (okay wow)',
     ' (noted)',
-    ' (aha)',
     ' (wer hat das geschrieben)',
     ' (stay with me hier)',
-    ' (ja gut)',
+    ' (ja gut, weiter)',
+    ' (muss man erstmal sacken lassen)',
+    ' (das war jetzt sehr Powerpoint-Folie-3)',
+    ' (stell dir vor das steht da wirklich)',
+    ' (keiner hat danach gefragt aber okay)',
   ],
   // Reaktionen auf positive Aussagen
   positive: [
@@ -30,11 +32,14 @@ const PARENTHETICAL_COMMENTS = {
     ' (W)',
     ' (king shit)',
     ' (slay)',
-    ' (ate)',
+    ' (ate and left no crumbs)',
     ' (wir fühlen das)',
     ' (so true bestie)',
     ' (das ist der Weg)',
-    ' (Ehre)',
+    ' (Ehre genommen)',
+    ' (der Satz hat verstanden)',
+    ' (understood the assignment)',
+    ' (endlich sagt es jemand)',
   ],
   // Reaktionen auf negative/problematische Aussagen
   negative: [
@@ -46,22 +51,36 @@ const PARENTHETICAL_COMMENTS = {
     ' (pain)',
     ' (das tut weh ngl)',
     ' (bruh moment)',
-    ' (red flag)',
+    ' (red flag übrigens)',
+    ' (okay DAS war unnötig)',
+    ' (ich würde jetzt gerne woanders sein)',
+    ' (der Vibe ist jetzt im Keller)',
   ],
   // Reaktionen auf formelle/steife Sprache — der Reza-Kern
   formal: [
     ' (so würde das ein Alman sagen)',
-    ' (sehr förmlich, Respekt)',
-    ' (klingt wie mein Lehrer)',
-    ' (okay Boomer)',
+    ' (klingt wie mein Lehrer am Montag)',
     ' (diese Formulierung hat mich kurz shook)',
-    ' (wer redet so)',
-    ' (Alman-Energy)',
-    ' (corporate speech detected)',
+    ' (wer redet so im echten Leben)',
+    ' (Alman-Energy at its finest)',
+    ' (corporate speech detected 🚨)',
     ' (irgendwie cute wie ernst das klingt)',
-    ' (das hat NPC-Energie)',
+    ' (das hat NPC-Energie und ich bin hier für)',
     ' (der Satz hat sich selbst ernst genommen)',
-    ' (jemand hatte einen Duden)',
+    ' (jemand hatte einen Duden und hat ihn auch benutzt)',
+    ' (ich höre förmlich die Krawatte)',
+    ' (LinkedIn-Energy)',
+    ' (das klingt wie eine E-Mail die mit "Sehr geehrte" anfängt)',
+    ' (der Satz läuft auf Lederschuhen)',
+  ],
+  // Reaktionen auf Zahlen/Statistik-Aussagen
+  data: [
+    ' (Mathe-Nerds aufgepasst)',
+    ' (ich vertraue einfach mal)',
+    ' (Zahlen sind auch nur Meinungen)',
+    ' (Quelle: trust me bro)',
+    ' (der Excel-Satz)',
+    ' (klingt wissenschaftlich also stimmt das wohl)',
   ],
   // Meta-Kommentare über die Verwandlung selbst
   meta: [
@@ -72,6 +91,9 @@ const PARENTHETICAL_COMMENTS = {
     ' (kein Zurück mehr)',
     ' (wir sind jetzt hier)',
     ' (der Originalautor würde weinen)',
+    ' (der Text hat die Kontrolle verloren und das ist okay)',
+    ' (Akt III betritt die Bühne)',
+    ' (wir sind im Endgame jetzt)',
   ],
 };
 
@@ -220,11 +242,15 @@ class GenZTransformer {
   getSentimentCategory(sentence) {
     const lower = sentence.toLowerCase();
     const posWords = ['gut', 'schön', 'freude', 'erfolg', 'gewinn', 'positiv', 'wundervoll',
-                      'hervorragend', 'gelungen', 'vorteil', 'fortschritt', 'wachstum'];
+                      'hervorragend', 'gelungen', 'vorteil', 'fortschritt', 'wachstum',
+                      'besser', 'optimal', 'übertroffen', 'gesteigert', 'gewachsen'];
     const negWords = ['schlecht', 'problem', 'schwierig', 'verlust', 'risiko', 'gefahr',
-                      'negativ', 'fehler', 'mangel', 'krise', 'rückgang', 'nachteil'];
+                      'negativ', 'fehler', 'mangel', 'krise', 'rückgang', 'nachteil',
+                      'leider', 'bedauerlicherweise', 'verschlechtert', 'gescheitert'];
 
     if (this.isFormalSentence(sentence)) return 'formal';
+    // Zahlen/Prozente/Statistiken erkennen
+    if (/\d+[.,]?\d*\s*(%|Prozent|Euro|Milliarden|Millionen|Mio|Mrd)/i.test(sentence)) return 'data';
     if (posWords.some(w => lower.includes(w))) return 'positive';
     if (negWords.some(w => lower.includes(w))) return 'negative';
     return 'neutral';
@@ -431,20 +457,25 @@ class GenZTransformer {
 
     // Formale Konnektoren bewusst stehen lassen und Slang-Suffix anhängen
     const juxtapositions = [
-      { find: /\bnichtsdestotrotz\b/gi, suffix: [', digga,', ', wenn man so will,', ', real talk,'] },
-      { find: /\bselbstverständlich\b/gi, suffix: [' – also safe', ' (safe)', ', obviously,'] },
-      { find: /\bdementsprechend\b/gi, suffix: [', also basically,', ', you know,'] },
-      { find: /\bdarüber hinaus\b/gi, suffix: [' – und das ist noch nicht alles, bro –', ', plus,'] },
+      { find: /\bnichtsdestotrotz\b/gi, suffix: [', digga,', ', real talk,', ' – und ich meine das fr –'] },
+      { find: /\bselbstverständlich\b/gi, suffix: [' – also safe', ' (safe)', ', no cap,'] },
+      { find: /\bdementsprechend\b/gi, suffix: [', also basically,', ', you know,', ' – und damit mein ich –'] },
+      { find: /\bdarüber hinaus\b/gi, suffix: [' – und das ist noch nicht alles, bro –', ', plus,', ' (wait es kommt noch mehr)'] },
       { find: /\bin Anbetracht\b/gi, suffix: [', ngl,', ', wenn man das mal real betrachtet,'] },
-      { find: /\bim Rahmen\b/gi, suffix: [' (oder wie auch immer man das nennt)'] },
-      { find: /\bhinsichtlich\b/gi, suffix: [', also bezogen auf', ', in Sachen'] },
-      { find: /\bferner\b/gi, suffix: [', und btw,', ', außerdem, no cap,'] },
-      { find: /\bzudem\b/gi, suffix: [', plus,', ', und halt auch,'] },
+      { find: /\bim Rahmen\b/gi, suffix: [' (oder wie auch immer man das nennt)', ' – whatever das heißt –'] },
+      { find: /\bhinsichtlich\b/gi, suffix: [', also in Sachen', ' – bezogen auf, you know,'] },
+      { find: /\bferner\b/gi, suffix: [', und btw,', ', außerdem, no cap,', ', plus, on top,'] },
+      { find: /\bzudem\b/gi, suffix: [', plus,', ', und halt auch,', ' – apropos –'] },
       { find: /\bGemäß\b/g, suffix: [' – laut', ' – also laut'] },
-      { find: /\bjedoch\b/gi, suffix: [', aber halt,', ', tho,'] },
+      { find: /\bjedoch\b/gi, suffix: [', aber halt,', ', tho,', ' – plot twist –'] },
       { find: /\bdennoch\b/gi, suffix: [', trotzdem tho,', ', but still,'] },
-      { find: /\bsomit\b/gi, suffix: [', also basically,'] },
+      { find: /\bsomit\b/gi, suffix: [', also basically,', ', ergo, wenn man so will,'] },
       { find: /\binsbesondere\b/gi, suffix: [', vor allem halt,', ', speziell,'] },
+      { find: /\bdes Weiteren\b/gi, suffix: [' – und es geht weiter –', ', also,'] },
+      { find: /\bim Übrigen\b/gi, suffix: [' – btw –', ', fun fact,'] },
+      { find: /\bgleichwohl\b/gi, suffix: [', trotzdem,', ', but hear me out,'] },
+      { find: /\bfolglich\b/gi, suffix: [', also logisch,', ', makes sense,'] },
+      { find: /\bindes\b/gi, suffix: [', meanwhile,', ', aber so,'] },
     ];
 
     for (const jux of juxtapositions) {
@@ -490,20 +521,41 @@ class GenZTransformer {
   }
 
   /**
+   * Schneller Sprach-Check: ist der Text wahrscheinlich Deutsch?
+   * Prüft auf typische deutsche Wörter um englische/fremdsprachige Texte zu skippen.
+   */
+  _looksGerman(text) {
+    if (text.length < 20) return true; // Zu kurz zum Erkennen → transformieren
+    const lower = text.toLowerCase();
+    const germanMarkers = /\b(und|der|die|das|ist|ein|eine|von|mit|für|auf|den|dem|des|sich|nicht|auch|werden|wird|sind|hat|bei|nach|nur|wie|noch|oder|aber|wenn|über|kann|mehr|schon|seit|dass|diese|einem|andere|alle|aus|zum|zur|vor|dann|hier|sein|durch|als|bis|sehr|dort|wir|sie|ihr)\b/;
+    // Mindestens 2 deutsche Marker in den ersten 200 Zeichen
+    const sample = lower.substring(0, 200);
+    const matches = sample.match(new RegExp(germanMarkers.source, 'g'));
+    return matches && matches.length >= 2;
+  }
+
+  /**
    * Durchläuft den DOM und transformiert alle Text-Nodes.
    * ZWEI Durchläufe: Erst zählen (für Eskalationsberechnung), dann transformieren.
+   * Chunked processing: Bei >500 Nodes in Batches, um den Main Thread nicht zu blockieren.
    */
   transformDOM(rootElement) {
     const root = rootElement || document.body;
 
     // Erster Durchlauf: Nodes sammeln
     const textNodes = this._collectTextNodes(root);
-    this.totalNodes = textNodes.length;
-    this.nodeCount = 0;
+    this.totalNodes += textNodes.length;
 
     // Zweiter Durchlauf: Transformieren mit Eskalation
     for (const textNode of textNodes) {
       const original = textNode.textContent;
+
+      // Sprach-Check: nur deutsche Texte transformieren
+      if (original.length > 30 && !this._looksGerman(original)) {
+        this.nodeCount++;
+        continue;
+      }
+
       const transformed = this.transform(original);
 
       if (transformed !== original) {

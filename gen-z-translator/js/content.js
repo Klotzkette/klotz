@@ -3,6 +3,7 @@
 // Unterstützt alle Modi: Gen-Z, Bildungssprache, Dialekte, Spezial-Modi
 
 let transformer = null;
+let _lastSettings = null; // Für SPA-Observer: merkt sich die Settings
 
 // Dialekt-Modi → DIALECTS key
 const DIALECT_MODES = {
@@ -40,6 +41,7 @@ function doTransform(settings) {
     transformer.revertAll();
   }
 
+  _lastSettings = settings;
   const mode = settings.mode || 'genz';
 
   if (mode === 'formal') {
@@ -114,37 +116,76 @@ function doRevert() {
   if (transformer) {
     transformer.revertAll();
     transformer = null;
+    _lastSettings = null;
     showNotification('Zurückgesetzt ↩️');
   }
 }
 
-// SPA-Navigation: Bei dynamisch nachgeladenem Content auch transformieren
+// ==========================================================================
+// SPA-Navigation: MutationObserver für dynamisch nachgeladene Inhalte
+// Erfasst: React/Vue/Angular-SPAs, infinite scroll, AJAX-Nachladen, Google-Suche
+// ==========================================================================
 let spaObserver = null;
 let spaDebounceTimer = null;
+let _spaIsTransforming = false; // Guard gegen Re-Entranz
 
 function startSPAObserver() {
-  if (spaObserver) return;
+  if (spaObserver) spaObserver.disconnect();
 
   spaObserver = new MutationObserver((mutations) => {
-    if (!transformer) return;
+    if (!transformer || _spaIsTransforming) return;
 
-    // Debounce: Nicht bei jeder Mini-Änderung feuern
+    // Nur feuern wenn tatsächlich neue Nodes hinzugefügt wurden
+    let hasNewNodes = false;
+    for (const m of mutations) {
+      if (m.addedNodes.length > 0) { hasNewNodes = true; break; }
+    }
+    if (!hasNewNodes) return;
+
+    // Debounce: Sammle schnelle DOM-Änderungen
     if (spaDebounceTimer) clearTimeout(spaDebounceTimer);
     spaDebounceTimer = setTimeout(() => {
-      // Nur neue, nicht-transformierte Nodes verarbeiten
-      // Das Dataset-Check in _collectTextNodes verhindert Doppel-Transformation
+      _spaIsTransforming = true;
       try {
         transformer.transformDOM(document.body);
       } catch (e) {
         // Fehler ignorieren — besser als Absturz
       }
-    }, 500);
+      _spaIsTransforming = false;
+    }, 400);
   });
 
   spaObserver.observe(document.body, {
     childList: true,
     subtree: true,
   });
+
+  // Auch auf URL-Änderungen (pushState) reagieren — für SPAs wie Google
+  if (!window._genzPopstateRegistered) {
+    window._genzPopstateRegistered = true;
+    // pushState/replaceState abfangen
+    const origPushState = history.pushState;
+    const origReplaceState = history.replaceState;
+    history.pushState = function() {
+      origPushState.apply(this, arguments);
+      _onSPANavigation();
+    };
+    history.replaceState = function() {
+      origReplaceState.apply(this, arguments);
+      _onSPANavigation();
+    };
+    window.addEventListener('popstate', _onSPANavigation);
+  }
+}
+
+function _onSPANavigation() {
+  if (!transformer || !_lastSettings) return;
+  // Bei URL-Wechsel: kurz warten bis neuer Content geladen, dann transformieren
+  setTimeout(() => {
+    if (transformer) {
+      try { transformer.transformDOM(document.body); } catch(e) {}
+    }
+  }, 800);
 }
 
 function stopSPAObserver() {

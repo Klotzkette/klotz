@@ -291,14 +291,22 @@ class FormalTransformer {
     return result;
   }
 
+  _looksGerman(text) {
+    if (text.length < 20) return true;
+    const lower = text.toLowerCase();
+    const sample = lower.substring(0, 200);
+    const matches = sample.match(/\b(und|der|die|das|ist|ein|eine|von|mit|für|auf|den|dem|des|sich|nicht|auch|werden|wird|sind|hat|bei|nach|nur|wie|noch|oder|aber|wenn|über|kann|mehr|schon|seit|dass)\b/g);
+    return matches && matches.length >= 2;
+  }
+
   transformDOM(rootElement) {
     const root = rootElement || document.body;
     const textNodes = this._collectTextNodes(root);
-    this.totalNodes = textNodes.length;
-    this.nodeCount = 0;
+    this.totalNodes += textNodes.length;
 
     for (const textNode of textNodes) {
       const original = textNode.textContent;
+      if (original.length > 30 && !this._looksGerman(original)) { this.nodeCount++; continue; }
       const transformed = this.transform(original);
 
       if (transformed !== original) {

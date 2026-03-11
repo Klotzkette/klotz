@@ -208,7 +208,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bschön\b/gi, replacements: ['aesthetic ✨', 'lowkey hübsch', 'voll cute', 'snatched'], type: 'adj' },
   { pattern: /\bhübsch\b/gi, replacements: ['cute', 'lowkey fine', 'aesthetic', 'snatched'], type: 'adj' },
   { pattern: /\bschlecht\b/gi, replacements: ['trash', 'mid', 'cringe', 'lowkey wack', 'Zonk'], type: 'adj' },
-  { pattern: /\blangweilig\b/gi, replacements: ['mid 😐', 'boring af', 'dead', 'lame 😴'], type: 'adj' },
+  { pattern: /\blangweilig\b/gi, replacements: ['mid 😐', 'boring af', 'dead', 'lame 😴', 'NPC-mäßig 🤖'], type: 'adj' },
   { pattern: /\binteressant\b/gi, replacements: ['lowkey spannend', 'kinda wild'], type: 'adj' },
   { pattern: /\bwichtig\b/gi, replacements: ['lowkey wichtig', 'real talk wichtig'], type: 'adj' },
   { pattern: /\bschlimm\b/gi, replacements: ['toxic ☠️', 'lowkey cursed'], type: 'adj' },
@@ -235,7 +235,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bklein\b/gi, replacements: ['smol', 'mini'], type: 'adj' },
   { pattern: /\bgroß\b/gi, replacements: ['huge', 'massive'], type: 'adj' },
   { pattern: /\bschnell\b/gi, replacements: ['speedy', 'lowkey schnell'], type: 'adj' },
-  { pattern: /\blangsam\b/gi, replacements: ['slow af', 'mega langsam'], type: 'adj' },
+  { pattern: /\blangsam\b/gi, replacements: ['slow af', 'mega langsam', 'NPC-Tempo 🤖'], type: 'adj' },
   { pattern: /\beinfach\b/gi, replacements: ['easy', 'chill', 'lowkey easy'], type: 'adj' },
   { pattern: /\bschwer\b/gi, replacements: ['hard af', 'lowkey impossible'], type: 'adj' },
   { pattern: /\bteuer\b/gi, replacements: ['overpriced fr', 'bougie'], type: 'adj' },
@@ -245,7 +245,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bstark\b/gi, replacements: ['OP', 'overpowered', 'tuff'], type: 'adj' },
   { pattern: /\bschwach\b/gi, replacements: ['nerfed', 'lowkey weak'], type: 'adj' },
   { pattern: /\bmutig\b/gi, replacements: ['bold', 'hat balls', 'savage 😈'], type: 'adj' },
-  { pattern: /\bdumm\b/gi, replacements: ['lowkey dumb', 'not it', 'cringe'], type: 'adj' },
+  { pattern: /\bdumm\b/gi, replacements: ['lowkey dumb', 'not it', 'cringe', 'brainrot 🧠🪱'], type: 'adj' },
   { pattern: /\bklug\b/gi, replacements: ['big brain 🧠', 'galaxy brain'], type: 'adj' },
   { pattern: /\bintelligent\b/gi, replacements: ['big brain energy 🧠', '200 IQ'], type: 'adj' },
   { pattern: /\bentspannt\b/gi, replacements: ['chillig 😎', 'auf Lock', 'schmoof 😌'], type: 'adj' },
@@ -332,8 +332,8 @@ const GENZ_DICTIONARY = [
   { pattern: /\bMann\b/g, replacements: ['Bro', 'King 👑', 'Dude'], type: 'noun' },
   { pattern: /\bFrau\b/g, replacements: ['Queen 👑', 'Girlie', 'Bestie'], type: 'noun' },
   { pattern: /\bLeute\b/gi, replacements: ['Leude', 'Crowd', 'die Gang'], type: 'noun' },
-  { pattern: /\bPerson\b/gi, replacements: ['Mensch halt', 'Random'], type: 'noun' },
-  { pattern: /\bMenschen\b/gi, replacements: ['Leude', 'die Crowd'], type: 'noun' },
+  { pattern: /\bPerson\b/gi, replacements: ['Mensch halt', 'Random', 'NPC 🤖'], type: 'noun' },
+  { pattern: /\bMenschen\b/gi, replacements: ['Leude', 'die Crowd', 'NPCs'], type: 'noun' },
   { pattern: /\bEltern\b/gi, replacements: ['die Alten', 'Eltern halt'], type: 'noun' },
   { pattern: /\bVater\b/g, replacements: ['Dad', 'der Alte'], type: 'noun' },
   { pattern: /\bMutter\b/g, replacements: ['Mom', 'Mama'], type: 'noun' },
@@ -423,6 +423,19 @@ const GENZ_DICTIONARY = [
   { pattern: /\bzusätzlich\b/gi, replacements: ['plus ➕'] },
 
   // ==========================================================================
+  // Kontextuelle Ausdrücke (NPC/Brainrot mit klarem Kontext)
+  // ==========================================================================
+  { pattern: /\bRoutine\b/gi, replacements: ['NPC-Routine 🤖', 'daily Grind'], type: 'noun' },
+  { pattern: /\bAlltag\b/gi, replacements: ['NPC-Life', 'der daily Grind'], type: 'noun' },
+  { pattern: /\bgedankenlos\b/gi, replacements: ['brainrot', 'NPC-mäßig'], type: 'adj' },
+  { pattern: /\bgeistlos\b/gi, replacements: ['brainrot 🧠🪱', 'NPC-Energie'], type: 'adj' },
+  { pattern: /\bstumpfsinnig\b/gi, replacements: ['brainrot', 'brainrot-inducing 🧠🪱'], type: 'adj' },
+  { pattern: /\bgehorsam\b/gi, replacements: ['NPC-mäßig', 'auf Autopilot'], type: 'adj' },
+  { pattern: /\bvorhersehbar\b/gi, replacements: ['NPC-Verhalten 🤖', 'scripted'], type: 'adj' },
+  { pattern: /\bablenkend\b/gi, replacements: ['brainrot-inducing 🧠🪱'], type: 'adj' },
+  { pattern: /\bAbsurdität\b/gi, replacements: ['Brainrot', 'absoluter Brainrot 🧠🪱'], type: 'noun' },
+
+  // ==========================================================================
   // Emotionen / Ausrufe
   // ==========================================================================
   { pattern: /\bWow\b/gi, replacements: ['Sheesh 😳', 'Bruuuh', 'Yooo'] },
@@ -433,6 +446,28 @@ const GENZ_DICTIONARY = [
   { pattern: /\bNein\b/g, replacements: ['Nah', 'Nope', 'Hell nah'] },
   { pattern: /\bOkay\b/gi, replacements: ['Bet', 'Aight', 'Kk'] },
   { pattern: /\bAusruf\b/gi, replacements: ['Sheesh', 'Bruh', 'Alter'] },
+
+  // ==========================================================================
+  // Nachrichtensprache & Corporate-Speak (häufig auf Websites)
+  // ==========================================================================
+  { pattern: /\bStudie\b/gi, replacements: ['Studie', 'Research'], type: 'noun' },
+  { pattern: /\bUnternehmen\b/gi, replacements: ['Company', 'die Firma'], type: 'noun' },
+  { pattern: /\bStrategie\b/gi, replacements: ['Masterplan', 'Game Plan'], type: 'noun' },
+  { pattern: /\bVeranstaltung\b/gi, replacements: ['Event', 'Happening'], type: 'noun' },
+  { pattern: /\bZusammenarbeit\b/gi, replacements: ['Collab', 'Teamwork'], type: 'noun' },
+  { pattern: /\bVeröffentlichung\b/gi, replacements: ['Drop', 'Release'], type: 'noun' },
+  { pattern: /\bAngebot\b/gi, replacements: ['Deal', 'Angebot'], type: 'noun' },
+  { pattern: /\bErgebnis\b/gi, replacements: ['Outcome', 'Result'], type: 'noun' },
+  { pattern: /\bErgebnisse\b/gi, replacements: ['Results', 'Outcomes'], type: 'noun' },
+  { pattern: /\bEntwicklung\b/gi, replacements: ['Development', 'Glow-Up ✨'], type: 'noun' },
+  { pattern: /\bVorstellung\b/gi, replacements: ['Reveal', 'Präsi'], type: 'noun' },
+  { pattern: /\bbekannt geben\b/gi, replacements: ['droppen', 'announcen'] },
+  { pattern: /\bverbessern\b/gi, replacements: ['upgraden', 'leveln'] },
+  { pattern: /\bverbessert\b/gi, replacements: ['upgraded', 'geleveled'] },
+  { pattern: /\bveröffentlichen\b/gi, replacements: ['droppen', 'releasen'] },
+  { pattern: /\bunterstützen\b/gi, replacements: ['supporten', 'backen'] },
+  { pattern: /\banalysieren\b/gi, replacements: ['checken', 'deep diven'] },
+  { pattern: /\bdiskutieren\b/gi, replacements: ['talken über', 'besprechen'] },
 
   // ==========================================================================
   // Grüße & Höflichkeitsfloskeln
