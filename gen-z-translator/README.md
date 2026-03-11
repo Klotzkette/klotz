@@ -1,25 +1,37 @@
-# Text-Transformer — Gen-Z & Bildungssprache
+# Text-Transformer — 15 Modi für deutschen Text
 
-Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten verwandelt.
+Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten transformiert — mit behutsamer Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung.
 
 ## Modi
 
-### Gen-Z / Alpha
-Ersetzt normalen Text durch Jugendsprache mit Emojis, Füllwörtern und Slang.
-- 200+ Wörter im Glossar (Stand 2026)
-- Emoji-Ketten nach Sätzen
-- Füllwörter wie *digga*, *lowkey*, *no cap*
+### Sprachstile
+- **Gen-Z / Gen Alpha** — Slang, Emojis, Füllwörter (200+ Einträge)
+- **Bildungssprache** — Fachbegriffe, Rechtslatein, gehobener Stil
+- **Politiker-Sprech** — Phrasen, Worthülsen, Maßnahmenpakete
+- **Barock-Deutsch** — Anachronistische Wörter, alterthümliche Schreibung
 
-### Bildungssprache
-Verwandelt Text in gehobene Sprache mit Fachbegriffen und rhetorischen Figuren.
-- Lateinische Wendungen und Fremdwörter
-- Parenthetische Einschübe
-- Konjunktiv und Passivkonstruktionen
+### Dialekte
+- **Berlinerisch** — ick, dit, jut, wa?
+- **Sächsisch** — nu, gelle, Konsonanten-Verschiebung
+- **Fränkisch** — fei, gell, ned, -la statt -chen
+- **Bairisch** — i, mia, ned, -erl, Ja mei!
+- **Schwäbisch** — isch, net, -le, gell?
+- **Ruhrpott** — dat, wat, Hömma, woll?
+- **Norddeutsch** — Moin, Understatement, schnacken
+
+### Text-Werkzeuge
+- **Gendern (Stern \*)** — Lehrer → Lehrer\*innen
+- **Gendern (Doppelpunkt :)** — Lehrer → Lehrer:innen
+- **Gendern (ausgeschrieben)** — Lehrerinnen und Lehrer
+- **Gendern (Partizip)** — Studenten → Studierende
+- **Generisches Maskulinum** — Gendern rückgängig machen
+- **Adjektivkiller** — Alle Adjektive streichen
 
 ## Features
 
 - Einstellbare Intensität (10% bis 100%)
 - Drei-Akt-Dramaturgie (subtil → Kontrast → Eskalation)
+- **Grammatikbewusste Ersetzung** — Adjektiv-Endungen und Nomen-Endungen werden erkannt und korrekt übertragen
 - One-Click Revert zum Original
 - Funktioniert auf allen Webseiten mit deutschem Text
 
@@ -34,19 +46,11 @@ Verwandelt Text in gehobene Sprache mit Fachbegriffen und rhetorischen Figuren.
 5. Den Ordner `gen-z-translator/` auswählen
 6. Das Extension-Icon in der Toolbar anklicken und loslegen
 
-### Verwendung
-
-1. Eine beliebige deutschsprachige Webseite öffnen
-2. Auf das Extension-Icon klicken
-3. Modus wählen (Gen-Z oder Bildungssprache)
-4. Toggles und Intensität nach Wunsch anpassen
-5. **SEITE TRANSFORMIEREN** klicken
-6. Zum Zurücksetzen: **ZURÜCKSETZEN** klicken
-
 ## Technologie
 
 - Chrome Manifest v3
 - Vanilla JavaScript (kein Framework)
+- Regelbasierte Grammatik-Engine (grammar.js)
 - Content Scripts für DOM-Manipulation
 
 ## Lizenz

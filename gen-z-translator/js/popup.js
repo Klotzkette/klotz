@@ -1,64 +1,229 @@
-// Popup controller — mit Modus-Auswahl
+// Popup Controller — Multi-Mode
 const $ = (id) => document.getElementById(id);
 
+const modeSelect = $('modeSelect');
 const intensitySlider = $('intensity');
 const intensityLabel = $('intensityLabel');
 const transformBtn = $('transformBtn');
 const revertBtn = $('revertBtn');
-const modeGenz = $('modeGenz');
-const modeFormal = $('modeFormal');
 
-let currentMode = 'genz';
+// Modus-Konfiguration: Theme, Titel, Beschreibungen
+const MODE_CONFIG = {
+  genz: {
+    theme: 'theme-genz', title: 'Gen-Z Transformer 💀🔥',
+    subtitle: 'Drei Akte der Jugendsprache-Verwandlung',
+    replace: 'Normale Wörter durch Slang ersetzen',
+    fillers: 'Digga, lowkey + Gen-Z-Kommentare',
+    fillersLabel: 'Füllwörter & Kommentare',
+    akt: ['Akt I: Subtil', 'Akt II: Kontrast', 'Akt III: Brainrot'],
+    btn: 'SEITE TRANSFORMIEREN 🔥', footer: 'no cap, fr fr — v3.0',
+    hasAkt: true,
+  },
+  formal: {
+    theme: 'theme-formal', title: 'Bildungssprache 📜⚖️',
+    subtitle: 'Drei Akte der sprachlichen Veredelung',
+    replace: 'Wörter durch elaborierte Synonyme ersetzen',
+    fillers: 'Nota bene, quod erat demonstrandum',
+    fillersLabel: 'Floskeln & Rechtslatein',
+    akt: ['Akt I: Dezent', 'Akt II: Gelehrt', 'Akt III: Kanzlei'],
+    btn: 'SEITE VEREDELN 📜', footer: 'Quod erat demonstrandum — v3.0',
+    hasAkt: true,
+  },
+  politiker: {
+    theme: 'theme-special', title: 'Politiker-Sprech 🏛️',
+    subtitle: 'Phrasen, Floskeln und Maßnahmenpakete',
+    replace: 'Probleme → Herausforderungen', fillers: 'Leere Worthülsen einfügen',
+    fillersLabel: 'Phrasen & Worthülsen',
+    akt: ['Akt I: Diplomatisch', 'Akt II: Ausweichend', 'Akt III: Reine Worthülsen'],
+    btn: 'SEITE POLITISIEREN 🏛️', footer: 'Das ist alternativlos — v3.0',
+    hasAkt: true,
+  },
+  barock: {
+    theme: 'theme-barock', title: 'Barock-Deutsch 🏰',
+    subtitle: 'Mir deucht, ein Wandel nahet',
+    replace: 'Wörter durch anachronistische Begriffe ersetzen',
+    fillers: 'Fürwahr, sintemalen und derohalben',
+    fillersLabel: 'Barocke Floskeln',
+    akt: ['Akt I: Leicht alterthümlich', 'Akt II: Barockisiert', 'Akt III: Vollständig anno 1700'],
+    btn: 'SEITE BAROCKISIEREN 🏰', footer: 'Sapperment! — v3.0',
+    hasAkt: true,
+  },
+  berlinerisch: {
+    theme: 'theme-dialect', title: 'Berlinerisch 🐻',
+    subtitle: 'Ick bin een Berlina!',
+    replace: 'dit → das, ick → ich, jut → gut',
+    fillers: 'Wa?, Ick sach ma, Kieka',
+    fillersLabel: 'Berliner Füllwörter',
+    akt: ['Akt I: Leichta Akzent', 'Akt II: Kiez-Sprache', 'Akt III: Volle Schnauze'],
+    btn: 'SEITE BERLINERN 🐻', footer: 'Dit is Berlin, wa? — v3.0',
+    hasAkt: true,
+  },
+  saechsisch: {
+    theme: 'theme-dialect', title: 'Sächsisch 🎻',
+    subtitle: 'Nu guck ma eener an!',
+    replace: 'Konsonanten-Verschiebung & Vokaländerungen',
+    fillers: 'Nu, Gelle, Na',
+    fillersLabel: 'Sächsische Füllwörter',
+    akt: ['Akt I: Leichter Tonfall', 'Akt II: Sachsen hört man', 'Akt III: Voll sächsisch'],
+    btn: 'SEITE SÄCHSELN 🎻', footer: 'Nu guck! — v3.0',
+    hasAkt: true,
+  },
+  fraenkisch: {
+    theme: 'theme-dialect', title: 'Fränkisch 🌭',
+    subtitle: 'Bassd scho, gell?',
+    replace: 'ned, fei, -la statt -chen',
+    fillers: 'Fei, Gell, Freilich',
+    fillersLabel: 'Fränkische Füllwörter',
+    akt: ['Akt I: Leicht fränkisch', 'Akt II: Franken merkt man', 'Akt III: Voll fränkisch'],
+    btn: 'SEITE FRANKISIEREN 🌭', footer: 'Bassd scho! — v3.0',
+    hasAkt: true,
+  },
+  bairisch: {
+    theme: 'theme-dialect', title: 'Bairisch 🥨',
+    subtitle: 'Ja mei, des passt scho!',
+    replace: 'ned, i, mia, -erl statt -chen',
+    fillers: 'Ja mei, Sakra, Gell',
+    fillersLabel: 'Bairische Füllwörter',
+    akt: ['Akt I: Leichter Dialekt', 'Akt II: Bayerisch', 'Akt III: Voll bairisch'],
+    btn: 'SEITE BAIRISCH MACHEN 🥨', footer: 'Habedieehre! — v3.0',
+    hasAkt: true,
+  },
+  schwaebisch: {
+    theme: 'theme-dialect', title: 'Schwäbisch 🏠',
+    subtitle: 'I sag\'s, wie\'s isch!',
+    replace: 'net, isch, -le statt -chen',
+    fillers: 'Ha, Gell, Weisch',
+    fillersLabel: 'Schwäbische Füllwörter',
+    akt: ['Akt I: Leicht schwäbisch', 'Akt II: Schwaben hört man', 'Akt III: Voll schwäbisch'],
+    btn: 'SEITE SCHWÄBELN 🏠', footer: 'Ha noi! — v3.0',
+    hasAkt: true,
+  },
+  ruhrpott: {
+    theme: 'theme-dialect', title: 'Ruhrpott ⚒️',
+    subtitle: 'Hömma, dat is hier so!',
+    replace: 'dat, wat, et, nich',
+    fillers: 'Ey, Hömma, Woll',
+    fillersLabel: 'Ruhrpott-Füllwörter',
+    akt: ['Akt I: Leichter Pott', 'Akt II: Ruhrgebiet', 'Akt III: Voll Ruhrpott'],
+    btn: 'SEITE VERPOTTEN ⚒️', footer: 'Hömma! — v3.0',
+    hasAkt: true,
+  },
+  norddeutsch: {
+    theme: 'theme-dialect', title: 'Norddeutsch ⚓',
+    subtitle: 'Moin. Nich so viel schnacken.',
+    replace: 'Understatement & norddeutsche Vokabeln',
+    fillers: 'Moin, Tja, Nech',
+    fillersLabel: 'Norddeutsche Füllwörter',
+    akt: ['Akt I: Leicht nordisch', 'Akt II: Küstennah', 'Akt III: Voll norddeutsch'],
+    btn: 'SEITE NORDISCH MACHEN ⚓', footer: 'Butter bei die Fische — v3.0',
+    hasAkt: true,
+  },
+  gender_star: {
+    theme: 'theme-gender', title: 'Gendern (Stern) ⭐',
+    subtitle: 'Lehrer → Lehrer*innen',
+    replace: 'Nomen mit Genderstern versehen', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'TEXT GENDERN ⭐',
+    footer: 'Inklusiv — v3.0', hasAkt: false,
+  },
+  gender_colon: {
+    theme: 'theme-gender', title: 'Gendern (Doppelpunkt) ✳️',
+    subtitle: 'Lehrer → Lehrer:innen',
+    replace: 'Nomen mit Gender-Doppelpunkt versehen', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'TEXT GENDERN ✳️',
+    footer: 'Inklusiv — v3.0', hasAkt: false,
+  },
+  gender_explicit: {
+    theme: 'theme-gender', title: 'Gendern (ausgeschrieben) 📝',
+    subtitle: 'Lehrer → Lehrerinnen und Lehrer',
+    replace: 'Beidnennung ausschreiben', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'TEXT GENDERN 📝',
+    footer: 'Inklusiv — v3.0', hasAkt: false,
+  },
+  gender_participle: {
+    theme: 'theme-gender', title: 'Gendern (Partizip) 🔄',
+    subtitle: 'Studenten → Studierende',
+    replace: 'Partizip-Formen verwenden', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'TEXT GENDERN 🔄',
+    footer: 'Inklusiv — v3.0', hasAkt: false,
+  },
+  gender_maskulinum: {
+    theme: 'theme-gender', title: 'Generisches Maskulinum ♂️',
+    subtitle: 'Studierende → Studenten',
+    replace: 'Gender-Formen durch Maskulinum ersetzen', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'GENERISCHES MASKULINUM ♂️',
+    footer: 'Klassisch — v3.0', hasAkt: false,
+  },
+  adjektivkiller: {
+    theme: 'theme-special', title: 'Adjektivkiller ✂️',
+    subtitle: 'Alle Adjektive raus!',
+    replace: 'Adjektive aus dem Text streichen', fillers: '—',
+    fillersLabel: 'Füllwörter', btn: 'ADJEKTIVE ELIMINIEREN ✂️',
+    footer: 'Weniger ist mehr — v3.0', hasAkt: true,
+  },
+};
 
-// === Modus-Auswahl ===
 function setMode(mode) {
-  currentMode = mode;
-  document.body.className = 'mode-' + mode;
+  const config = MODE_CONFIG[mode];
+  if (!config) return;
 
-  // Aktive Klasse
-  modeGenz.classList.toggle('active', mode === 'genz');
-  modeFormal.classList.toggle('active', mode === 'formal');
+  // Theme
+  document.body.className = config.theme;
 
-  // UI-Texte anpassen
-  if (mode === 'genz') {
-    $('headerTitle').textContent = 'Gen-Z Transformer 💀🔥';
-    $('headerSubtitle').textContent = 'Drei Akte der Jugendsprache-Verwandlung';
-    $('descReplace').textContent = 'Normale Wörter durch Slang ersetzen';
-    $('labelFillers').textContent = 'Füllwörter & Kommentare';
-    $('descFillers').textContent = 'Digga, lowkey + Gen-Z-Kommentare';
-    $('aktLabel1').textContent = 'Akt I: Subtil';
-    $('aktLabel2').textContent = 'Akt II: Kontrast';
-    $('aktLabel3').textContent = 'Akt III: Brainrot';
-    transformBtn.textContent = 'SEITE TRANSFORMIEREN 🔥';
-    $('footerText').textContent = 'no cap, fr fr — v2.0';
-  } else {
-    $('headerTitle').textContent = 'Bildungssprache 📜⚖️';
-    $('headerSubtitle').textContent = 'Drei Akte der sprachlichen Veredelung';
-    $('descReplace').textContent = 'Wörter durch elaborierte Synonyme ersetzen';
-    $('labelFillers').textContent = 'Floskeln & Rechtslatein';
-    $('descFillers').textContent = 'Nota bene, quod erat demonstrandum';
-    $('aktLabel1').textContent = 'Akt I: Dezent';
-    $('aktLabel2').textContent = 'Akt II: Gelehrt';
-    $('aktLabel3').textContent = 'Akt III: Kanzlei';
-    transformBtn.textContent = 'SEITE VEREDELN 📜';
-    $('footerText').textContent = 'Quod erat demonstrandum — v2.0';
+  // Header
+  $('headerTitle').textContent = config.title;
+  $('headerSubtitle').textContent = config.subtitle;
+
+  // Controls
+  $('descReplace').textContent = config.replace;
+  $('labelFillers').textContent = config.fillersLabel;
+  $('descFillers').textContent = config.fillers;
+
+  // Akt-Labels
+  if (config.akt) {
+    $('aktLabel1').textContent = config.akt[0];
+    $('aktLabel2').textContent = config.akt[1];
+    $('aktLabel3').textContent = config.akt[2];
   }
+
+  // Akt-Sichtbarkeit
+  if (config.hasAkt) {
+    document.body.classList.remove('no-akt');
+  } else {
+    document.body.classList.add('no-akt');
+  }
+
+  // Button
+  transformBtn.textContent = config.btn;
+  $('footerText').textContent = config.footer;
+
+  // Select synchronisieren
+  modeSelect.value = mode;
 
   saveSettings(getSettings());
 }
 
-modeGenz.addEventListener('click', () => setMode('genz'));
-modeFormal.addEventListener('click', () => setMode('formal'));
+// === Mode Select Handler ===
+modeSelect.addEventListener('change', () => {
+  setMode(modeSelect.value);
+});
 
 // === Settings ===
 function getSettings() {
-  return {
-    mode: currentMode,
+  const mode = modeSelect.value;
+  const settings = {
+    mode: mode,
     replace: $('toggleReplace').checked,
     fillers: $('toggleFillers').checked,
     emojis: $('toggleEmojis').checked,
-    intensity: parseInt(intensitySlider.value)
+    intensity: parseInt(intensitySlider.value),
   };
+
+  // Gender-Submodus
+  if (mode.startsWith('gender_')) {
+    settings.genderMode = mode.replace('gender_', '');
+  }
+
+  return settings;
 }
 
 function saveSettings(settings) {
@@ -75,7 +240,7 @@ chrome.storage.local.get(['genzSettings', 'genzActive'], (data) => {
     intensitySlider.value = s.intensity;
     intensityLabel.textContent = s.intensity + '%';
   }
-  if (s.mode) {
+  if (s.mode && MODE_CONFIG[s.mode]) {
     setMode(s.mode);
   }
   if (data.genzActive) {
@@ -113,7 +278,7 @@ revertBtn.addEventListener('click', async () => {
   transformBtn.style.display = 'block';
 });
 
-// Save on any toggle change
+// Save on any toggle/slider change
 document.querySelectorAll('input[type="checkbox"], input[type="range"]').forEach(el => {
   el.addEventListener('change', () => saveSettings(getSettings()));
 });

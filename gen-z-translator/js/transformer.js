@@ -179,12 +179,17 @@ class GenZTransformer {
         replacement = replacements[Math.floor(Math.random() * replacements.length)];
       }
 
-      result = result.replace(entry.pattern, (match) => {
-        if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
-          return replacement.charAt(0).toUpperCase() + replacement.slice(1);
-        }
-        return replacement;
-      });
+      // Grammar-aware Ersetzung: Endungen erkennen und übertragen
+      if (entry.type && typeof GermanGrammar !== 'undefined') {
+        result = GermanGrammar.replaceWithGrammar(result, entry, replacement, akt);
+      } else {
+        result = result.replace(entry.pattern, (match) => {
+          if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
+            return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+          }
+          return replacement;
+        });
+      }
     }
 
     return result;

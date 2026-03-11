@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text-Transformer — Gen-Z & Bildungssprache",
-  "version": "2.0.0",
-  "description": "Verwandelt deutschen Text in Gen-Z Jugendsprache oder hochtrabende Bildungssprache - mit behutsamer Drei-Akt-Dramaturgie",
+  "name": "Text-Transformer — 15 Modi für deutschen Text",
+  "version": "3.0.0",
+  "description": "Verwandelt deutschen Text in Gen-Z, Bildungssprache, 7 Dialekte, Politiker-Sprech, Barock-Deutsch, Gender-Varianten oder streicht alle Adjektive — mit behutsamer Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -21,6 +21,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "js": [
+        "js/grammar.js",
         "js/dictionary.js",
         "js/emojis.js",
         "js/fillers.js",
@@ -28,6 +29,9 @@
         "js/formal-dictionary.js",
         "js/formal-fillers.js",
         "js/formal-transformer.js",
+        "js/dialects.js",
+        "js/dialect-transformer.js",
+        "js/special-modes.js",
         "js/content.js"
       ],
       "css": ["css/overlay.css"],
