@@ -1,5 +1,5 @@
-// Gen-Z / Gen-Alpha Füllwörter und Einschübe
-// Werden zufällig in Sätze eingefügt
+// Gen-Z / Gen-Alpha Füllwörter und Einschübe 2026
+// Erweitert mit allen Begriffen aus dem Jugendsprache-Glossar
 
 const FILLER_WORDS = {
   // Füllwörter die am Satzanfang stehen können
@@ -22,8 +22,14 @@ const FILLER_WORDS = {
     'Slay, ',
     'Bruh, ',
     'Sheesh, ',
-    'Vallah, ',
     'Wallah, ',
+    'Mois, ',
+    'Habibi, ',
+    'King, ',
+    'Queen, ',
+    'Ahnma, ',
+    'Leude, ',
+    'Fam, ',
   ],
 
   // Füllwörter die in der Mitte eines Satzes stehen können
@@ -46,6 +52,10 @@ const FILLER_WORDS = {
     ' oder so ',
     ' safe ',
     ' real talk ',
+    ', mois, ',
+    ' unironisch ',
+    ' on god ',
+    ' periodt ',
   ],
 
   // Füllwörter die am Satzende stehen können
@@ -70,27 +80,59 @@ const FILLER_WORDS = {
     ' tbh',
     ' istg',
     ', ich schwör',
+    ', periodt',
+    ', Mashallah',
+    ' fr fr',
+    ', Habibi',
+    ', no cap fr',
   ],
 };
 
-// Gen-Alpha spezifische Einschübe (TikTok / Roblox / Fortnite)
+// Gen-Alpha spezifische Einschübe (TikTok / Roblox / Fortnite / 2026 Trends)
 const GEN_ALPHA_EXTRAS = [
-  'skibidi ',
-  'rizz-mäßig ',
-  'sigma ',
-  'ohio-mäßig ',
-  'gyatt ',
-  'fanum tax ',
-  'literally so ',
-  'sus ',
-  'bussin ',
-  'slay ',
-  'periodt ',
-  'its giving ',
-  'main character energy ',
-  'understood the assignment ',
-  'ate and left no crumbs ',
-  'rent free ',
+  'Skibidi ',
+  'Rizz-mäßig ',
+  'Sigma ',
+  'Ohio-mäßig ',
+  'Gyatt ',
+  'Fanum tax ',
+  'Literally so ',
+  'Sus ',
+  'Bussin ',
+  'Slay ',
+  'Periodt ',
+  'Its giving ',
+  'Main character energy ',
+  'Understood the assignment ',
+  'Ate and left no crumbs ',
+  'Rent free ',
+  'Locked in ',
+  'Delulu ',
+  'Its giving Era ',
+  'Vibe check: ',
+  'No cap fr fr ',
+  'POV: ',
+];
+
+// Satz-Einschübe die zwischen Sätzen eingefügt werden (bei hoher Intensität)
+const SENTENCE_INTERJECTIONS = [
+  'Sheesh.',
+  'No cap.',
+  'Fr fr.',
+  'Wild.',
+  'Ong.',
+  'Slay.',
+  'Periodt.',
+  'Real.',
+  'Facts.',
+  'Based.',
+  'Respekt.',
+  'Ehre.',
+  'W.',
+  'Mood.',
+  'Vibe.',
+  'Das crazy.',
+  'Bruh.',
 ];
 
 /**
@@ -109,6 +151,13 @@ function getRandomFiller(position, intensity) {
   }
 
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/**
+ * Gibt einen zufälligen Satz-Einschub zurück
+ */
+function getRandomInterjection() {
+  return SENTENCE_INTERJECTIONS[Math.floor(Math.random() * SENTENCE_INTERJECTIONS.length)];
 }
 
 /**

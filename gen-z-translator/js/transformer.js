@@ -49,7 +49,7 @@ class GenZTransformer {
 
     // Teile in Sätze auf
     const sentences = text.split(/(?<=[.!?])\s+/);
-    const result = sentences.map(sentence => {
+    const result = sentences.map((sentence, idx) => {
       if (sentence.length < 10) return sentence; // Zu kurze Sätze überspringen
 
       let modified = sentence;
@@ -72,6 +72,11 @@ class GenZTransformer {
         } else {
           modified = modified + filler;
         }
+      }
+
+      // Bei hoher Intensität: Satz-Einschübe zwischen Sätzen (z.B. "Sheesh." "Fr fr.")
+      if (this.intensity > 70 && idx > 0 && Math.random() < 0.2) {
+        modified = getRandomInterjection() + ' ' + modified;
       }
 
       return modified;
