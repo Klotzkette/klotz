@@ -15,6 +15,9 @@ const DIALECT_MODES = {
   norddeutsch: 'norddeutsch',
   wienerisch: 'wienerisch',
   schweizerdeutsch: 'schweizerdeutsch',
+  hessisch: 'hessisch',
+  saarlaendisch: 'saarlaendisch',
+  koelsch: 'koelsch',
 };
 
 // Nachrichten vom Popup empfangen
@@ -82,6 +85,9 @@ function doTransform(settings) {
 
   const count = transformer.transformDOM(document.body);
 
+  // SPA-Observer starten: Bei dynamisch nachgeladenen Inhalten auch transformieren
+  startSPAObserver();
+
   const modeNames = {
     genz: '🔥 Gen-Z', formal: '📜 Bildungssprache', politiker: '🏛️ Politiker',
     barock: '🏰 Barock', adjektivkiller: '✂️ Adjektivkiller', adjektivflut: '🌊 Adjektiv-Überschwemmer',
@@ -93,6 +99,8 @@ function doTransform(settings) {
     schwaebisch: '🏠 Schwäbisch', ruhrpott: '⚒️ Ruhrpott',
     norddeutsch: '⚓ Norddeutsch', wienerisch: '🎡 Wienerisch',
     schweizerdeutsch: '🏔️ Schweizerdeutsch',
+    hessisch: '🍎 Hessisch', saarlaendisch: '🥨 Saarländisch',
+    koelsch: '🍺 Kölsch',
     gender_star: '⭐ Gendern (*)', gender_colon: '✳️ Gendern (:)',
     gender_explicit: '📝 Gendern', gender_participle: '🔄 Partizip',
     gender_maskulinum: '♂️ Maskulinum',
@@ -102,10 +110,51 @@ function doTransform(settings) {
 }
 
 function doRevert() {
+  stopSPAObserver();
   if (transformer) {
     transformer.revertAll();
     transformer = null;
     showNotification('Zurückgesetzt ↩️');
+  }
+}
+
+// SPA-Navigation: Bei dynamisch nachgeladenem Content auch transformieren
+let spaObserver = null;
+let spaDebounceTimer = null;
+
+function startSPAObserver() {
+  if (spaObserver) return;
+
+  spaObserver = new MutationObserver((mutations) => {
+    if (!transformer) return;
+
+    // Debounce: Nicht bei jeder Mini-Änderung feuern
+    if (spaDebounceTimer) clearTimeout(spaDebounceTimer);
+    spaDebounceTimer = setTimeout(() => {
+      // Nur neue, nicht-transformierte Nodes verarbeiten
+      // Das Dataset-Check in _collectTextNodes verhindert Doppel-Transformation
+      try {
+        transformer.transformDOM(document.body);
+      } catch (e) {
+        // Fehler ignorieren — besser als Absturz
+      }
+    }, 500);
+  });
+
+  spaObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+function stopSPAObserver() {
+  if (spaObserver) {
+    spaObserver.disconnect();
+    spaObserver = null;
+  }
+  if (spaDebounceTimer) {
+    clearTimeout(spaDebounceTimer);
+    spaDebounceTimer = null;
   }
 }
 

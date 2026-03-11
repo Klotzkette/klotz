@@ -10,6 +10,29 @@ const GermanGrammar = {
   ADJ_ENDINGS: ['en', 'em', 'er', 'es', 'e'],
   NOUN_ENDINGS: ['en', 'ern', 'ens', 'er', 'es', 'em', 'e', 'n', 's'],
 
+  // Artikel-Tabelle als Konstante (nicht bei jedem Aufruf neu erzeugen)
+  ARTICLES: {
+    'der': { m: 'der', f: 'die', n: 'das' },
+    'die': { m: 'der', f: 'die', n: 'das' },
+    'das': { m: 'der', f: 'die', n: 'das' },
+    'den': { m: 'den', f: 'die', n: 'das' },
+    'dem': { m: 'dem', f: 'der', n: 'dem' },
+    'des': { m: 'des', f: 'der', n: 'des' },
+    'ein':   { m: 'ein',   f: 'eine',  n: 'ein' },
+    'eine':  { m: 'ein',   f: 'eine',  n: 'ein' },
+    'einem': { m: 'einem', f: 'einer', n: 'einem' },
+    'einen': { m: 'einen', f: 'eine',  n: 'ein' },
+    'einer': { m: 'eines', f: 'einer', n: 'eines' },
+    'eines': { m: 'eines', f: 'einer', n: 'eines' },
+    'kein':   { m: 'kein',   f: 'keine',  n: 'kein' },
+    'keine':  { m: 'kein',   f: 'keine',  n: 'kein' },
+    'keinem': { m: 'keinem', f: 'keiner', n: 'keinem' },
+    'keinen': { m: 'keinen', f: 'keine',  n: 'kein' },
+  },
+
+  // Cache für erweiterte Patterns (vermeidet ständiges Regex-Neukompilieren)
+  _patternCache: new Map(),
+
   // Wörter die KEINE deutschen Endungen bekommen
   UNINFLECTABLE: new Set([
     // English adjectives/slang
@@ -37,18 +60,28 @@ const GermanGrammar = {
    * \bgut\b → \bgut(en|em|er|es|e)?\b
    */
   extendPattern(pattern, type) {
+    // Cache-Lookup: vermeidet Regex-Neukompilierung pro Textknoten
+    const cacheKey = pattern.source + '|' + pattern.flags + '|' + type;
+    if (this._patternCache.has(cacheKey)) return this._patternCache.get(cacheKey);
+
     const src = pattern.source;
     const flags = pattern.flags;
 
-    if (!src.endsWith('\\b')) return { regex: pattern, extended: false };
+    if (!src.endsWith('\\b')) {
+      const result = { regex: pattern, extended: false };
+      this._patternCache.set(cacheKey, result);
+      return result;
+    }
 
     const endings = type === 'adj' ? this.ADJ_ENDINGS : this.NOUN_ENDINGS;
     const base = src.slice(0, -2); // Remove trailing \b
     const group = '(' + endings.join('|') + ')?';
-    return {
+    const result = {
       regex: new RegExp(base + group + '\\b', flags),
       extended: true
     };
+    this._patternCache.set(cacheKey, result);
+    return result;
   },
 
   /**
@@ -119,37 +152,12 @@ const GermanGrammar = {
   adjustArticle(textBefore, fromGender, toGender) {
     if (!fromGender || !toGender || fromGender === toGender) return textBefore;
 
-    const ARTICLES = {
-      // Nominativ
-      'der': { m: 'der', f: 'die', n: 'das' },
-      'die': { m: 'der', f: 'die', n: 'das' },
-      'das': { m: 'der', f: 'die', n: 'das' },
-      // Akkusativ
-      'den': { m: 'den', f: 'die', n: 'das' },
-      // Dativ
-      'dem': { m: 'dem', f: 'der', n: 'dem' },
-      // Genitiv
-      'des': { m: 'des', f: 'der', n: 'des' },
-      // Unbestimmt
-      'ein':   { m: 'ein',   f: 'eine',  n: 'ein' },
-      'eine':  { m: 'ein',   f: 'eine',  n: 'ein' },
-      'einem': { m: 'einem', f: 'einer', n: 'einem' },
-      'einen': { m: 'einen', f: 'eine',  n: 'ein' },
-      'einer': { m: 'eines', f: 'einer', n: 'eines' },
-      'eines': { m: 'eines', f: 'einer', n: 'eines' },
-      // Kein
-      'kein':   { m: 'kein',   f: 'keine',  n: 'kein' },
-      'keine':  { m: 'kein',   f: 'keine',  n: 'kein' },
-      'keinem': { m: 'keinem', f: 'keiner', n: 'keinem' },
-      'keinen': { m: 'keinen', f: 'keine',  n: 'kein' },
-    };
-
     // Suche nach dem letzten Artikel in den letzten 30 Zeichen
     const match = textBefore.match(/\b(der|die|das|den|dem|des|eine[mnrs]?|keine?[mnrs]?)\s+$/i);
     if (!match) return textBefore;
 
     const originalArticle = match[1];
-    const mapping = ARTICLES[originalArticle.toLowerCase()];
+    const mapping = this.ARTICLES[originalArticle.toLowerCase()];
     if (!mapping) return textBefore;
 
     let newArticle = mapping[toGender];
@@ -199,6 +207,11 @@ const GermanGrammar = {
    * Großschreibung vom Original auf die Ersetzung übertragen
    */
   _preserveCase(original, replacement) {
+    // ALL-CAPS: "SEHR" → "LIT"
+    if (original.length > 1 && original === original.toUpperCase() && original !== original.toLowerCase()) {
+      return replacement.toUpperCase();
+    }
+    // Title case: "Sehr" → "Lit"
     if (original[0] === original[0].toUpperCase() && original[0] !== original[0].toLowerCase()) {
       return replacement.charAt(0).toUpperCase() + replacement.slice(1);
     }

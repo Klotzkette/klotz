@@ -63,7 +63,7 @@ const FORMAL_DICTIONARY = [
   { pattern: /\bklein\b/gi, replacements: ['diminutiv', 'geringfügig', 'bescheiden'], type: 'adj' },
   { pattern: /\bgroß\b/gi, replacements: ['beträchtlich', 'stattlich', 'imposant'], type: 'adj' },
   { pattern: /\bschnell\b/gi, replacements: ['unverzüglich', 'eilfertig', 'geschwind'], type: 'adj' },
-  { pattern: /\blangsam\b/gi, replacements: ['gemächlich', 'bedächtig', 'langmütig'], type: 'adj' },
+  { pattern: /\blangsam\b/gi, replacements: ['gemächlich', 'bedächtig', 'geruhsam'], type: 'adj' },
   { pattern: /\beinfach\b/gi, replacements: ['schlicht', 'unkompliziert', 'mühelos'], type: 'adj' },
   { pattern: /\bschwer\b/gi, replacements: ['anspruchsvoll', 'diffizil', 'herausfordernd'], type: 'adj' },
   { pattern: /\bteuer\b/gi, replacements: ['kostspielig', 'von beträchtlichem Gegenwert', 'preisintensiv'], type: 'adj' },
@@ -132,7 +132,7 @@ const FORMAL_DICTIONARY = [
   { pattern: /\bMenschen\b/gi, replacements: ['das Menschengeschlecht', 'die Zeitgenossen', 'Individuen'], type: 'noun' },
   { pattern: /\bPerson\b/gi, replacements: ['Individuum', 'natürliche Person', 'der oder die Betreffende'], type: 'noun' },
   { pattern: /\bTyp\b/g, replacements: ['Individuum', 'der Herr', 'besagte Person'], type: 'noun' },
-  { pattern: /\bMädchen\b/gi, replacements: ['junge Dame', 'das Fräulein'], type: 'noun' },
+  { pattern: /\bMädchen\b/gi, replacements: ['junge Dame', 'die Demoiselle'], type: 'noun' },
   { pattern: /\bJunge\b/g, replacements: ['junger Herr', 'Knabe'], type: 'noun' },
   { pattern: /\bMann\b/g, replacements: ['der Herr', 'Gentleman', 'besagter Herr'], type: 'noun' },
   { pattern: /\bFrau\b/g, replacements: ['die Dame', 'die Gnädige', 'besagte Dame'], type: 'noun' },
@@ -167,7 +167,7 @@ const FORMAL_DICTIONARY = [
   { pattern: /\bVideo\b/gi, replacements: ['Bewegtbildaufnahme', 'audiovisueller Beitrag'], type: 'noun' },
   { pattern: /\bFoto\b/gi, replacements: ['Lichtbild', 'photographische Aufnahme'], type: 'noun' },
   { pattern: /\bKleidung\b/gi, replacements: ['Garderobe', 'Bekleidung', 'das Gewand'], type: 'noun' },
-  { pattern: /\bEssen\b/g, replacements: ['Mahl', 'Speise', 'Dinér'], type: 'noun' },
+  { pattern: /\bEssen\b/g, replacements: ['Mahl', 'Speise', 'Diner'], type: 'noun' },
 
   // ==========================================================================
   // Verstärker & Adverbien
@@ -187,7 +187,7 @@ const FORMAL_DICTIONARY = [
   { pattern: /\bheimlich\b/gi, replacements: ['im Verborgenen', 'klandestin', 'sub rosa'] },
   { pattern: /\bimmer\b/gi, replacements: ['stets', 'allezeit', 'zu jeder Zeit'] },
   { pattern: /\bnie\b/gi, replacements: ['zu keinem Zeitpunkt', 'nimmerdar', 'niemals'] },
-  { pattern: /\bnoch\b/gi, replacements: ['nach wie vor', 'fortwährend'] },
+  { pattern: /\bnoch immer\b/gi, replacements: ['nach wie vor', 'fortwährend'] },
   { pattern: /\bziemlich\b/gi, replacements: ['recht', 'durchaus', 'in nicht unerheblichem Maße'] },
   { pattern: /\bübrigens\b/gi, replacements: ['nebenbei bemerkt', 'beiläufig erwähnt', 'apropos'] },
   { pattern: /\bbesonders\b/gi, replacements: ['in besonderem Maße', 'namentlich', 'zumal'] },

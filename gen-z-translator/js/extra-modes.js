@@ -378,15 +378,17 @@ const LUTHER_CONFIG = {
 // ==========================================================================
 // Shared helper functions (DRY für simple Transformer)
 // ==========================================================================
+const _SHARED_SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','TEXTAREA','INPUT','CODE','PRE','SVG']);
 function _sharedCollectTextNodes(root) {
   const w = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
     acceptNode: (n) => {
       const p = n.parentElement; if (!p) return NodeFilter.FILTER_REJECT;
-      if (['SCRIPT','STYLE','NOSCRIPT','IFRAME','TEXTAREA','INPUT','CODE','PRE','SVG'].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (_SHARED_SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
       if (p.dataset && p.dataset.genzTransformed) return NodeFilter.FILTER_REJECT;
       if (n.textContent.trim().length < 3) return NodeFilter.FILTER_REJECT;
-      const s = window.getComputedStyle(p);
-      if (s.display === 'none' || s.visibility === 'hidden') return NodeFilter.FILTER_REJECT;
+      if (!p.offsetParent && p !== document.body && p.tagName !== 'BODY') {
+        if (p.style && p.style.display === 'none') return NodeFilter.FILTER_REJECT;
+      }
       return NodeFilter.FILTER_ACCEPT;
     }
   });

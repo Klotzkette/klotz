@@ -7,7 +7,8 @@ class DialectTransformer {
     this.settings = settings;
     this.dialect = dialectConfig;
     this.baseIntensity = settings.intensity || 50;
-    this.originalTexts = new Map();
+    this.originalTexts = new WeakMap();
+    this._originalNodesList = [];
     this.nodeCount = 0;
     this.totalNodes = 0;
   }
@@ -162,6 +163,7 @@ class DialectTransformer {
       const transformed = this.transform(original);
       if (transformed !== original) {
         this.originalTexts.set(textNode, original);
+        this._originalNodesList.push(textNode);
         textNode.textContent = transformed;
         if (textNode.parentElement) {
           textNode.parentElement.dataset.genzTransformed = 'true';
@@ -173,18 +175,18 @@ class DialectTransformer {
   }
 
   _collectTextNodes(root) {
+    const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'SVG']);
+
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
         const parent = node.parentElement;
         if (!parent) return NodeFilter.FILTER_REJECT;
-        const tag = parent.tagName;
-        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'SVG'].includes(tag)) {
-          return NodeFilter.FILTER_REJECT;
-        }
+        if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
         if (parent.dataset && parent.dataset.genzTransformed) return NodeFilter.FILTER_REJECT;
         if (node.textContent.trim().length < 3) return NodeFilter.FILTER_REJECT;
-        const style = window.getComputedStyle(parent);
-        if (style.display === 'none' || style.visibility === 'hidden') return NodeFilter.FILTER_REJECT;
+        if (!parent.offsetParent && parent !== document.body && parent.tagName !== 'BODY') {
+          if (parent.style && parent.style.display === 'none') return NodeFilter.FILTER_REJECT;
+        }
         return NodeFilter.FILTER_ACCEPT;
       }
     });
@@ -195,12 +197,16 @@ class DialectTransformer {
   }
 
   revertAll() {
-    for (const [node, original] of this.originalTexts) {
+    for (const node of this._originalNodesList) {
       try {
-        node.textContent = original;
-        if (node.parentElement) delete node.parentElement.dataset.genzTransformed;
+        const original = this.originalTexts.get(node);
+        if (original !== undefined) {
+          node.textContent = original;
+          if (node.parentElement) delete node.parentElement.dataset.genzTransformed;
+        }
       } catch (e) {}
     }
-    this.originalTexts.clear();
+    this.originalTexts = new WeakMap();
+    this._originalNodesList = [];
   }
 }

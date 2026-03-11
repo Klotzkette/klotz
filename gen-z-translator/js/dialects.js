@@ -46,7 +46,7 @@ const DIALECTS = {
       { pattern: /\bAuge\b/gi, replacements: ['Ooge'] },
     ],
     fillers: {
-      start: ['Mensch, ', 'Ick sach ma, ', 'Na, ', 'Hömma, ', 'Kieka, ', 'Naja, '],
+      start: ['Mensch, ', 'Ick sach ma, ', 'Na, ', 'Kiek ma, ', 'Hör ma, ', 'Naja, '],
       end: [', wa?', ', oder?', ', ick sach\'s ja', ', vastehste?', ', wa'],
       interjections: ['Na sowat!', 'Ick jloob dit nich.', 'Donnawetta!', 'Na hör ma.'],
     }
@@ -68,8 +68,8 @@ const DIALECTS = {
       { pattern: /ei/g, replacement: 'ee', chance: 0.65 },
       // nicht → nich
       { pattern: /\bnicht\b/gi, replacement: 'nich', chance: 0.8 },
-      // ich → isch
-      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.7 },
+      // ich → isch (in manchen sächsischen Subdialekten)
+      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.4 },
       // -er → -or
       { pattern: /er\b/g, replacement: 'or', chance: 0.4 },
       // ein → een
@@ -77,9 +77,9 @@ const DIALECTS = {
     ],
     vocabulary: [
       { pattern: /\bschauen\b/gi, replacements: ['gucken', 'guggen'] },
-      { pattern: /\breden\b/gi, replacements: ['labern', 'babbeln'] },
+      { pattern: /\breden\b/gi, replacements: ['labern', 'schwatzen'] },
       { pattern: /\bMädchen\b/gi, replacements: ['Mädl', 'Meedchen'] },
-      { pattern: /\blecker\b/gi, replacements: ['schmackofatz'], type: 'adj' },
+      { pattern: /\blecker\b/gi, replacements: ['lecker', 'gudd'], type: 'adj' },
       { pattern: /\bklein\b/gi, replacements: ['gleen', 'glään'], type: 'adj' },
       { pattern: /\bBrötchen\b/gi, replacements: ['Semmel'] },
       { pattern: /\bFleischer\b/gi, replacements: ['Fleescher'] },
@@ -121,7 +121,7 @@ const DIALECTS = {
       { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
       { pattern: /\bKartoffel\b/gi, replacements: ['Grumbern', 'Erdäpfl'] },
       { pattern: /\blecker\b/gi, replacements: ['guud', 'bassd scho'], type: 'adj' },
-      { pattern: /\bsprechen\b/gi, replacements: ['redd', 'babbeln'] },
+      { pattern: /\bsprechen\b/gi, replacements: ['redd', 'schwätzen'] },
       { pattern: /\barbeiten\b/gi, replacements: ['schaffen', 'wergn'] },
     ],
     fillers: {
@@ -172,12 +172,12 @@ const DIALECTS = {
       { pattern: /\bKartoffel\b/gi, replacements: ['Erdäpfl', 'Erdapfl'] },
       { pattern: /\bJunge\b/g, replacements: ['Bua', 'Bub'] },
       { pattern: /\bMädchen\b/gi, replacements: ['Madl', 'Deandl'] },
-      { pattern: /\bBier\b/gi, replacements: ['Bier', 'a Mass'] },
+      { pattern: /\bBier\b/gi, replacements: ['a Bier', 'a Mass'] },
       { pattern: /\bschauen\b/gi, replacements: ['schaug', 'schaugn'] },
       { pattern: /\blecker\b/gi, replacements: ['gschmackig', 'guad'], type: 'adj' },
       { pattern: /\bschön\b/gi, replacements: ['fei', 'schee'], type: 'adj' },
       { pattern: /\bklein\b/gi, replacements: ['kloa'], type: 'adj' },
-      { pattern: /\bgroß\b/gi, replacements: ['groß', 'mords'], type: 'adj' },
+      { pattern: /\bgroß\b/gi, replacements: ['mords', 'gscheit groß'], type: 'adj' },
       { pattern: /\bArbeitsplatz\b/gi, replacements: ['Hackn'] },
       { pattern: /\bGeld\b/gi, replacements: ['Zaster', 'Kohle'] },
     ],
@@ -254,8 +254,6 @@ const DIALECTS = {
       { pattern: /\bes\b/gi, replacement: 'et', chance: 0.7 },
       // nicht → nich
       { pattern: /\bnicht\b/gi, replacement: 'nich', chance: 0.85 },
-      // ich → isch
-      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.6 },
       // ge- am Anfang → je-
       { pattern: /\bge([a-zäöü])/gi, replacement: (m, c) => (m[0] === m[0].toUpperCase() ? 'Je' : 'je') + c, chance: 0.5 },
       // g am Anfang vor Vokalen → j
@@ -270,16 +268,16 @@ const DIALECTS = {
       { pattern: /\ban dem\b/gi, replacement: 'am', chance: 0.5 },
     ],
     vocabulary: [
-      { pattern: /\bBrötchen\b/gi, replacements: ['Brötchen', 'Stuten'] },
+      { pattern: /\bBrötchen\b/gi, replacements: ['Stuten', 'Brötken'] },
       { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
       { pattern: /\bGeld\b/gi, replacements: ['Knete', 'Kohle', 'Kröten'] },
       { pattern: /\bArbeitsplatz\b/gi, replacements: ['Maloche'] },
       { pattern: /\barbeiten\b/gi, replacements: ['malochen', 'schaffen'] },
       { pattern: /\bschauen\b/gi, replacements: ['kucken', 'gucken'] },
-      { pattern: /\breden\b/gi, replacements: ['schnacken', 'quatschen'] },
-      { pattern: /\bJunge\b/g, replacements: ['Pansen', 'Junge'] },
+      { pattern: /\breden\b/gi, replacements: ['quatschen', 'labern'] },
+      { pattern: /\bJunge\b/g, replacements: ['Pansen', 'Fiansen'] },
       { pattern: /\bgroß\b/gi, replacements: ['riesig', 'ordentlich'], type: 'adj' },
-      { pattern: /\blecker\b/gi, replacements: ['lecker', 'geil'], type: 'adj' },
+      { pattern: /\blecker\b/gi, replacements: ['schmackhaft', 'geil'], type: 'adj' },
       { pattern: /\bkaputt\b/gi, replacements: ['am Arsch', 'hinüber'], type: 'adj' },
     ],
     fillers: {
@@ -408,8 +406,8 @@ const DIALECTS = {
       { pattern: /\bk([aeiouäöü])/gi, replacement: (m, v) => (m[0] === m[0].toUpperCase() ? 'Ch' : 'ch') + v, chance: 0.5 },
       // nicht → nöd/nid
       { pattern: /\bnicht\b/gi, replacement: 'nöd', chance: 0.7 },
-      // ich → ich (bleibt, aber "i" in manchen Kontexten)
-      { pattern: /\bich\b/gi, replacement: 'ich', chance: 0.3 },
+      // ich → i
+      { pattern: /\bich\b/gi, replacement: 'i', chance: 0.5 },
       // ist → isch
       { pattern: /\bist\b/gi, replacement: 'isch', chance: 0.7 },
       // kein → kei
@@ -427,14 +425,14 @@ const DIALECTS = {
       { pattern: /\bKartoffel\b/gi, replacements: ['Härdöpfel', 'Härdöpfl'] },
       { pattern: /\bFahrrad\b/gi, replacements: ['Velo'] },
       { pattern: /\bSchrank\b/gi, replacements: ['Chaschte', 'Kasten'] },
-      { pattern: /\bschön\b/gi, replacements: ['schön', 'hübsch'], type: 'adj' },
+      { pattern: /\bschön\b/gi, replacements: ['schön', 'herzig'], type: 'adj' },
       { pattern: /\btoll\b/gi, replacements: ['lässig', 'mega'], type: 'adj' },
       { pattern: /\bgut\b/gi, replacements: ['guet', 'super'], type: 'adj' },
-      { pattern: /\bschlecht\b/gi, replacements: ['schlecht', 'gruusig'], type: 'adj' },
+      { pattern: /\bschlecht\b/gi, replacements: ['mies', 'gruusig'], type: 'adj' },
       { pattern: /\bklein\b/gi, replacements: ['chli', 'chlii'], type: 'adj' },
       { pattern: /\bschauen\b/gi, replacements: ['luege'] },
       { pattern: /\breden\b/gi, replacements: ['schwätze', 'rede'] },
-      { pattern: /\bessen\b/gi, replacements: ['ässe', 'Znüni ha'] },
+      { pattern: /\bessen\b/gi, replacements: ['ässe', 'verputze'] },
       { pattern: /\barbeiten\b/gi, replacements: ['schaffe'] },
       { pattern: /\bgehen\b/gi, replacements: ['go', 'gah'] },
       { pattern: /\bHallo\b/gi, replacements: ['Grüezi', 'Sali', 'Hoi'] },
@@ -448,7 +446,158 @@ const DIALECTS = {
     fillers: {
       start: ['Also, ', 'Lueg, ', 'Weisch, ', 'Gäll, ', 'Jä, '],
       end: [', oder?', ', gäll?', ', oder nöd?', ', weisch'],
-      interjections: ['Gopferdammi!', 'Herrjemine!', 'Uf Züridütsch:', 'So isch es.'],
+      interjections: ['Gopferdammi!', 'Herrjemine!', 'Potztuusig!', 'So isch es.'],
+    }
+  },
+
+  // ==========================================================================
+  // HESSISCH
+  // ==========================================================================
+  hessisch: {
+    name: 'Hessisch',
+    phonetics: [
+      // s → sch vor t/p: Stein → Schdein, Spaß → Schpaß
+      { pattern: /\bst/gi, replacement: (m) => (m[0] === 'S' ? 'Schd' : 'schd'), chance: 0.6 },
+      { pattern: /\bsp/gi, replacement: (m) => (m[0] === 'S' ? 'Schb' : 'schb'), chance: 0.5 },
+      // nicht → net
+      { pattern: /\bnicht\b/gi, replacement: 'net', chance: 0.8 },
+      // auch → aach
+      { pattern: /\bauch\b/gi, replacement: 'aach', chance: 0.7 },
+      // -chen → -che
+      { pattern: /chen\b/g, replacement: 'che', chance: 0.6 },
+      // ich → isch
+      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.7 },
+      // ein → en
+      { pattern: /\bein\b/gi, replacement: 'en', chance: 0.5 },
+      // auf → uff
+      { pattern: /\bauf\b/gi, replacement: 'uff', chance: 0.65 },
+      // es → 's
+      { pattern: /\bes\b/gi, replacement: "'s", chance: 0.5 },
+    ],
+    vocabulary: [
+      { pattern: /\breden\b/gi, replacements: ['babbeln', 'schwätze'] },
+      { pattern: /\bsprechen\b/gi, replacements: ['babbeln'] },
+      { pattern: /\bBrötchen\b/gi, replacements: ['Weck', 'Weckche'] },
+      { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
+      { pattern: /\bKartoffel\b/gi, replacements: ['Grumbeer', 'Krumbeer'] },
+      { pattern: /\bArbeitsplatz\b/gi, replacements: ['Schaff'] },
+      { pattern: /\barbeiten\b/gi, replacements: ['schaffe'] },
+      { pattern: /\bschauen\b/gi, replacements: ['gucke', 'gugge'] },
+      { pattern: /\bgut\b/gi, replacements: ['guud', 'gut'], type: 'adj' },
+      { pattern: /\bschön\b/gi, replacements: ['schää', 'nett'], type: 'adj' },
+      { pattern: /\bklein\b/gi, replacements: ['klaa'], type: 'adj' },
+      { pattern: /\bJunge\b/g, replacements: ['Bub', 'Bubb'] },
+      { pattern: /\bMädchen\b/gi, replacements: ['Mädsche', 'Mädschi'] },
+      { pattern: /\bGeld\b/gi, replacements: ['Geld', 'Kies', 'Mobbe'] },
+      { pattern: /\blecker\b/gi, replacements: ['lecker', 'guud'], type: 'adj' },
+      { pattern: /\bHallo\b/gi, replacements: ['Ei Gude!', 'Gude'] },
+      { pattern: /\btschüss\b/gi, replacements: ['Tschüssi', 'Mach\'s guud'] },
+    ],
+    fillers: {
+      start: ['Ei, ', 'Gell, ', 'Also, ', 'Horsch emol, ', 'Gude, '],
+      end: [', gell?', ', ne?', ', oder?', ', isch schwör'],
+      interjections: ['Ei Gude wie!', 'Uff!', 'Des gibbt\'s doch net!', 'Ei verbibbsch!'],
+    }
+  },
+
+  // ==========================================================================
+  // SAARLÄNDISCH
+  // ==========================================================================
+  saarlaendisch: {
+    name: 'Saarländisch',
+    phonetics: [
+      // st → schd
+      { pattern: /\bst/gi, replacement: (m) => (m[0] === 'S' ? 'Schd' : 'schd'), chance: 0.55 },
+      // sp → schb
+      { pattern: /\bsp/gi, replacement: (m) => (m[0] === 'S' ? 'Schb' : 'schb'), chance: 0.5 },
+      // nicht → net / nit
+      { pattern: /\bnicht\b/gi, replacement: 'net', chance: 0.8 },
+      // ich → isch
+      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.7 },
+      // auch → aach
+      { pattern: /\bauch\b/gi, replacement: 'aach', chance: 0.6 },
+      // ein → en
+      { pattern: /\bein\b/gi, replacement: 'en', chance: 0.5 },
+      // auf → uff
+      { pattern: /\bauf\b/gi, replacement: 'uff', chance: 0.6 },
+      // -chen → -che
+      { pattern: /chen\b/g, replacement: 'che', chance: 0.55 },
+    ],
+    vocabulary: [
+      { pattern: /\breden\b/gi, replacements: ['schwätze', 'babbele'] },
+      { pattern: /\bsprechen\b/gi, replacements: ['schwätze'] },
+      { pattern: /\bBrötchen\b/gi, replacements: ['Weck'] },
+      { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
+      { pattern: /\bKartoffel\b/gi, replacements: ['Grumbeere', 'Grombeer'] },
+      { pattern: /\barbeiten\b/gi, replacements: ['schaffe'] },
+      { pattern: /\bschauen\b/gi, replacements: ['gucke', 'lugge'] },
+      { pattern: /\bgut\b/gi, replacements: ['gudd', 'gut'], type: 'adj' },
+      { pattern: /\bschön\b/gi, replacements: ['schää'], type: 'adj' },
+      { pattern: /\bklein\b/gi, replacements: ['klään'], type: 'adj' },
+      { pattern: /\blecker\b/gi, replacements: ['lecker', 'gudd'], type: 'adj' },
+      { pattern: /\bJunge\b/g, replacements: ['Bub'] },
+      { pattern: /\bMädchen\b/gi, replacements: ['Mädsche', 'Määdsche'] },
+      { pattern: /\bHallo\b/gi, replacements: ['Unn?', 'Salü'] },
+      { pattern: /\btschüss\b/gi, replacements: ['Salü', 'Ade'] },
+      { pattern: /\bguten Tag\b/gi, replacements: ['Salü'] },
+      { pattern: /\bGeld\b/gi, replacements: ['Geld', 'Moneten'] },
+    ],
+    fillers: {
+      start: ['Ei jo, ', 'Also, ', 'Gell, ', 'Weischd, ', 'Horch emol, '],
+      end: [', gell?', ', ne?', ', oder?', ', weischd'],
+      interjections: ['Ei jo!', 'Unn dann?', 'Des gibbt\'s doch net!', 'Hauptsach gudd gess.'],
+    }
+  },
+
+  // ==========================================================================
+  // KÖLSCH
+  // ==========================================================================
+  koelsch: {
+    name: 'Kölsch',
+    phonetics: [
+      // das → dat
+      { pattern: /\bdas\b/gi, replacement: 'dat', chance: 0.8 },
+      // was → wat
+      { pattern: /\bwas\b/gi, replacement: 'wat', chance: 0.8 },
+      // ich → isch
+      { pattern: /\bich\b/gi, replacement: 'isch', chance: 0.7 },
+      // nicht → nit
+      { pattern: /\bnicht\b/gi, replacement: 'nit', chance: 0.85 },
+      // auch → ooch
+      { pattern: /\bauch\b/gi, replacement: 'ooch', chance: 0.6 },
+      // g am Anfang vor Vokal → j
+      { pattern: /\bg([aeiouyäöü])/gi, replacement: (m, v) => (m[0] === m[0].toUpperCase() ? 'J' : 'j') + v, chance: 0.55 },
+      // -st → -s
+      { pattern: /st\b/g, replacement: 's', chance: 0.4 },
+      // auf → op
+      { pattern: /\bauf\b/gi, replacement: 'op', chance: 0.5 },
+      // ein → ene/en
+      { pattern: /\bein\b/gi, replacement: 'ene', chance: 0.5 },
+    ],
+    vocabulary: [
+      { pattern: /\breden\b/gi, replacements: ['kalle', 'schwade'] },
+      { pattern: /\bsprechen\b/gi, replacements: ['kalle'] },
+      { pattern: /\bBrötchen\b/gi, replacements: ['Röggelche'] },
+      { pattern: /\bBier\b/gi, replacements: ['Kölsch', 'e Kölsch'] },
+      { pattern: /\btrinken\b/gi, replacements: ['süffe', 'drinke'] },
+      { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
+      { pattern: /\barbeiten\b/gi, replacements: ['schaffe'] },
+      { pattern: /\bschauen\b/gi, replacements: ['luure', 'kucke'] },
+      { pattern: /\bgut\b/gi, replacements: ['jot', 'jut'], type: 'adj' },
+      { pattern: /\bschön\b/gi, replacements: ['schön', 'nett'], type: 'adj' },
+      { pattern: /\bklein\b/gi, replacements: ['klein', 'lück'], type: 'adj' },
+      { pattern: /\blecker\b/gi, replacements: ['lecker', 'jot'], type: 'adj' },
+      { pattern: /\bJunge\b/g, replacements: ['Jung', 'Pänz'] },
+      { pattern: /\bKinder\b/gi, replacements: ['Pänz'] },
+      { pattern: /\bMädchen\b/gi, replacements: ['Mädsche', 'Weet'] },
+      { pattern: /\bGeld\b/gi, replacements: ['Jeld', 'Penunze'] },
+      { pattern: /\bHallo\b/gi, replacements: ['Tach', 'Moin'] },
+      { pattern: /\btschüss\b/gi, replacements: ['Tschö', 'Bes demnähx'] },
+    ],
+    fillers: {
+      start: ['Hür ens, ', 'Sach ens, ', 'Jot, ', 'Weiste wat, ', 'Ävver, '],
+      end: [', ne?', ', woll?', ', oder wat?', ', sach isch doch'],
+      interjections: ['Et kütt wie et kütt.', 'Wat soll dä Quatsch?', 'Do lachste disch kapott!', 'Jot jemaat!'],
     }
   },
 };

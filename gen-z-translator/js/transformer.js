@@ -93,7 +93,8 @@ class GenZTransformer {
   constructor(settings) {
     this.settings = settings;
     this.baseIntensity = settings.intensity || 50;
-    this.originalTexts = new Map();
+    this.originalTexts = new WeakMap();
+    this._originalNodesList = []; // Für revertAll() — WeakMap ist nicht iterierbar
     this.nodeCount = 0;       // Zählt verarbeitete Nodes
     this.totalNodes = 0;      // Gesamtzahl der Nodes (für Eskalationsberechnung)
     this.sortedDictionary = null; // Cache
@@ -402,9 +403,11 @@ class GenZTransformer {
 
       // Akt II: Nur einzelne Emojis (dezent)
       if (akt === 2) {
-        const singleEmoji = emoji.replace(/(.[\uFE00-\uFE0F\u200D]?[\u{1F3FB}-\u{1F3FF}]?)/u, '$1');
-        // Nimm nur das erste Emoji/Wort
-        const firstEmoji = emoji.split(/\s/)[0].substring(0, 4);
+        // Erstes Emoji extrahieren (Unicode-sicher mit Segmenter oder Split)
+        const segments = typeof Intl !== 'undefined' && Intl.Segmenter
+          ? [...new Intl.Segmenter('de', { granularity: 'grapheme' }).segment(emoji)].map(s => s.segment)
+          : [...emoji];
+        const firstEmoji = segments[0] || emoji.charAt(0);
         return punct + ' ' + firstEmoji + (space || ' ');
       }
 
@@ -505,6 +508,7 @@ class GenZTransformer {
 
       if (transformed !== original) {
         this.originalTexts.set(textNode, original);
+        this._originalNodesList.push(textNode);
         textNode.textContent = transformed;
 
         if (textNode.parentElement) {
@@ -522,6 +526,8 @@ class GenZTransformer {
    * Sammelt alle transformierbaren Text-Nodes
    */
   _collectTextNodes(root) {
+    const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'SVG']);
+
     const walker = document.createTreeWalker(
       root,
       NodeFilter.SHOW_TEXT,
@@ -530,8 +536,7 @@ class GenZTransformer {
           const parent = node.parentElement;
           if (!parent) return NodeFilter.FILTER_REJECT;
 
-          const tag = parent.tagName;
-          if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'SVG'].includes(tag)) {
+          if (SKIP_TAGS.has(parent.tagName)) {
             return NodeFilter.FILTER_REJECT;
           }
 
@@ -543,9 +548,13 @@ class GenZTransformer {
             return NodeFilter.FILTER_REJECT;
           }
 
-          const style = window.getComputedStyle(parent);
-          if (style.display === 'none' || style.visibility === 'hidden') {
-            return NodeFilter.FILTER_REJECT;
+          // Günstiger als getComputedStyle: offsetParent ist null für hidden/display:none
+          // (Ausnahme: body/fixed, die wir aber nie skippen wollen)
+          if (!parent.offsetParent && parent !== document.body && parent.tagName !== 'BODY') {
+            // Doppel-Check für position:fixed Elemente
+            if (parent.style && parent.style.display === 'none') {
+              return NodeFilter.FILTER_REJECT;
+            }
           }
 
           return NodeFilter.FILTER_ACCEPT;
@@ -565,16 +574,20 @@ class GenZTransformer {
    * Macht alle Transformationen rückgängig
    */
   revertAll() {
-    for (const [node, original] of this.originalTexts) {
+    for (const node of this._originalNodesList) {
       try {
-        node.textContent = original;
-        if (node.parentElement) {
-          delete node.parentElement.dataset.genzTransformed;
+        const original = this.originalTexts.get(node);
+        if (original !== undefined) {
+          node.textContent = original;
+          if (node.parentElement) {
+            delete node.parentElement.dataset.genzTransformed;
+          }
         }
       } catch (e) {
         // Node wurde möglicherweise aus dem DOM entfernt
       }
     }
-    this.originalTexts.clear();
+    this.originalTexts = new WeakMap();
+    this._originalNodesList = [];
   }
 }
