@@ -1,3 +1,8 @@
+/**
+ * Tracker-Datenbank - Rein lokale Erkennung
+ * Diese Liste wird nur lokal im Browser verwendet, um Tracker zu identifizieren.
+ * Es findet keinerlei Kommunikation mit externen Servern statt.
+ */
 // Known tracker domains and their categories
 const TRACKER_DATABASE = {
   // Google

@@ -1,3 +1,14 @@
+/**
+ * Tracker Sidebar - Background Service Worker
+ *
+ * DATENSCHUTZ-HINWEIS:
+ * Dieses Plugin arbeitet zu 100% lokal im Browser.
+ * Es werden KEINE Daten an externe Server, Dritte oder den Entwickler gesendet.
+ * Alle Tracker-Analysen, Cookie-Auswertungen und Blockierungen finden
+ * ausschließlich lokal auf dem Gerät des Nutzers statt.
+ * Es gibt keinen fetch(), XMLHttpRequest, WebSocket oder sonstigen
+ * ausgehenden Netzwerkverkehr durch dieses Plugin.
+ */
 importScripts('trackers.js');
 
 // Store tracker data per tab

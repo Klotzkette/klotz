@@ -1,4 +1,10 @@
-// Tracker Sidebar - Content Script
+/**
+ * Tracker Sidebar - Content Script
+ *
+ * DATENSCHUTZ: Dieses Script arbeitet ausschließlich lokal.
+ * Es werden keine Daten an externe Server übermittelt.
+ * Alle Informationen verbleiben im Browser des Nutzers.
+ */
 (function () {
   'use strict';
 
