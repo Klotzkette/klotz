@@ -31,7 +31,9 @@
   let currentData = null;
   let sidebarVisible = false;
   let renderPending = false;
-  let openDetails = new Set();
+
+  // IMPORTANT: This Set persists across re-renders so detail panels stay open
+  const openDetails = new Set();
 
   // Load sidebar state from storage
   chrome.storage?.local?.get(['sidebarVisible'], (result) => {
@@ -121,7 +123,7 @@
         <textarea class="ts-summary-text" readonly id="ts-summary-textarea">${esc(generateSummaryText(data))}</textarea>
         <div class="ts-summary-actions">
           <button class="ts-summary-copy" id="ts-summary-copy">Kopieren</button>
-          <span class="ts-summary-copied" id="ts-summary-copied" style="display:none">Kopiert</span>
+          <span class="ts-summary-copied" id="ts-summary-copied" style="display:none">Kopiert &#10003;</span>
         </div>
       </div>
     `;
@@ -135,7 +137,7 @@
       navigator.clipboard.writeText(ta.value).then(() => {
         const label = overlay.querySelector('#ts-summary-copied');
         label.style.display = 'inline';
-        setTimeout(() => { label.style.display = 'none'; }, 2000);
+        setTimeout(() => { label.style.display = 'none'; }, 2500);
       });
     });
     overlay.querySelector('#ts-summary-textarea').addEventListener('focus', (e) => e.target.select());
@@ -156,7 +158,7 @@
   }
 
   // ============================================================
-  // Render
+  // Render (throttled via requestAnimationFrame)
   // ============================================================
   function requestRender() {
     if (renderPending) return;
@@ -168,15 +170,18 @@
   }
 
   function renderSidebar(data) {
-    // Preserve open details across re-renders
+    // STEP 1: Read which panels are currently open in the DOM and sync to our persistent Set
     sidebar.querySelectorAll('.ts-expand-panel.open').forEach(el => {
-      const hostname = el.closest('.ts-item')?.dataset.hostname;
+      const hostname = el.closest('.ts-item')?.dataset?.hostname;
       if (hostname) openDetails.add(hostname);
     });
     sidebar.querySelectorAll('.ts-expand-panel:not(.open)').forEach(el => {
-      const hostname = el.closest('.ts-item')?.dataset.hostname;
+      const hostname = el.closest('.ts-item')?.dataset?.hostname;
       if (hostname) openDetails.delete(hostname);
     });
+
+    // Current page URL for display
+    const pageUrl = location.hostname + location.pathname;
 
     let html = `
       <div class="ts-header">
@@ -188,6 +193,7 @@
           <span class="ts-stat"><span class="ts-stat-number">${data.totalTrackers}</span> Tracker</span>
           <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Anfragen</span>
         </div>
+        <div class="ts-url" title="${esc(location.href)}">${esc(pageUrl)}</div>
       </div>
 
       <div class="ts-action-bar">
@@ -211,7 +217,9 @@
     if (data.trackers.length === 0) {
       html += `
         <div class="ts-empty">
+          <div class="ts-empty-icon">&#128269;</div>
           <div class="ts-empty-text">Keine Tracker auf dieser Seite</div>
+          <div class="ts-empty-sub">Beim Laden der Seite werden Tracker automatisch erkannt</div>
         </div>
       `;
     } else {
@@ -221,6 +229,8 @@
     }
 
     html += '</div>';
+    html += '<div class="ts-footer">Tracker Viewer &mdash; arbeitet vollst\u00e4ndig lokal</div>';
+
     sidebar.innerHTML = html;
     attachEventListeners(data);
   }
@@ -230,6 +240,8 @@
     const cookieCount = Object.keys(tracker.allCookies || {}).length;
     const paramCount = Object.keys(tracker.allParams || {}).length;
     const receivedCookieCount = (tracker.receivedCookies || []).length;
+
+    // Check our persistent Set - this is what keeps details open across re-renders
     const isOpen = openDetails.has(tracker.hostname);
 
     const dataSections = [];
@@ -294,8 +306,8 @@
         </div>
         ${dataHtml ? `
           <div class="ts-item-data">
-            <button class="ts-expand-btn">${isOpen ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?'}</button>
-            <div class="ts-expand-panel ${isOpen ? 'open' : ''}">${dataHtml}</div>
+            <button class="ts-expand-btn${isOpen ? ' open' : ''}"><span class="ts-expand-arrow">&#9654;</span> ${isOpen ? 'Ausblenden' : 'Was wird gesendet?'}</button>
+            <div class="ts-expand-panel${isOpen ? ' open' : ''}">${dataHtml}</div>
           </div>
         ` : ''}
       </div>
@@ -315,11 +327,20 @@
         const panel = btn.nextElementSibling;
         if (panel) {
           const isOpen = panel.classList.toggle('open');
-          btn.textContent = isOpen ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?';
-          const hostname = btn.closest('.ts-item')?.dataset.hostname;
+          btn.classList.toggle('open', isOpen);
+          // Update button text
+          const arrow = btn.querySelector('.ts-expand-arrow');
+          const arrowHtml = arrow ? arrow.outerHTML : '';
+          btn.innerHTML = `${arrowHtml} ${isOpen ? 'Ausblenden' : 'Was wird gesendet?'}`;
+
+          // PERSIST the open/close state in our Set so it survives re-renders
+          const hostname = btn.closest('.ts-item')?.dataset?.hostname;
           if (hostname) {
-            if (isOpen) openDetails.add(hostname);
-            else openDetails.delete(hostname);
+            if (isOpen) {
+              openDetails.add(hostname);
+            } else {
+              openDetails.delete(hostname);
+            }
           }
         }
       });
