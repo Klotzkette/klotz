@@ -5,7 +5,6 @@
   "description": "Zeigt alle Tracker, Cookies und Datenflüsse auf jeder Website in einer Sidebar an. Tracker können einzeln oder alle auf einmal blockiert werden.",
   "permissions": [
     "webRequest",
-    "webRequestBlocking",
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
     "cookies",

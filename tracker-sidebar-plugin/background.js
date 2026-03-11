@@ -220,6 +220,10 @@ function countCategories(trackerList) {
 }
 
 // --- Blocking functionality using declarativeNetRequest ---
+// Strategy: Instead of hard-blocking (which causes errors the website/tracker
+// can detect), we redirect tracker requests to harmless empty data URIs.
+// This way the website gets a valid (but empty) response, preventing crashes
+// and making it invisible to the tracker that it was blocked.
 
 async function updateBlockRules() {
   try {
@@ -229,18 +233,56 @@ async function updateBlockRules() {
 
     // Create new rules from blocked domains
     const domains = Object.keys(blockedDomains);
-    const addRules = domains.map((domain, index) => ({
-      id: index + 1,
-      priority: 1,
-      action: { type: 'block' },
-      condition: {
-        urlFilter: `||${domain}`,
-        resourceTypes: [
-          'script', 'image', 'stylesheet', 'font', 'xmlhttprequest',
-          'ping', 'media', 'websocket', 'sub_frame', 'other'
-        ]
-      }
-    }));
+    const addRules = [];
+
+    domains.forEach((domain, index) => {
+      const baseId = (index * 3) + 1;
+
+      // Rule for scripts: redirect to empty JS
+      addRules.push({
+        id: baseId,
+        priority: 1,
+        action: {
+          type: 'redirect',
+          redirect: { url: 'data:text/javascript,' }
+        },
+        condition: {
+          urlFilter: `||${domain}`,
+          resourceTypes: ['script']
+        }
+      });
+
+      // Rule for images/pixels: redirect to transparent 1x1 GIF
+      addRules.push({
+        id: baseId + 1,
+        priority: 1,
+        action: {
+          type: 'redirect',
+          redirect: { url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }
+        },
+        condition: {
+          urlFilter: `||${domain}`,
+          resourceTypes: ['image', 'ping']
+        }
+      });
+
+      // Rule for all other resource types: redirect to empty response
+      addRules.push({
+        id: baseId + 2,
+        priority: 1,
+        action: {
+          type: 'redirect',
+          redirect: { url: 'data:text/plain,' }
+        },
+        condition: {
+          urlFilter: `||${domain}`,
+          resourceTypes: [
+            'stylesheet', 'font', 'xmlhttprequest',
+            'media', 'sub_frame', 'other'
+          ]
+        }
+      });
+    });
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeRuleIds,

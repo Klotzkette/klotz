@@ -67,16 +67,26 @@
     chrome.storage?.local?.set({ blockedDomains });
   }
 
+  // Graceful reload: waits for block rules to be applied, then reloads
+  // Uses a soft reload to avoid breaking the page state
+  function gracefulReload() {
+    setTimeout(() => {
+      try {
+        location.reload();
+      } catch (e) {
+        // Fallback: navigate to the same URL
+        window.location.href = window.location.href;
+      }
+    }, 400);
+  }
+
   function blockDomain(hostname) {
     blockedDomains[hostname] = true;
     saveBlockedDomains();
-    // Update the blocking rules
     chrome.runtime.sendMessage({
       type: 'UPDATE_BLOCK_RULES',
       blockedDomains: blockedDomains
-    });
-    // Reload the page
-    setTimeout(() => location.reload(), 200);
+    }, () => gracefulReload());
   }
 
   function unblockDomain(hostname) {
@@ -85,8 +95,7 @@
     chrome.runtime.sendMessage({
       type: 'UPDATE_BLOCK_RULES',
       blockedDomains: blockedDomains
-    });
-    setTimeout(() => location.reload(), 200);
+    }, () => gracefulReload());
   }
 
   function blockAll(trackers) {
@@ -97,8 +106,7 @@
     chrome.runtime.sendMessage({
       type: 'UPDATE_BLOCK_RULES',
       blockedDomains: blockedDomains
-    });
-    setTimeout(() => location.reload(), 300);
+    }, () => gracefulReload());
   }
 
   function unblockAll() {
@@ -107,8 +115,102 @@
     chrome.runtime.sendMessage({
       type: 'UPDATE_BLOCK_RULES',
       blockedDomains: blockedDomains
+    }, () => gracefulReload());
+  }
+
+  function generateSummaryText(data) {
+    const pageUrl = location.href;
+    const date = new Date().toLocaleString('de-DE');
+    let lines = [];
+    lines.push('=== TRACKER-ZUSAMMENFASSUNG ===');
+    lines.push(`Website: ${pageUrl}`);
+    lines.push(`Datum: ${date}`);
+    lines.push(`Gefundene Tracker: ${data.totalTrackers}`);
+    lines.push(`Gesamte Requests: ${data.totalRequests}`);
+    const blockedCount = Object.keys(blockedDomains).length;
+    if (blockedCount > 0) {
+      lines.push(`Blockierte Domains: ${blockedCount}`);
+    }
+    lines.push('');
+    lines.push('--- Tracker-Liste ---');
+    lines.push('');
+
+    for (const tracker of data.trackers) {
+      const isBlocked = blockedDomains[tracker.hostname];
+      lines.push(`${tracker.name}${isBlocked ? ' [BLOCKIERT]' : ''}`);
+      lines.push(`  Firma: ${tracker.company}`);
+      lines.push(`  Domain: ${tracker.hostname}`);
+      lines.push(`  Kategorie: ${tracker.category}`);
+      lines.push(`  Requests: ${tracker.requestCount}`);
+
+      const cookieCount = Object.keys(tracker.allCookies || {}).length;
+      if (cookieCount > 0) {
+        lines.push(`  Gesendete Cookies (${cookieCount}): ${Object.keys(tracker.allCookies).join(', ')}`);
+      }
+
+      const receivedCount = (tracker.receivedCookies || []).length;
+      if (receivedCount > 0) {
+        lines.push(`  Empfangene Cookies (${receivedCount}): ${tracker.receivedCookies.map(c => c.name).join(', ')}`);
+      }
+
+      const paramCount = Object.keys(tracker.allParams || {}).length;
+      if (paramCount > 0) {
+        lines.push(`  URL-Parameter (${paramCount}): ${Object.keys(tracker.allParams).join(', ')}`);
+      }
+
+      lines.push('');
+    }
+
+    // Blocked domains not in current list
+    const currentHostnames = new Set(data.trackers.map(t => t.hostname));
+    for (const hostname of Object.keys(blockedDomains)) {
+      if (!currentHostnames.has(hostname)) {
+        lines.push(`${hostname} [BLOCKIERT - nicht geladen]`);
+        lines.push('');
+      }
+    }
+
+    lines.push('=== ENDE DER ZUSAMMENFASSUNG ===');
+    return lines.join('\n');
+  }
+
+  function showSummaryOverlay(data) {
+    // Remove existing overlay if any
+    const existing = document.getElementById('ts-summary-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ts-summary-overlay';
+    overlay.innerHTML = `
+      <div class="ts-summary-backdrop"></div>
+      <div class="ts-summary-modal">
+        <div class="ts-summary-header">
+          <span>Tracker-Zusammenfassung</span>
+          <button class="ts-summary-close" id="ts-summary-close">&#10005;</button>
+        </div>
+        <textarea class="ts-summary-text" readonly id="ts-summary-textarea">${escapeHtml(generateSummaryText(data))}</textarea>
+        <div class="ts-summary-actions">
+          <button class="ts-summary-copy" id="ts-summary-copy">&#128203; In Zwischenablage kopieren</button>
+          <span class="ts-summary-copied" id="ts-summary-copied" style="display:none">Kopiert!</span>
+        </div>
+      </div>
+    `;
+    document.documentElement.appendChild(overlay);
+
+    overlay.querySelector('#ts-summary-close').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('.ts-summary-backdrop').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#ts-summary-copy').addEventListener('click', () => {
+      const textarea = overlay.querySelector('#ts-summary-textarea');
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        const copiedLabel = overlay.querySelector('#ts-summary-copied');
+        copiedLabel.style.display = 'inline';
+        setTimeout(() => { copiedLabel.style.display = 'none'; }, 2000);
+      });
     });
-    setTimeout(() => location.reload(), 300);
+
+    // Auto-select all text on focus
+    overlay.querySelector('#ts-summary-textarea').addEventListener('focus', (e) => e.target.select());
   }
 
   function escapeHtml(str) {
@@ -146,6 +248,7 @@
       <div class="ts-block-all-bar">
         <button class="ts-block-all-btn block" id="ts-block-all">&#128683; Alle blockieren</button>
         ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">&#10003; Alle erlauben</button>` : ''}
+        <button class="ts-block-all-btn summary" id="ts-show-summary">&#128203; Zusammenfassung</button>
       </div>
     `;
 
@@ -198,6 +301,10 @@
 
     sidebar.querySelector('#ts-unblock-all')?.addEventListener('click', () => {
       unblockAll();
+    });
+
+    sidebar.querySelector('#ts-show-summary')?.addEventListener('click', () => {
+      showSummaryOverlay(data);
     });
 
     // Toggle buttons for data details
