@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracker Watch</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      min-height: 180px;
+      background: #0f1117;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px 12px;
+      background: #1a1d2e;
+      border-bottom: 1px solid #2d3148;
+    }
+    .header-icon { font-size: 20px; }
+    .header-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #a5b4fc;
+      letter-spacing: 0.2px;
+    }
+    .header-subtitle {
+      font-size: 10px;
+      color: #475569;
+      margin-top: 1px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #1e2140;
+    }
+    .stat-box {
+      flex: 1;
+      padding: 12px 10px;
+      text-align: center;
+      border-right: 1px solid #1e2140;
+    }
+    .stat-box:last-child { border-right: none; }
+    .stat-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #6366f1;
+    }
+    .stat-num.warn { color: #f59e0b; }
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e2140;
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 7px;
+    }
+
+    .tracker-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .tracker-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tracker-popup-name {
+      flex: 1;
+      color: #cbd5e1;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tracker-popup-count {
+      font-size: 11px;
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    .empty-msg {
+      padding: 30px 16px;
+      text-align: center;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .empty-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .footer {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d0f1a;
+    }
+    .footer-note {
+      font-size: 10px;
+      color: #334155;
+    }
+    .footer-link {
+      font-size: 10px;
+      color: #6366f1;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .footer-link:hover { color: #818cf8; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-icon">🔍</div>
+    <div>
+      <div class="header-title">Tracker Watch</div>
+      <div class="header-subtitle">Aktive Seite überwachen</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-trackers">–</div>
+      <div class="stat-label">Tracker</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num warn" id="stat-requests">–</div>
+      <div class="stat-label">Anfragen</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-cookies">–</div>
+      <div class="stat-label">Cookies gesendet</div>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="empty-msg">
+      <div class="empty-icon">🕵️</div>
+      Lade Tracker-Daten…
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-note">Tracker Watch v1.0</span>
+    <a class="footer-link" id="open-sidebar" href="#">Sidebar anzeigen ▶</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
