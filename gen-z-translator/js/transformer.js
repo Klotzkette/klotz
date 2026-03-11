@@ -92,14 +92,14 @@ class GenZTransformer {
     if (!this.settings.emojis) return text;
 
     // Nach Satzzeichen Emojis einfügen
-    return text.replace(/([.!?]+)(\s|$)/g, (match, punct, space) => {
+    // offset trackt die aktuelle Position um bei mehreren Matches den richtigen Kontext zu finden
+    let offset = 0;
+    return text.replace(/([.!?]+)(\s|$)/g, (match, punct, space, matchIndex) => {
       if (Math.random() * 100 > this.intensity) return match;
 
-      // Kontext aus dem vorhergehenden Text extrahieren
-      const beforePunct = text.substring(
-        Math.max(0, text.indexOf(match) - 50),
-        text.indexOf(match)
-      );
+      // Kontext aus den 50 Zeichen VOR dem aktuellen Match extrahieren
+      const contextStart = Math.max(0, matchIndex - 50);
+      const beforePunct = text.substring(contextStart, matchIndex);
 
       const emoji = getContextualEmoji(beforePunct);
       return punct + ' ' + emoji + (space || ' ');

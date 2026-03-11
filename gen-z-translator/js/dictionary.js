@@ -75,7 +75,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bunsicher\b/gi, replacements: ['Beta', 'lowkey unsicher'] },
   { pattern: /\bpassiv\b/gi, replacements: ['Beta'] },
   { pattern: /\bbeste Freundin\b/gi, replacements: ['Bestie'] },
-  { pattern: /\bbemerkenswert\b/gi, replacements: ['bike', 'sheesh-würdig'] },
+  { pattern: /\bbemerkenswert\b/gi, replacements: ['sheesh-würdig', 'wild'] },
   { pattern: /\bEinkommen\b/gi, replacements: ['Bread 🍞', 'Bag 💰'] },
   { pattern: /\btäuschen\b/gi, replacements: ['catfishen 🐱'] },
   { pattern: /\birreführen\b/gi, replacements: ['catfishen'] },
@@ -88,7 +88,7 @@ const GENZ_DICTIONARY = [
   // ==========================================================================
   // E-K: Glossar-Begriffe
   // ==========================================================================
-  { pattern: /\bEhre\b/gi, replacements: ['Ehre', 'Respekt fr'] },
+  { pattern: /\bEhre\b/gi, replacements: ['Ehrenmann-mäßig', 'Props'] },
   { pattern: /\bprovokant\b/gi, replacements: ['edgy'] },
   { pattern: /\bkontrovers\b/gi, replacements: ['edgy', 'spicy'] },
   { pattern: /\bAusstrahlung\b/gi, replacements: ['Energy ⚡✨', 'Vibe'] },
@@ -140,7 +140,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bernsthaft\b/gi, replacements: ['no cap', 'fr fr'] },
   { pattern: /\bHöhepunkt\b/gi, replacements: ['Peak 🏔️'] },
   { pattern: /\bOptimum\b/gi, replacements: ['Peak'] },
-  { pattern: /\bPunkt\b/gi, replacements: ['Periodt'] },
+  // "Punkt" bewusst nicht ersetzt - zu häufig/mehrdeutig ("An diesem Punkt", "Punkt 3")
   { pattern: /\bVerräter\b/gi, replacements: ['Petze', 'Snitch'] },
   { pattern: /\bPerspektive\b/gi, replacements: ['POV 👁️'] },
   { pattern: /\bSichtweise\b/gi, replacements: ['POV'] },
@@ -150,7 +150,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bCharisma\b/gi, replacements: ['Rizz 😎✨'] },
   { pattern: /\bÜberzeugungskraft\b/gi, replacements: ['Rizz ✨'] },
   { pattern: /\bständig denken an\b/gi, replacements: ['rent free im Kopf'] },
-  { pattern: /\bpräsent\b/gi, replacements: ['rent free'] },
+  // "präsent" bewusst nicht ersetzt - "rent free" bedeutet spezifisch "im Kopf leben"
 
   // ==========================================================================
   // S-Z: Glossar-Begriffe
@@ -158,7 +158,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bbeleidigt\b/gi, replacements: ['salty 🧂', 'getriggert'] },
   { pattern: /\bverstimmt\b/gi, replacements: ['salty'] },
   { pattern: /\bbrutal ehrlich\b/gi, replacements: ['savage 😈'] },
-  { pattern: /\bdirekt\b/gi, replacements: ['savage', 'straight up'] },
+  // "direkt" bewusst nicht ersetzt - zu mehrdeutig ("direkt nach Hause" vs. "direkte Art")
   { pattern: /\bgeschockt\b/gi, replacements: ['shook 😱'] },
   { pattern: /\büberrascht\b/gi, replacements: ['shook', 'sheesh'] },
   { pattern: /\bskeptisch\b/gi, replacements: ['side-eye 👀'] },
@@ -167,28 +167,28 @@ const GENZ_DICTIONARY = [
   { pattern: /\bautonom\b/gi, replacements: ['Sigma'] },
   { pattern: /\bunterwürfig\b/gi, replacements: ['Simp'] },
   { pattern: /\bübermäßig entgegenkommend\b/gi, replacements: ['Simp'] },
-  { pattern: /\bchaotisch\b/gi, replacements: ['skibidi'] },
-  { pattern: /\bdynamisch\b/gi, replacements: ['skibidi', 'lit'] },
+  { pattern: /\bchaotisch\b/gi, replacements: ['wild', 'lowkey chaotisch'] },
+  { pattern: /\bdynamisch\b/gi, replacements: ['lit', 'energetic'] },
   { pattern: /\bgroßartig sein\b/gi, replacements: ['slayen 💅'] },
   { pattern: /\büberzeugen\b/gi, replacements: ['slayen'] },
   { pattern: /\bgemeistert\b/gi, replacements: ['slayed ✅', 'geclutcht'] },
   { pattern: /\berfolgreich abgeschlossen\b/gi, replacements: ['slayed ✅'] },
   { pattern: /\btoll finden\b/gi, replacements: ['smashen 🔥'] },
   { pattern: /\bbegeistert sein\b/gi, replacements: ['smashen', 'hyped sein'] },
-  { pattern: /\büberempfindlich\b/gi, replacements: ['Snowflake ❄️😢'] },
-  { pattern: /\bsensibel\b/gi, replacements: ['Snowflake', 'soft'] },
+  { pattern: /\büberempfindlich\b/gi, replacements: ['soft', 'lowkey Snowflake ❄️'] },
+  { pattern: /\bsensibel\b/gi, replacements: ['soft', 'emotional'] },
   { pattern: /\bmakellos\b/gi, replacements: ['snatched 💅', 'on point'] },
   { pattern: /\bvorsichtig zeigen\b/gi, replacements: ['soft launchen'] },
   { pattern: /\bschrittweise einführen\b/gi, replacements: ['soft launchen'] },
   { pattern: /\bKlatsch\b/gi, replacements: ['Tea ☕', 'spill the tea'] },
-  { pattern: /\bInformation\b/gi, replacements: ['Tea ☕', 'Info'] },
+  { pattern: /\bInformation\b/gi, replacements: ['Info', 'die Info'] },
   { pattern: /\bgiftig\b/gi, replacements: ['toxic ☠️'] },
   { pattern: /\bschädlich\b/gi, replacements: ['toxic'] },
   { pattern: /\bprovoziert\b/gi, replacements: ['triggered 😤'] },
   { pattern: /\bverärgert\b/gi, replacements: ['triggered', 'salty'] },
   { pattern: /\bcool, hart\b/gi, replacements: ['tuff'] },
   { pattern: /\bStimmungstest\b/gi, replacements: ['Vibe Check ✅😌'] },
-  { pattern: /\bich schwöre\b/gi, replacements: ['Wallah'] },
+  // Duplikat entfernt - "ich schwöre" wird bereits oben in Phrasen-Sektion behandelt
   { pattern: /\bwahrhaftig\b/gi, replacements: ['wallah', 'no cap'] },
   { pattern: /\bkrass\b/gi, replacements: ['wild 🔥', 'wyld'] },
   { pattern: /\baußergewöhnlich\b/gi, replacements: ['wild', 'das crazy'] },
@@ -230,7 +230,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bseltsam\b/gi, replacements: ['sus af', 'kinda weird ngl', 'Ohio'] },
   { pattern: /\bmerkwürdig\b/gi, replacements: ['sus', 'irgendwie off', 'Ohio-mäßig'] },
   { pattern: /\bpeinlich\b/gi, replacements: ['cringe 😬', 'mega cringe', 'Augencringe'] },
-  { pattern: /\bcool\b/gi, replacements: ['lit 🔥', 'fire', 'valid', 'fly', 'bike'] },
+  { pattern: /\bcool\b/gi, replacements: ['lit 🔥', 'fire', 'valid', 'fly'] },
   { pattern: /\bbeliebt\b/gi, replacements: ['viral', 'hyped', 'mainstream'] },
   { pattern: /\bberühmt\b/gi, replacements: ['famous af', 'literally ein Promi'] },
   { pattern: /\bneu\b/gi, replacements: ['fresh', 'brand new'] },
@@ -243,7 +243,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bschwer\b/gi, replacements: ['hard af', 'lowkey impossible'] },
   { pattern: /\bteuer\b/gi, replacements: ['overpriced fr', 'bougie'] },
   { pattern: /\bbillig\b/gi, replacements: ['cheap af', 'lowkey ein Schnapper'] },
-  { pattern: /\breich\b/gi, replacements: ['loaded 💰', 'hat Guap', 'Stonks 📈'] },
+  { pattern: /\breich\b/gi, replacements: ['loaded 💰', 'hat Guap', 'hat Bread 🍞'] },
   { pattern: /\barm\b/gi, replacements: ['broke', 'kein Guap', 'kein Bread'] },
   { pattern: /\bstark\b/gi, replacements: ['OP', 'overpowered', 'tuff'] },
   { pattern: /\bschwach\b/gi, replacements: ['nerfed', 'lowkey weak'] },
@@ -252,7 +252,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bklug\b/gi, replacements: ['big brain 🧠', 'galaxy brain'] },
   { pattern: /\bintelligent\b/gi, replacements: ['big brain energy 🧠', '200 IQ'] },
   { pattern: /\bentspannt\b/gi, replacements: ['chillig 😎', 'auf Lock', 'schmoof 😌'] },
-  { pattern: /\bangenehm\b/gi, replacements: ['chillig', 'vibe-ig'] },
+  { pattern: /\bangenehm\b/gi, replacements: ['chillig', 'nice'] },
   { pattern: /\bstabil\b/gi, replacements: ['Fels 🪨', 'safe'] },
   { pattern: /\bverdächtig\b/gi, replacements: ['sus 🤨', 'irgendwie off'] },
 
@@ -398,7 +398,7 @@ const GENZ_DICTIONARY = [
   { pattern: /\bÜbertreibung\b/gi, replacements: ['Clownery 🤡', 'too much'] },
   { pattern: /\bStreit\b/gi, replacements: ['Beef', 'Drama'] },
   { pattern: /\bAktien\b/gi, replacements: ['Stonks 📈'] },
-  { pattern: /\bSituation\b/gi, replacements: ['Lituation 🔥', 'Sitch'] },
+  { pattern: /\bSituation\b/gi, replacements: ['Sitch', 'Lage'] },
 
   // ==========================================================================
   // Verstärker & Adverbien
