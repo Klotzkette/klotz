@@ -106,7 +106,10 @@ const FORMAL_CONNECTORS_TO_KEEP = [
 class GenZTransformer {
   constructor(settings) {
     this.settings = settings;
-    this.intensity = settings.intensity || 50;
+    this.settings.replace = true;
+    this.settings.fillers = true;
+    this.settings.emojis = true;
+    this.intensity = 100; // Immer volle Intensität
     this.originalTexts = new WeakMap();
     this._originalNodesList = []; // Für revertAll() — WeakMap ist nicht iterierbar
     this.sortedDictionary = null; // Cache
@@ -134,7 +137,8 @@ class GenZTransformer {
     const sorted = this.getSortedDictionary();
 
     for (const entry of sorted) {
-      if (Math.random() * 100 > intensity) continue;
+      // Bei voller Intensität: nur 10% Skip-Chance (statt vorher bis zu 50%)
+      if (Math.random() > 0.9) continue;
 
       const replacements = entry.replacements;
       const replacement = replacements[Math.floor(Math.random() * replacements.length)];
@@ -200,8 +204,8 @@ class GenZTransformer {
     const category = this.getSentimentCategory(sentence);
 
     // Formale Sätze kriegen häufiger Kommentare — DER Kontrast
-    const chance = category === 'formal' ? 0.35 : 0.2;
-    if (Math.random() > chance * (this.intensity / 100)) return '';
+    const chance = category === 'formal' ? 0.55 : 0.35;
+    if (Math.random() > chance) return '';
 
     // Bei formalen Sätzen: bevorzuge die "formal"-Kommentare
     if (category === 'formal' && Math.random() < 0.7) {
@@ -308,7 +312,7 @@ class GenZTransformer {
    */
   insertJuxtapositions(text) {
     let result = text;
-    const chance = 0.25 * (this.intensity / 100);
+    const chance = 0.5; // Aggressiv: 50% Chance bei formalen Konnektoren
 
     // Formale Konnektoren bewusst stehen lassen und Slang-Suffix anhängen
     const juxtapositions = [

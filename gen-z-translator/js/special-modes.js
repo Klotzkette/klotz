@@ -110,7 +110,7 @@ class GenderTransformer {
   constructor(settings) {
     this.settings = settings;
     this.mode = settings.genderMode || 'star';
-    this.intensity = settings.intensity || 70;
+    this.intensity = 100; // Immer volle Intensität
     this.originalTexts = new Map();
   }
 

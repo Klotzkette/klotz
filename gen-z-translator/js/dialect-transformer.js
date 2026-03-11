@@ -6,7 +6,9 @@ class DialectTransformer {
   constructor(settings, dialectConfig) {
     this.settings = settings;
     this.dialect = dialectConfig;
-    this.intensity = settings.intensity || 50;
+    this.settings.replace = true;
+    this.settings.fillers = true;
+    this.intensity = 100; // Immer volle Intensität
     this.originalTexts = new WeakMap();
     this._originalNodesList = [];
   }
@@ -104,6 +106,37 @@ class DialectTransformer {
   }
 
   /**
+   * Schwäbisch-Spezial: Adjektive bekommen -le Suffix
+   * "gut" → "gütle", "schön" → "schönle", "groß" → "großle"
+   */
+  applyAdjectiveDiminutive(text) {
+    if (!this.dialect.adjectiveDiminutive) return text;
+
+    const commonAdjs = [
+      'gut', 'schlecht', 'schön', 'groß', 'klein', 'alt', 'neu', 'jung',
+      'lang', 'kurz', 'schnell', 'langsam', 'hoch', 'tief', 'breit',
+      'dick', 'dünn', 'schwer', 'leicht', 'hell', 'dunkel', 'warm', 'kalt',
+      'laut', 'leise', 'stark', 'schwach', 'hart', 'weich', 'voll', 'leer',
+      'teuer', 'billig', 'einfach', 'schwierig', 'wichtig', 'richtig',
+      'toll', 'super', 'nett', 'lieb', 'freundlich', 'lustig', 'witzig',
+      'traurig', 'dumm', 'klug', 'cool', 'wild', 'fein', 'frisch', 'rund',
+      'süß', 'sauer', 'bitter', 'salzig', 'brav', 'frech', 'still', 'ruhig',
+    ];
+
+    const endings = '(?:e[mnrs]?|er|es)?';
+    const pattern = new RegExp(
+      '\\b(' + commonAdjs.join('|') + ')(' + endings + ')\\b',
+      'gi'
+    );
+
+    return text.replace(pattern, (match, stem, ending) => {
+      if (Math.random() > 0.8) return match;
+      // -le an den Stamm hängen, Endung dahinter
+      return stem + 'le' + (ending || '');
+    });
+  }
+
+  /**
    * Alle Transformationen in Reihenfolge
    */
   transform(text) {
@@ -113,6 +146,7 @@ class DialectTransformer {
 
     result = this.applyVocabulary(result, intensity);
     result = this.applyPhonetics(result, intensity);
+    result = this.applyAdjectiveDiminutive(result);
     result = this.insertFillers(result, intensity);
 
     return result;

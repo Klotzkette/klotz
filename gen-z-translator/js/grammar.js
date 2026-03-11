@@ -133,13 +133,21 @@ const GermanGrammar = {
     if (type === 'adj' && /[^e]en$/i.test(word) && suffix.startsWith('e')) {
       return word.slice(0, -2) + 'n' + suffix;
     }
-    // Wort endet auf -e: kein doppeltes e
+    // Adjektive auf -e: "leise" + "n" → "leisen" (kein doppeltes e)
     if (word.endsWith('e') && suffix.startsWith('e')) {
       return word + suffix.slice(1);
     }
     // Nomen auf -e + n: "Straße" + "n" → "Straßen"
     if (type === 'noun' && word.endsWith('e') && suffix === 'n') {
       return word + 'n';
+    }
+    // Nomen auf -er + n: "Lehrer" + "n" → "Lehrern"
+    if (type === 'noun' && word.endsWith('er') && suffix === 'n') {
+      return word + 'n';
+    }
+    // Nomen: Wort endet auf Konsonant + "s": "Erfolg" + "s" → "Erfolgs"
+    if (type === 'noun' && suffix === 's' && /[bcdfgklmnpqrstvwxz]$/.test(word)) {
+      return word + 's';
     }
     return word + suffix;
   },

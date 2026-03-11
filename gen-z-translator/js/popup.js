@@ -5,13 +5,16 @@
 const MODE_THEMES = {
   genz: 'theme-genz',
   formal: 'theme-formal',
-  altertuemlich: 'theme-barock',
   fraenkisch: 'theme-dialect',
+  berlinerisch: 'theme-dialect',
+  schwaebisch: 'theme-dialect',
   gender_star: 'theme-gender',
   gender_colon: 'theme-gender',
-  gender_explicit: 'theme-gender',
   gender_participle: 'theme-gender',
   gender_maskulinum: 'theme-gender',
+  adjektivkiller: 'theme-tool',
+  kleinschreibung: 'theme-tool',
+  vokalentferner: 'theme-tool',
 };
 
 let activeMode = null;
@@ -44,7 +47,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
       replace: true,
       fillers: true,
       emojis: true,
-      intensity: 60,
+      intensity: 100,
     };
 
     if (mode.startsWith('gender_')) {

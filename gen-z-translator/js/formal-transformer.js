@@ -5,7 +5,9 @@
 class FormalTransformer {
   constructor(settings) {
     this.settings = settings;
-    this.intensity = settings.intensity || 50;
+    this.settings.replace = true;
+    this.settings.fillers = true;
+    this.intensity = 100; // Immer volle Intensität
     this.originalTexts = new WeakMap();
     this._originalNodesList = [];
     this.sortedDictionary = null;
@@ -108,7 +110,7 @@ class FormalTransformer {
       if (sentence.length < 20) return sentence;
 
       const category = this.getCommentCategory(sentence);
-      const chance = 0.2 * (this.intensity / 100);
+      const chance = 0.4; // Aggressiver kommentieren
       if (Math.random() > chance) return sentence;
 
       // Bei informalen Sätzen häufiger kommentieren (der Kontrast!)
@@ -163,7 +165,7 @@ class FormalTransformer {
    */
   insertJuxtapositions(text) {
     let result = text;
-    const chance = 0.2 * (this.intensity / 100);
+    const chance = 0.45;
 
     const juxtapositions = [
       { find: /\bcool\b/gi, formal: ['– wenn ich es einmal so umgangssprachlich formulieren darf –', ', um es salopp auszudrücken,'] },

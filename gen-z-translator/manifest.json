@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text-Transformer — Gen-Z, Gendern, Fränkisch, Altertümlich, Bildungssprache",
-  "version": "4.0.0",
-  "description": "Verwandelt deutschen Text in Gen-Z-Sprache, gendert mit Stern/Doppelpunkt/Partizip, stellt generisches Maskulinum her, übersetzt in Fränkisch, altertümliches Deutsch oder Bildungssprache. 100% lokal — keine Daten werden gesammelt oder übertragen.",
+  "name": "Text-Transformer — 12 Modi für deutschen Text",
+  "version": "4.1.0",
+  "description": "Gen-Z-Sprache, Bildungssprache, Fränkisch, Berlinerisch, Schwäbisch (-le), Gendern (*/:/Partizip), Maskulinum, Adjektivkiller, Kleinschreibung, Vokalentferner. 100% lokal — keine Daten werden übertragen.",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",

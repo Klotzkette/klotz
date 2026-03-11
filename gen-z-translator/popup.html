@@ -13,18 +13,16 @@
       transition: background 0.4s ease;
     }
 
-    /* Hintergrund-Themes */
     body.theme-genz    { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     body.theme-formal  { background: linear-gradient(135deg, #2c3e50 0%, #4a0e0e 100%); }
     body.theme-dialect { background: linear-gradient(135deg, #2d5016 0%, #1a472a 100%); }
     body.theme-gender  { background: linear-gradient(135deg, #6b21a8 0%, #db2777 100%); }
-    body.theme-barock  { background: linear-gradient(135deg, #78350f 0%, #451a03 100%); }
+    body.theme-tool    { background: linear-gradient(135deg, #4a1942 0%, #1a1a2e 100%); }
 
     .header { text-align: center; padding: 14px 16px 10px; }
     .header h1 { font-size: 15px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
     .header .subtitle { font-size: 10px; opacity: 0.85; margin-top: 2px; }
 
-    /* Modus-Liste */
     .mode-list { padding: 0 12px 10px; display: flex; flex-direction: column; gap: 4px; }
 
     .mode-btn {
@@ -54,7 +52,6 @@
     .mode-btn .check { opacity: 0; font-size: 14px; transition: opacity 0.2s; }
     .mode-btn.active .check { opacity: 1; }
 
-    /* Kategorie-Header */
     .category { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; padding: 6px 4px 2px; }
 
     .footer { text-align: center; padding: 4px 16px 8px; font-size: 9px; opacity: 0.5; }
@@ -63,7 +60,7 @@
 <body class="theme-genz">
   <div class="header">
     <h1 id="headerTitle">Text-Transformer</h1>
-    <div class="subtitle" id="headerSubtitle">Modus anklicken → sofort aktiv</div>
+    <div class="subtitle" id="headerSubtitle">Modus anklicken → sofort aktiv. Nochmal → aus.</div>
   </div>
 
   <div class="mode-list" id="modeList">
@@ -78,16 +75,21 @@
       <span class="label">Bildungssprache</span>
       <span class="check">✓</span>
     </button>
-    <button class="mode-btn" data-mode="altertuemlich">
-      <span class="icon">🏰</span>
-      <span class="label">Altertümliches Deutsch</span>
-      <span class="check">✓</span>
-    </button>
 
-    <div class="category">Dialekt</div>
+    <div class="category">Dialekte</div>
     <button class="mode-btn" data-mode="fraenkisch">
       <span class="icon">🌭</span>
       <span class="label">Fränkisch</span>
+      <span class="check">✓</span>
+    </button>
+    <button class="mode-btn" data-mode="berlinerisch">
+      <span class="icon">🐻</span>
+      <span class="label">Berlinerisch</span>
+      <span class="check">✓</span>
+    </button>
+    <button class="mode-btn" data-mode="schwaebisch">
+      <span class="icon">🏠</span>
+      <span class="label">Schwäbisch (-le Edition)</span>
       <span class="check">✓</span>
     </button>
 
@@ -102,11 +104,6 @@
       <span class="label">Gendern (Doppelpunkt :)</span>
       <span class="check">✓</span>
     </button>
-    <button class="mode-btn" data-mode="gender_explicit">
-      <span class="icon">📝</span>
-      <span class="label">Gendern (ausgeschrieben)</span>
-      <span class="check">✓</span>
-    </button>
     <button class="mode-btn" data-mode="gender_participle">
       <span class="icon">🔄</span>
       <span class="label">Gendern (Partizip)</span>
@@ -117,9 +114,26 @@
       <span class="label">Generisches Maskulinum</span>
       <span class="check">✓</span>
     </button>
+
+    <div class="category">Text-Werkzeuge</div>
+    <button class="mode-btn" data-mode="adjektivkiller">
+      <span class="icon">✂️</span>
+      <span class="label">Adjektivkiller</span>
+      <span class="check">✓</span>
+    </button>
+    <button class="mode-btn" data-mode="kleinschreibung">
+      <span class="icon">🔡</span>
+      <span class="label">alles kleinschreiben</span>
+      <span class="check">✓</span>
+    </button>
+    <button class="mode-btn" data-mode="vokalentferner">
+      <span class="icon">🕳️</span>
+      <span class="label">Vokalentferner</span>
+      <span class="check">✓</span>
+    </button>
   </div>
 
-  <div class="footer" id="footerText">Text-Transformer v4.0 — 100% lokal</div>
+  <div class="footer" id="footerText">Text-Transformer v4.1 — 12 Modi — 100% lokal</div>
 
   <script src="js/popup.js"></script>
 </body>

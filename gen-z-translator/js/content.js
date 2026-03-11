@@ -40,18 +40,28 @@ function doTransform(settings) {
   _lastSettings = settings;
   const mode = settings.mode || 'genz';
 
+  // Immer volle Intensität
+  settings.intensity = 100;
+  settings.replace = true;
+  settings.fillers = true;
+  settings.emojis = true;
+
   if (mode === 'formal') {
     transformer = new FormalTransformer(settings);
   } else if (mode === 'genz') {
     transformer = new GenZTransformer(settings);
-  } else if (mode === 'fraenkisch') {
-    const dialectConfig = DIALECTS['fraenkisch'];
+  } else if (mode === 'fraenkisch' || mode === 'berlinerisch' || mode === 'schwaebisch') {
+    const dialectConfig = DIALECTS[mode];
     transformer = new DialectTransformer(settings, dialectConfig);
-  } else if (mode === 'altertuemlich') {
-    transformer = new DialectTransformer(settings, ALTERTUEMLICH_CONFIG);
   } else if (mode.startsWith('gender_')) {
     settings.genderMode = mode.replace('gender_', '');
     transformer = new GenderTransformer(settings);
+  } else if (mode === 'adjektivkiller') {
+    transformer = new AdjektivkillerTransformer(settings);
+  } else if (mode === 'kleinschreibung') {
+    transformer = new KleinschreibungTransformer(settings);
+  } else if (mode === 'vokalentferner') {
+    transformer = new VokalentfernerTransformer(settings);
   } else {
     transformer = new GenZTransformer(settings);
   }
@@ -63,10 +73,12 @@ function doTransform(settings) {
 
   const modeNames = {
     genz: '🔥 Gen-Z', formal: '📜 Bildungssprache',
-    fraenkisch: '🌭 Fränkisch', altertuemlich: '📜 Altertümliches Deutsch',
+    fraenkisch: '🌭 Fränkisch', berlinerisch: '🐻 Berlinerisch',
+    schwaebisch: '🏠 Schwäbisch',
     gender_star: '⭐ Gendern (*)', gender_colon: '✳️ Gendern (:)',
-    gender_explicit: '📝 Gendern', gender_participle: '🔄 Partizip',
-    gender_maskulinum: '♂️ Maskulinum',
+    gender_participle: '🔄 Partizip', gender_maskulinum: '♂️ Maskulinum',
+    adjektivkiller: '✂️ Adjektivkiller', kleinschreibung: '🔡 kleinschreibung',
+    vokalentferner: '🕳️ Vokalentferner',
   };
   const modeName = modeNames[mode] || mode;
   showNotification(`${modeName}: ${count} Texte transformiert`);
