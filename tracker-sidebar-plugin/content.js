@@ -11,33 +11,40 @@
   // Avoid double-injection
   if (document.getElementById('tracker-sidebar-container')) return;
 
-  // Category colors
+  // Category colors — muted, elegant palette
   const CATEGORY_COLORS = {
-    "Analytics": "#4285f4",
-    "Werbung": "#ea4335",
-    "Social Tracking": "#1877f2",
-    "Tag Manager": "#f4b400",
-    "Einbettung": "#9c27b0",
-    "CDN": "#607d8b",
-    "Consent": "#4caf50",
-    "Chat/Support": "#00bcd4",
-    "Marketing": "#ff9800",
-    "Affiliate": "#795548",
-    "Social Sharing": "#e91e63",
-    "Sicherheit": "#2e7d32",
-    "Performance": "#3f51b5",
-    "Fehlertracking": "#ff5722",
-    "Unbekannt": "#9e9e9e"
+    "Analytics": "#6b9dc2",
+    "Werbung": "#d97556",
+    "Social Tracking": "#7b8fb8",
+    "Tag Manager": "#c9a84c",
+    "Einbettung": "#9b7db8",
+    "CDN": "#8a9baa",
+    "Consent": "#6aab8e",
+    "Chat/Support": "#5ea8b5",
+    "Marketing": "#d4955a",
+    "Affiliate": "#9e8878",
+    "Social Sharing": "#c47a8e",
+    "Sicherheit": "#5a9a6e",
+    "Performance": "#7585b5",
+    "Fehlertracking": "#cd6f55",
+    "Unbekannt": "#a0aab4"
   };
 
   let currentData = null;
   let sidebarVisible = false;
   let blockedDomains = {};
   let renderPending = false;
+  let openDetails = new Set(); // Track which tracker details are open (by hostname)
 
-  // Load blocked domains from storage
-  chrome.storage?.local?.get(['blockedDomains'], (result) => {
+  // Load blocked domains and sidebar state from storage
+  chrome.storage?.local?.get(['blockedDomains', 'sidebarVisible'], (result) => {
     if (result?.blockedDomains) blockedDomains = result.blockedDomains;
+    if (result?.sidebarVisible) {
+      sidebarVisible = true;
+      sidebar.classList.remove('hidden');
+      toggleBtn.classList.add('sidebar-open');
+      if (currentData) renderSidebar(currentData);
+    }
   });
 
   // ============================================================
@@ -61,6 +68,8 @@
     sidebarVisible = !sidebarVisible;
     sidebar.classList.toggle('hidden', !sidebarVisible);
     toggleBtn.classList.toggle('sidebar-open', sidebarVisible);
+    // Persist sidebar state
+    chrome.storage?.local?.set({ sidebarVisible });
     if (sidebarVisible && currentData) renderSidebar(currentData);
   }
 
@@ -72,7 +81,6 @@
   }
 
   function gracefulReload() {
-    // Wait for declarativeNetRequest rules to be applied before reloading
     setTimeout(() => {
       try { location.reload(); } catch { window.location.href = window.location.href; }
     }, 500);
@@ -161,7 +169,7 @@
       <div class="ts-summary-backdrop"></div>
       <div class="ts-summary-modal">
         <div class="ts-summary-header">
-          <span>Wer trackt hier &mdash; Zusammenfassung</span>
+          <span>Zusammenfassung</span>
           <button class="ts-summary-close" id="ts-summary-close">&#10005;</button>
         </div>
         <textarea class="ts-summary-text" readonly id="ts-summary-textarea">${esc(generateSummaryText(data))}</textarea>
@@ -198,7 +206,7 @@
   function trunc(str, max = 60) {
     if (!str) return '';
     const s = String(str);
-    return s.length > max ? s.substring(0, max) + '...' : s;
+    return s.length > max ? s.substring(0, max) + '\u2026' : s;
   }
 
   // ============================================================
@@ -214,33 +222,41 @@
   }
 
   function renderSidebar(data) {
+    // Save which details are currently open before re-render
+    sidebar.querySelectorAll('.ts-data-details.open').forEach(el => {
+      const hostname = el.closest('.ts-tracker-item')?.dataset.hostname;
+      if (hostname) openDetails.add(hostname);
+    });
+    sidebar.querySelectorAll('.ts-data-details:not(.open)').forEach(el => {
+      const hostname = el.closest('.ts-tracker-item')?.dataset.hostname;
+      if (hostname) openDetails.delete(hostname);
+    });
+
     const blockedCount = Object.keys(blockedDomains).length;
     const hasBlockedAny = blockedCount > 0;
 
     let html = `
       <div class="ts-header">
         <div class="ts-header-top">
-          <div class="ts-title">
-            Wer trackt wen warum wozu
-          </div>
+          <div class="ts-title">Wer trackt wen warum wozu</div>
           <button class="ts-close-btn" id="ts-close">&#10005;</button>
         </div>
         <div class="ts-stats">
           <span class="ts-stat"><span class="ts-stat-number">${data.totalTrackers}</span> Tracker</span>
           <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Anfragen</span>
-          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-stealth"><span class="ts-stat-number">${blockedCount}</span> unterbunden</span>` : ''}
+          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-blocked"><span class="ts-stat-number">${blockedCount}</span> unterbunden</span>` : ''}
         </div>
       </div>
 
-      <div class="ts-block-all-bar">
-        <button class="ts-block-all-btn block" id="ts-block-all">Tracken nicht zulassen</button>
-        ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">Alle wieder zulassen</button>` : ''}
-        <button class="ts-block-all-btn summary" id="ts-show-summary">Zusammenfassung</button>
+      <div class="ts-action-bar">
+        <button class="ts-action-btn ts-action-block" id="ts-block-all">Tracken nicht zulassen</button>
+        ${hasBlockedAny ? `<button class="ts-action-btn ts-action-unblock" id="ts-unblock-all">Alle wieder zulassen</button>` : ''}
+        <button class="ts-action-btn ts-action-summary" id="ts-show-summary">Zusammenfassung</button>
       </div>
 
       ${hasBlockedAny ? `
-        <div class="ts-stealth-banner">
-          <span>${blockedCount} Tracker d&uuml;rfen hier nicht tracken</span>
+        <div class="ts-banner">
+          ${blockedCount} Tracker d&uuml;rfen hier nicht tracken
         </div>
       ` : ''}
     `;
@@ -249,19 +265,18 @@
     if (data.categories && Object.keys(data.categories).length > 0) {
       html += '<div class="ts-categories">';
       for (const [cat, count] of Object.entries(data.categories)) {
-        const color = CATEGORY_COLORS[cat] || '#9e9e9e';
-        html += `<span class="ts-category-badge" style="background:${color}">${esc(cat)} (${count})</span>`;
+        const color = CATEGORY_COLORS[cat] || '#a0aab4';
+        html += `<span class="ts-cat" style="background:${color}">${esc(cat)} ${count}</span>`;
       }
       html += '</div>';
     }
 
     // Tracker list
-    html += '<div class="ts-tracker-list">';
+    html += '<div class="ts-list">';
 
     if (data.trackers.length === 0 && blockedCount === 0) {
       html += `
         <div class="ts-empty">
-          <div class="ts-empty-icon">&#9989;</div>
           <div class="ts-empty-text">Keine Tracker auf dieser Seite</div>
         </div>
       `;
@@ -283,10 +298,11 @@
   }
 
   function renderTrackerItem(tracker, isBlocked) {
-    const color = CATEGORY_COLORS[tracker.category] || '#9e9e9e';
+    const color = CATEGORY_COLORS[tracker.category] || '#a0aab4';
     const cookieCount = Object.keys(tracker.allCookies || {}).length;
     const paramCount = Object.keys(tracker.allParams || {}).length;
     const receivedCookieCount = (tracker.receivedCookies || []).length;
+    const isOpen = openDetails.has(tracker.hostname);
 
     // Build data details HTML
     const dataSections = [];
@@ -296,16 +312,16 @@
       for (const [name, value] of Object.entries(tracker.allCookies)) {
         rows += `<tr><td title="${esc(name)}">${esc(trunc(name, 30))}</td><td title="${esc(value)}">${esc(trunc(value))}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Cookies gesendet (${cookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-detail-section"><div class="ts-detail-label">Cookies gesendet (${cookieCount})</div><table class="ts-detail-table">${rows}</table></div>`);
     }
 
     if (receivedCookieCount > 0) {
       let rows = '';
       for (const cookie of tracker.receivedCookies) {
         const attrs = Object.keys(cookie.attributes || {}).join(', ');
-        rows += `<tr><td title="${esc(cookie.name)}">${esc(trunc(cookie.name, 30))}</td><td title="${esc(cookie.value)}">${esc(trunc(cookie.value))}${attrs ? ` <span style="color:#666">(${esc(attrs)})</span>` : ''}</td></tr>`;
+        rows += `<tr><td title="${esc(cookie.name)}">${esc(trunc(cookie.name, 30))}</td><td title="${esc(cookie.value)}">${esc(trunc(cookie.value))}${attrs ? ` <span class="ts-detail-attr">(${esc(attrs)})</span>` : ''}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Cookies empfangen (${receivedCookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-detail-section"><div class="ts-detail-label">Cookies empfangen (${receivedCookieCount})</div><table class="ts-detail-table">${rows}</table></div>`);
     }
 
     if (paramCount > 0) {
@@ -313,7 +329,7 @@
       for (const [name, value] of Object.entries(tracker.allParams)) {
         rows += `<tr><td title="${esc(name)}">${esc(trunc(name, 30))}</td><td title="${esc(value)}">${esc(trunc(value))}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Daten in der URL (${paramCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-detail-section"><div class="ts-detail-label">Daten in der URL (${paramCount})</div><table class="ts-detail-table">${rows}</table></div>`);
     }
 
     if (tracker.requests?.length > 0) {
@@ -321,39 +337,43 @@
       for (const r of tracker.requests) types[r.type] = (types[r.type] || 0) + 1;
       let badges = '';
       for (const [type, count] of Object.entries(types)) {
-        badges += `<span class="ts-request-type">${esc(type)} (${count})</span>`;
+        badges += `<span class="ts-type-badge">${esc(type)} (${count})</span>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Art der Anfragen</div><div>${badges}</div></div>`);
+      dataSections.push(`<div class="ts-detail-section"><div class="ts-detail-label">Art der Anfragen</div><div>${badges}</div></div>`);
     }
 
     if (tracker.requests?.some(r => r.sentData?.referer)) {
       const referer = tracker.requests.find(r => r.sentData?.referer)?.sentData.referer;
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Herkunft mitgeteilt</div><div style="font-size:11px;color:#d0d0e0;word-break:break-all">${esc(referer)}</div></div>`);
+      dataSections.push(`<div class="ts-detail-section"><div class="ts-detail-label">Herkunft mitgeteilt</div><div class="ts-detail-referer">${esc(referer)}</div></div>`);
     }
 
     const dataHtml = dataSections.join('');
+    const trackerUrl = `https://${tracker.hostname}`;
 
     return `
-      <div class="ts-tracker-item ${isBlocked ? 'blocked' : ''}">
-        <div class="ts-tracker-header">
-          <div class="ts-tracker-name-area">
-            <div class="ts-tracker-name">${esc(tracker.name)}</div>
-            <div class="ts-tracker-company">${esc(tracker.company)} &mdash; ${esc(tracker.hostname)}</div>
+      <div class="ts-item ${isBlocked ? 'ts-item-blocked' : ''}" data-hostname="${esc(tracker.hostname)}">
+        <div class="ts-item-header">
+          <div class="ts-item-info">
+            <div class="ts-item-name">${esc(tracker.name)}</div>
+            <div class="ts-item-meta">
+              ${esc(tracker.company)} &mdash;
+              <a href="${esc(trackerUrl)}" target="_blank" rel="noopener noreferrer" class="ts-item-link">${esc(tracker.hostname)}</a>
+            </div>
           </div>
-          <div class="ts-tracker-right">
-            <span class="ts-tracker-badge" style="background:${color}">${esc(tracker.category)}</span>
-            <span class="ts-tracker-requests">${tracker.requestCount}x</span>
-            <label class="ts-block-toggle" title="${isBlocked ? 'Tracking unterbunden - klicken zum Zulassen' : 'Trackt dich - klicken zum Unterbinden'}">
-              <input type="checkbox" class="ts-block-input" data-hostname="${esc(tracker.hostname)}" ${isBlocked ? 'checked' : ''}>
-              <span class="ts-block-slider"></span>
+          <div class="ts-item-controls">
+            <span class="ts-item-cat" style="background:${color}">${esc(tracker.category)}</span>
+            <span class="ts-item-count">${tracker.requestCount}x</span>
+            <label class="ts-toggle" title="${isBlocked ? 'Tracking unterbunden \u2013 klicken zum Zulassen' : 'Trackt dich \u2013 klicken zum Unterbinden'}">
+              <input type="checkbox" class="ts-toggle-input" data-hostname="${esc(tracker.hostname)}" ${isBlocked ? 'checked' : ''}>
+              <span class="ts-toggle-slider"></span>
             </label>
           </div>
         </div>
-        ${isBlocked ? '<div class="ts-blocked-label">Tracking nicht zugelassen</div>' : ''}
+        ${isBlocked ? '<div class="ts-item-status">Tracking nicht zugelassen</div>' : ''}
         ${dataHtml ? `
-          <div class="ts-sent-data">
-            <button class="ts-data-toggle">&#9654; Was wird gesendet?</button>
-            <div class="ts-data-details">${dataHtml}</div>
+          <div class="ts-item-data">
+            <button class="ts-expand-btn">${isOpen ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?'}</button>
+            <div class="ts-expand-panel ${isOpen ? 'open' : ''}">${dataHtml}</div>
           </div>
         ` : ''}
       </div>
@@ -361,22 +381,25 @@
   }
 
   function renderBlockedPlaceholder(hostname) {
+    const trackerUrl = `https://${hostname}`;
     return `
-      <div class="ts-tracker-item blocked">
-        <div class="ts-tracker-header">
-          <div class="ts-tracker-name-area">
-            <div class="ts-tracker-name">${esc(hostname)}</div>
-            <div class="ts-tracker-company">Tracking unterbunden</div>
+      <div class="ts-item ts-item-blocked" data-hostname="${esc(hostname)}">
+        <div class="ts-item-header">
+          <div class="ts-item-info">
+            <div class="ts-item-name">
+              <a href="${esc(trackerUrl)}" target="_blank" rel="noopener noreferrer" class="ts-item-link">${esc(hostname)}</a>
+            </div>
+            <div class="ts-item-meta">Tracking unterbunden</div>
           </div>
-          <div class="ts-tracker-right">
-            <span class="ts-tracker-badge" style="background:#e07a3a">Unterbunden</span>
-            <label class="ts-block-toggle" title="Tracking unterbunden - klicken zum Zulassen">
-              <input type="checkbox" class="ts-block-input" data-hostname="${esc(hostname)}" checked>
-              <span class="ts-block-slider"></span>
+          <div class="ts-item-controls">
+            <span class="ts-item-cat" style="background:#d97556">Unterbunden</span>
+            <label class="ts-toggle" title="Tracking unterbunden \u2013 klicken zum Zulassen">
+              <input type="checkbox" class="ts-toggle-input" data-hostname="${esc(hostname)}" checked>
+              <span class="ts-toggle-slider"></span>
             </label>
           </div>
         </div>
-        <div class="ts-blocked-label">Tracking nicht zugelassen</div>
+        <div class="ts-item-status">Tracking nicht zugelassen</div>
       </div>
     `;
   }
@@ -390,22 +413,34 @@
     sidebar.querySelector('#ts-unblock-all')?.addEventListener('click', () => unblockAll());
     sidebar.querySelector('#ts-show-summary')?.addEventListener('click', () => showSummaryOverlay(data));
 
-    sidebar.querySelectorAll('.ts-data-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const details = btn.nextElementSibling;
-        if (details) {
-          details.classList.toggle('open');
-          btn.textContent = details.classList.contains('open') ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?';
+    sidebar.querySelectorAll('.ts-expand-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const panel = btn.nextElementSibling;
+        if (panel) {
+          const isOpen = panel.classList.toggle('open');
+          btn.textContent = isOpen ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?';
+          // Track open state by hostname
+          const hostname = btn.closest('.ts-item')?.dataset.hostname;
+          if (hostname) {
+            if (isOpen) openDetails.add(hostname);
+            else openDetails.delete(hostname);
+          }
         }
       });
     });
 
-    sidebar.querySelectorAll('.ts-block-input').forEach(input => {
+    sidebar.querySelectorAll('.ts-toggle-input').forEach(input => {
       input.addEventListener('change', (e) => {
         const hostname = e.target.dataset.hostname;
         if (e.target.checked) blockDomain(hostname);
         else unblockDomain(hostname);
       });
+    });
+
+    // Prevent link clicks from bubbling to toggle
+    sidebar.querySelectorAll('.ts-item-link').forEach(link => {
+      link.addEventListener('click', (e) => e.stopPropagation());
     });
   }
 
@@ -419,7 +454,6 @@
     }
     if (message.type === 'TRACKER_UPDATE') {
       currentData = message.data;
-      // Sync blocked domains from background to always stay current
       if (message.data.blockedDomains) blockedDomains = message.data.blockedDomains;
       const blockedCount = Object.keys(blockedDomains).length;
       const trackerCount = currentData.totalTrackers;
