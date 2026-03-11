@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Gen-Z Übersetzer - Jugendsprache Transformer",
-  "version": "1.0.0",
-  "description": "Verwandelt jeden deutschen Text in authentische Gen-Z / Gen-Alpha Jugendsprache mit Slang, Füllwörtern und Emoji-Ketten 💀🔥",
+  "name": "Text-Transformer — 27 Modi für deutschen Text",
+  "version": "3.1.0",
+  "description": "Verwandelt deutschen Text in Gen-Z, Bildungssprache, 12 Dialekte (inkl. Hessisch, Saarländisch, Kölsch), 80er-Slang, DDR-Parteisprech, Barock, Luther-Orthographie, Bürokrat, Politiker-Sprech, Gender-Varianten, Adjektivkiller und mehr — mit Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -19,8 +19,22 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["js/dictionary.js", "js/emojis.js", "js/fillers.js", "js/transformer.js", "js/content.js"],
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "js/grammar.js",
+        "js/dictionary.js",
+        "js/emojis.js",
+        "js/fillers.js",
+        "js/transformer.js",
+        "js/formal-dictionary.js",
+        "js/formal-fillers.js",
+        "js/formal-transformer.js",
+        "js/dialects.js",
+        "js/dialect-transformer.js",
+        "js/special-modes.js",
+        "js/extra-modes.js",
+        "js/content.js"
+      ],
       "css": ["css/overlay.css"],
       "run_at": "document_idle"
     }
