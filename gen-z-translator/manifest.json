@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text-Transformer — 15 Modi für deutschen Text",
+  "name": "Text-Transformer — 23 Modi für deutschen Text",
   "version": "3.0.0",
-  "description": "Verwandelt deutschen Text in Gen-Z, Bildungssprache, 7 Dialekte, Politiker-Sprech, Barock-Deutsch, Gender-Varianten oder streicht alle Adjektive — mit behutsamer Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung",
+  "description": "Verwandelt deutschen Text in Gen-Z, Bildungssprache, 9 Dialekte, 80er-Slang, DDR-Parteisprech, Barock, Luther-Orthographie, Bürokrat, Politiker-Sprech, Gender-Varianten, Adjektivkiller und mehr — mit Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -32,6 +32,7 @@
         "js/dialects.js",
         "js/dialect-transformer.js",
         "js/special-modes.js",
+        "js/extra-modes.js",
         "js/content.js"
       ],
       "css": ["css/overlay.css"],

@@ -13,6 +13,8 @@ const DIALECT_MODES = {
   schwaebisch: 'schwaebisch',
   ruhrpott: 'ruhrpott',
   norddeutsch: 'norddeutsch',
+  wienerisch: 'wienerisch',
+  schweizerdeutsch: 'schweizerdeutsch',
 };
 
 // Nachrichten vom Popup empfangen
@@ -31,20 +33,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * Führt die Transformation durch
  */
 function doTransform(settings) {
-  // Erst rückgängig machen falls schon transformiert
   if (transformer) {
     transformer.revertAll();
   }
 
   const mode = settings.mode || 'genz';
 
-  // === Transformer erstellen je nach Modus ===
   if (mode === 'formal') {
     transformer = new FormalTransformer(settings);
   } else if (mode === 'genz') {
     transformer = new GenZTransformer(settings);
   } else if (DIALECT_MODES[mode]) {
-    // Dialekt-Modus
     const dialectConfig = DIALECTS[DIALECT_MODES[mode]];
     if (dialectConfig) {
       transformer = new DialectTransformer(settings, dialectConfig);
@@ -56,27 +55,42 @@ function doTransform(settings) {
     transformer = new PolitikerTransformer(settings);
   } else if (mode === 'barock') {
     transformer = new DialectTransformer(settings, BAROCK_CONFIG);
+  } else if (mode === 'achtziger') {
+    transformer = new DialectTransformer(settings, ACHTZIGER_CONFIG);
+  } else if (mode === 'ddr') {
+    transformer = new DialectTransformer(settings, DDR_CONFIG);
+  } else if (mode === 'luther') {
+    transformer = new DialectTransformer(settings, LUTHER_CONFIG);
+  } else if (mode === 'burokrat') {
+    transformer = new DialectTransformer(settings, BUROKRAT_CONFIG);
   } else if (mode === 'adjektivkiller') {
     transformer = new AdjektivkillerTransformer(settings);
+  } else if (mode === 'adjektivflut') {
+    transformer = new AdjektivUeberschwemmerTransformer(settings);
+  } else if (mode === 'emoji') {
+    transformer = new EmojiSprinklerTransformer(settings);
+  } else if (mode === 'kleinschreibung') {
+    transformer = new KleinschreibungTransformer(settings);
   } else if (mode.startsWith('gender_')) {
     settings.genderMode = mode.replace('gender_', '');
     transformer = new GenderTransformer(settings);
   } else {
-    // Fallback: Gen-Z
     transformer = new GenZTransformer(settings);
   }
 
-  // Transformation durchführen
   const count = transformer.transformDOM(document.body);
 
-  // Visuelles Feedback
   const modeNames = {
     genz: '🔥 Gen-Z', formal: '📜 Bildungssprache', politiker: '🏛️ Politiker',
-    barock: '🏰 Barock', adjektivkiller: '✂️ Adjektivkiller',
+    barock: '🏰 Barock', adjektivkiller: '✂️ Adjektivkiller', adjektivflut: '🌊 Adjektiv-Überschwemmer',
+    emoji: '😊 Emoji-Sprinkler', kleinschreibung: '🔡 Kleinschreibung',
+    achtziger: '📼 80er West', ddr: '☭ DDR-Sprech', luther: '✝️ Luther',
+    burokrat: '🏢 Bürokrat',
     berlinerisch: '🐻 Berlinern', saechsisch: '🎻 Sächseln',
     fraenkisch: '🌭 Fränkisch', bairisch: '🥨 Bairisch',
     schwaebisch: '🏠 Schwäbisch', ruhrpott: '⚒️ Ruhrpott',
-    norddeutsch: '⚓ Norddeutsch',
+    norddeutsch: '⚓ Norddeutsch', wienerisch: '🎡 Wienerisch',
+    schweizerdeutsch: '🏔️ Schweizerdeutsch',
     gender_star: '⭐ Gendern (*)', gender_colon: '✳️ Gendern (:)',
     gender_explicit: '📝 Gendern', gender_participle: '🔄 Partizip',
     gender_maskulinum: '♂️ Maskulinum',
@@ -85,9 +99,6 @@ function doTransform(settings) {
   showNotification(`${modeName}: ${count} Texte transformiert 🎭`);
 }
 
-/**
- * Macht die Transformation rückgängig
- */
 function doRevert() {
   if (transformer) {
     transformer.revertAll();
@@ -96,9 +107,6 @@ function doRevert() {
   }
 }
 
-/**
- * Zeigt eine kurze Benachrichtigung an
- */
 function showNotification(text) {
   const existing = document.getElementById('genz-notification');
   if (existing) existing.remove();

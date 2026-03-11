@@ -333,4 +333,122 @@ const DIALECTS = {
       interjections: ['Moin.', 'Tja.', 'Dat löppt.', 'Butter bei die Fische.', 'Nich lang schnacken.'],
     }
   },
+
+  // ==========================================================================
+  // ÖSTERREICHISCH / WIENERISCH
+  // ==========================================================================
+  wienerisch: {
+    name: 'Wienerisch',
+    phonetics: [
+      // nicht → net
+      { pattern: /\bnicht\b/gi, replacement: 'net', chance: 0.85 },
+      // ich → i
+      { pattern: /\bich\b/gi, replacement: 'i', chance: 0.7 },
+      // ist → is
+      { pattern: /\bist\b/gi, replacement: 'is', chance: 0.75 },
+      // ein → a
+      { pattern: /\bein\b/gi, replacement: 'a', chance: 0.6 },
+      // eine → a
+      { pattern: /\beine\b/gi, replacement: 'a', chance: 0.6 },
+      // haben → ham
+      { pattern: /\bhaben\b/gi, replacement: 'ham', chance: 0.6 },
+      // auch → aa
+      { pattern: /\bauch\b/gi, replacement: 'aa', chance: 0.5 },
+      // -chen → -erl (behutsam)
+      { pattern: /chen\b/g, replacement: 'erl', chance: 0.6 },
+      // was → wos
+      { pattern: /\bwas\b/gi, replacement: 'wos', chance: 0.6 },
+      // nein → na
+      { pattern: /\bnein\b/gi, replacement: 'na', chance: 0.7 },
+    ],
+    vocabulary: [
+      { pattern: /\bBrötchen\b/gi, replacements: ['Semmerl', 'Semmel'] },
+      { pattern: /\bFleischer\b/gi, replacements: ['Fleischhauer'] },
+      { pattern: /\bKartoffel\b/gi, replacements: ['Erdapfl', 'Erdäpfl'] },
+      { pattern: /\bTomate\b/gi, replacements: ['Paradeiser'] },
+      { pattern: /\bSahne\b/gi, replacements: ['Obers', 'Schlagobers'] },
+      { pattern: /\bMarmelade\b/gi, replacements: ['Marmelad'] },
+      { pattern: /\bAprikose\b/gi, replacements: ['Marille'] },
+      { pattern: /\bAubergine\b/gi, replacements: ['Melanzani'] },
+      { pattern: /\bBlumenkohl\b/gi, replacements: ['Karfiol'] },
+      { pattern: /\bschön\b/gi, replacements: ['leiwand', 'fesch'], type: 'adj' },
+      { pattern: /\btoll\b/gi, replacements: ['leiwand', 'ur leiwand'], type: 'adj' },
+      { pattern: /\bsehr\b/gi, replacements: ['ur', 'voi'] },
+      { pattern: /\bgut\b/gi, replacements: ['leiwand', 'passt scho'], type: 'adj' },
+      { pattern: /\bschlecht\b/gi, replacements: ['grauslich', 'deppert'], type: 'adj' },
+      { pattern: /\bdumm\b/gi, replacements: ['deppert', 'deppat'], type: 'adj' },
+      { pattern: /\blecker\b/gi, replacements: ['gschmackig', 'guad'], type: 'adj' },
+      { pattern: /\bJunge\b/g, replacements: ['Bub', 'Bua'] },
+      { pattern: /\bMädchen\b/gi, replacements: ['Madl', 'Maderl'] },
+      { pattern: /\bschauen\b/gi, replacements: ['schaun', 'schaugn'] },
+      { pattern: /\breden\b/gi, replacements: ['ratschen', 'plaudern'] },
+      { pattern: /\bessen\b/gi, replacements: ['essen', 'jausnen'] },
+      { pattern: /\bGeld\b/gi, replacements: ['Schilling', 'Marie'] },
+      { pattern: /\bPolizei\b/gi, replacements: ['Kiberer', 'Polizei'] },
+      { pattern: /\bTasche\b/gi, replacements: ['Sackerl', 'Tascherl'] },
+      { pattern: /\bTreppe\b/gi, replacements: ['Stiegenhaus', 'Stiege'] },
+      { pattern: /\bHallo\b/gi, replacements: ['Servus', 'Grüß Gott'] },
+      { pattern: /\bguten Tag\b/gi, replacements: ['Grüß Gott', 'Servus'] },
+      { pattern: /\btschüss\b/gi, replacements: ['Baba', 'Servus', 'Pfiat di'] },
+    ],
+    fillers: {
+      start: ['Geh, ', 'Schau, ', 'Najo, ', 'Weißt eh, ', 'Heast, ', 'Oida, '],
+      end: [', gell?', ', oder?', ', weißt eh', ', Oida', ', gö?'],
+      interjections: ['Leck mich!', 'Na geh!', 'Jessas!', 'Na servas!', 'Mei, oh mei.'],
+    }
+  },
+
+  // ==========================================================================
+  // SCHWEIZERDEUTSCH (behutsam)
+  // ==========================================================================
+  schweizerdeutsch: {
+    name: 'Schweizerdeutsch',
+    phonetics: [
+      // k → ch (Kinder → Chinder, kalt → chalt) — behutsam
+      { pattern: /\bk([aeiouäöü])/gi, replacement: (m, v) => (m[0] === m[0].toUpperCase() ? 'Ch' : 'ch') + v, chance: 0.5 },
+      // nicht → nöd/nid
+      { pattern: /\bnicht\b/gi, replacement: 'nöd', chance: 0.7 },
+      // ich → ich (bleibt, aber "i" in manchen Kontexten)
+      { pattern: /\bich\b/gi, replacement: 'ich', chance: 0.3 },
+      // ist → isch
+      { pattern: /\bist\b/gi, replacement: 'isch', chance: 0.7 },
+      // kein → kei
+      { pattern: /\bkein\b/gi, replacement: 'kei', chance: 0.6 },
+      // -chen → -li
+      { pattern: /chen\b/g, replacement: 'li', chance: 0.8 },
+      // -lein → -li
+      { pattern: /lein\b/g, replacement: 'li', chance: 0.9 },
+      // auch → au
+      { pattern: /\bauch\b/gi, replacement: 'au', chance: 0.45 },
+    ],
+    vocabulary: [
+      { pattern: /\bBrötchen\b/gi, replacements: ['Weggli', 'Brötli'] },
+      { pattern: /\bFleischer\b/gi, replacements: ['Metzger'] },
+      { pattern: /\bKartoffel\b/gi, replacements: ['Härdöpfel', 'Härdöpfl'] },
+      { pattern: /\bFahrrad\b/gi, replacements: ['Velo'] },
+      { pattern: /\bSchrank\b/gi, replacements: ['Chaschte', 'Kasten'] },
+      { pattern: /\bschön\b/gi, replacements: ['schön', 'hübsch'], type: 'adj' },
+      { pattern: /\btoll\b/gi, replacements: ['lässig', 'mega'], type: 'adj' },
+      { pattern: /\bgut\b/gi, replacements: ['guet', 'super'], type: 'adj' },
+      { pattern: /\bschlecht\b/gi, replacements: ['schlecht', 'gruusig'], type: 'adj' },
+      { pattern: /\bklein\b/gi, replacements: ['chli', 'chlii'], type: 'adj' },
+      { pattern: /\bschauen\b/gi, replacements: ['luege'] },
+      { pattern: /\breden\b/gi, replacements: ['schwätze', 'rede'] },
+      { pattern: /\bessen\b/gi, replacements: ['ässe', 'Znüni ha'] },
+      { pattern: /\barbeiten\b/gi, replacements: ['schaffe'] },
+      { pattern: /\bgehen\b/gi, replacements: ['go', 'gah'] },
+      { pattern: /\bHallo\b/gi, replacements: ['Grüezi', 'Sali', 'Hoi'] },
+      { pattern: /\bguten Tag\b/gi, replacements: ['Grüezi', 'Grüessech'] },
+      { pattern: /\bguten Morgen\b/gi, replacements: ['Guete Morge'] },
+      { pattern: /\btschüss\b/gi, replacements: ['Ade', 'Tschau', 'Uf Widerluege'] },
+      { pattern: /\bsehr\b/gi, replacements: ['mega', 'huerä', 'voll'] },
+      { pattern: /\bJunge\b/g, replacements: ['Bueb'] },
+      { pattern: /\bMädchen\b/gi, replacements: ['Meitli'] },
+    ],
+    fillers: {
+      start: ['Also, ', 'Lueg, ', 'Weisch, ', 'Gäll, ', 'Jä, '],
+      end: [', oder?', ', gäll?', ', oder nöd?', ', weisch'],
+      interjections: ['Gopferdammi!', 'Herrjemine!', 'Uf Züridütsch:', 'So isch es.'],
+    }
+  },
 };

@@ -1,4 +1,5 @@
-// Spezial-Modi: Politiker-Sprech, Adjektivkiller, Barock-Deutsch, Gender-Modi
+// Spezial-Modi: Politiker-Sprech, Adjektivkiller, Barock-Deutsch, Gender-Modi,
+// Emoji-Sprinkler, Kleinschreibung, 80er-West-Slang
 // Jeder Modus ist ein eigenständiger Transformer mit transformDOM/revertAll
 
 // ==========================================================================
@@ -302,12 +303,26 @@ const BAROCK_CONFIG = {
   phonetics: [
     // c/k → ck (Verdopplung typisch Barock)
     { pattern: /\b([A-ZÄÖÜ][a-zäöü]*?)k([aeiouäöü])/g, replacement: '$1ck$2', chance: 0.5 },
-    // t → th (barocke Schreibung)
+    // t → th (barocke Schreibung): Tat → That, Tür → Thür
     { pattern: /\b([Tt])([aeiouäöü])/g, replacement: (m, t, v) => t + 'h' + v, chance: 0.4 },
+    // rt → rth: wert → werth, Wort → Worth, Art → Arth
+    { pattern: /([Ww])ert\b/g, replacement: '$1erth', chance: 0.7 },
+    { pattern: /([Aa])rt\b/g, replacement: '$1rth', chance: 0.5 },
+    // nk → nck: Dank → Danck, denken → dencken, Trunk → Trunck
+    { pattern: /nk/g, replacement: 'nck', chance: 0.6 },
+    // nd → ndt am Wortende: Tugend → Tugendt, Freund → Freundt, Feind → Feindt
+    { pattern: /nd\b/g, replacement: 'ndt', chance: 0.55 },
+    // Dativ-e: dem Mann → dem Manne, dem Kind → dem Kinde, dem Haus → dem Hause
+    { pattern: /\b(dem|vom|zum|beim|im)\s+([A-ZÄÖÜ][a-zäöü]{2,}[bcdfgklmnprst])\b/g,
+      replacement: (m, prep, noun) => prep + ' ' + noun + 'e', chance: 0.65 },
     // i → ie (Dehnung)
     { pattern: /\b([A-Za-z])i([rnlm]\b)/g, replacement: '$1ie$2', chance: 0.3 },
     // y statt i in Fremdwörtern
     { pattern: /\bPhilosoph/g, replacement: 'Philosophus', chance: 0.5 },
+    // ß → ſſ (Langes s)
+    { pattern: /ß/g, replacement: 'ſſ', chance: 0.35 },
+    // ey statt ei (selten im Barock, häufiger bei Luther)
+    { pattern: /ei\b/g, replacement: 'ey', chance: 0.25 },
   ],
   vocabulary: [
     { pattern: /\bdeshalb\b/gi, replacements: ['derohalben', 'dero Ursach halber'] },
@@ -339,7 +354,23 @@ const BAROCK_CONFIG = {
     { pattern: /\bHaus\b/g, replacements: ['Behausung', 'Gemach', 'Losament'], type: 'noun' },
     { pattern: /\bGeld\b/gi, replacements: ['Münze', 'Thaler', 'Ducaten'] },
     { pattern: /\bArbeit\b/g, replacements: ['Tagwerck', 'Mühewalten', 'Verrichtung'], type: 'noun' },
-    { pattern: /\bich denke\b/gi, replacements: ['mir deucht', 'mich dünkt', 'meines Erachtens'] },
+    { pattern: /\bTugend\b/gi, replacements: ['Tugendt'], type: 'noun' },
+    { pattern: /\bJugend\b/gi, replacements: ['Jugendt'], type: 'noun' },
+    { pattern: /\bDank\b/g, replacements: ['Danck'], type: 'noun' },
+    { pattern: /\bWerk\b/g, replacements: ['Werck'], type: 'noun' },
+    { pattern: /\bVolk\b/g, replacements: ['Volck'], type: 'noun' },
+    { pattern: /\bHerz\b/g, replacements: ['Hertz', 'Hertze'], type: 'noun' },
+    { pattern: /\bKraft\b/gi, replacements: ['Krafft'], type: 'noun' },
+    { pattern: /\bHilfe\b/gi, replacements: ['Hülffe', 'Beystandt'], type: 'noun' },
+    { pattern: /\bKrieg\b/gi, replacements: ['Krieg', 'Krieges-Noth'], type: 'noun' },
+    { pattern: /\bFriede\b/gi, replacements: ['Friede', 'Frieden'], type: 'noun' },
+    { pattern: /\bLeben\b/g, replacements: ['Leben', 'Lebens-Wandel'], type: 'noun' },
+    { pattern: /\bTod\b/g, replacements: ['Todt', 'das Zeitliche'], type: 'noun' },
+    { pattern: /\bwert\b/gi, replacements: ['werth'], type: 'adj' },
+    { pattern: /\bstark\b/gi, replacements: ['starck', 'kräfftig', 'gewaltig'], type: 'adj' },
+    { pattern: /\bfreundlich\b/gi, replacements: ['freundtlich', 'holdseelig'], type: 'adj' },
+    { pattern: /\bklug\b/gi, replacements: ['klug', 'sinnreich', 'weyland'], type: 'adj' },
+    { pattern: /\bich denke\b/gi, replacements: ['mir deucht', 'mich dünckt', 'meines Erachtens'] },
     { pattern: /\bich glaube\b/gi, replacements: ['mir ist, als ob', 'ich halte dafür'] },
     { pattern: /\bdarüber\b/gi, replacements: ['darob', 'darüber hinaus'] },
     { pattern: /\bvorwärts\b/gi, replacements: ['fürbaß', 'voran'] },

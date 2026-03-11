@@ -1,4 +1,4 @@
-# Text-Transformer — 15 Modi für deutschen Text
+# Text-Transformer — 23 Modi für deutschen Text
 
 Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten transformiert — mit behutsamer Drei-Akt-Dramaturgie und grammatikbewusster Ersetzung.
 
@@ -7,8 +7,12 @@ Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten tran
 ### Sprachstile
 - **Gen-Z / Gen Alpha** — Slang, Emojis, Füllwörter (200+ Einträge)
 - **Bildungssprache** — Fachbegriffe, Rechtslatein, gehobener Stil
+- **80er West-Slang (Gen X)** — Dufte, affengeil, Alter Schwede!
 - **Politiker-Sprech** — Phrasen, Worthülsen, Maßnahmenpakete
-- **Barock-Deutsch** — Anachronistische Wörter, alterthümliche Schreibung
+- **Der Bürokrat** — Verben → Substantivierungen, Amtsdeutsch, Passiv
+- **DDR-Parteisprech** — Sozialistischer Realismus, Planerfüllung, Genossinnen und Genossen
+- **Barock-Deutsch** — Anachronistische Wörter, alterthümliche Schreibung, Danck, Tugendt, Dativ-e
+- **Lutherbibel-Orthographie** — Frühneuhochdeutsch ~1534: vnd, ſſ, ey, werth, Danck, Dativ-e
 
 ### Dialekte
 - **Berlinerisch** — ick, dit, jut, wa?
@@ -18,14 +22,19 @@ Chrome Extension (Manifest v3), die deutschen Text auf beliebigen Webseiten tran
 - **Schwäbisch** — isch, net, -le, gell?
 - **Ruhrpott** — dat, wat, Hömma, woll?
 - **Norddeutsch** — Moin, Understatement, schnacken
+- **Wienerisch** — Oida, leiwand, Beisl, Schmäh
+- **Schweizerdeutsch** — Grüezi, chli, Velo, Natel
 
 ### Text-Werkzeuge
+- **Emoji-Sprinkler** — Kontextuelle Emojis über den Text streuen
+- **Alles kleinschreiben** — großbuchstaben sind überbewertet
+- **Adjektivkiller** — Alle Adjektive streichen
+- **Adjektiv-Überschwemmer** — Die schönsten Adjektive der deutschen Sprache überall einfügen
 - **Gendern (Stern \*)** — Lehrer → Lehrer\*innen
 - **Gendern (Doppelpunkt :)** — Lehrer → Lehrer:innen
 - **Gendern (ausgeschrieben)** — Lehrerinnen und Lehrer
 - **Gendern (Partizip)** — Studenten → Studierende
 - **Generisches Maskulinum** — Gendern rückgängig machen
-- **Adjektivkiller** — Alle Adjektive streichen
 
 ## Features
 
