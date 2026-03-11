@@ -1,5 +1,5 @@
 /**
- * Tracker Sidebar - Content Script
+ * Wer trackt wen warum wozu - Content Script
  *
  * DATENSCHUTZ: Dieses Script arbeitet ausschließlich lokal.
  * Es werden keine Daten an externe Server übermittelt.
@@ -45,7 +45,7 @@
   // ============================================================
   const toggleBtn = document.createElement('div');
   toggleBtn.id = 'tracker-sidebar-toggle';
-  toggleBtn.innerHTML = '<span class="ts-toggle-count">0</span> Tracker';
+  toggleBtn.innerHTML = '<span class="ts-toggle-count">0</span>';
   toggleBtn.addEventListener('click', () => toggleSidebar());
   document.documentElement.appendChild(toggleBtn);
 
@@ -109,18 +109,18 @@
     const date = new Date().toLocaleString('de-DE');
     const blockedCount = Object.keys(blockedDomains).length;
     const lines = [
-      '=== TRACKER-ZUSAMMENFASSUNG ===',
+      '=== WER TRACKT WEN WARUM WOZU ===',
       `Website: ${location.href}`,
       `Datum: ${date}`,
-      `Gefundene Tracker: ${data.totalTrackers}`,
-      `Gesamte Requests: ${data.totalRequests}`,
+      `Aktive Tracker: ${data.totalTrackers}`,
+      `Anfragen: ${data.totalRequests}`,
     ];
-    if (blockedCount > 0) lines.push(`Blockierte Domains: ${blockedCount} (Stealth-Modus: erhalten Fake-Daten)`);
+    if (blockedCount > 0) lines.push(`Privat geschuetzt: ${blockedCount}`);
     lines.push('', '--- Tracker-Liste ---', '');
 
     for (const tracker of data.trackers) {
       const isBlocked = blockedDomains[tracker.hostname];
-      lines.push(`${tracker.name}${isBlocked ? ' [STEALTH-BLOCKIERT]' : ''}`);
+      lines.push(`${tracker.name}${isBlocked ? ' [geschuetzt]' : ''}`);
       lines.push(`  Firma: ${tracker.company}`);
       lines.push(`  Domain: ${tracker.hostname}`);
       lines.push(`  Kategorie: ${tracker.category}`);
@@ -135,19 +135,19 @@
       const paramCount = Object.keys(tracker.allParams || {}).length;
       if (paramCount > 0) lines.push(`  URL-Parameter (${paramCount}): ${Object.keys(tracker.allParams).join(', ')}`);
 
-      if (isBlocked) lines.push(`  Status: Tracker erhaelt pseudonymisierte Fake-Daten`);
+      if (isBlocked) lines.push(`  Status: Privatsphaere geschuetzt`);
       lines.push('');
     }
 
     const currentHostnames = new Set(data.trackers.map(t => t.hostname));
     for (const hostname of Object.keys(blockedDomains)) {
       if (!currentHostnames.has(hostname)) {
-        lines.push(`${hostname} [STEALTH-BLOCKIERT - erhaelt Fake-Antworten]`);
+        lines.push(`${hostname} [geschuetzt]`);
         lines.push('');
       }
     }
 
-    lines.push('=== ENDE DER ZUSAMMENFASSUNG ===');
+    lines.push('=== ENDE ===');
     return lines.join('\n');
   }
 
@@ -161,13 +161,13 @@
       <div class="ts-summary-backdrop"></div>
       <div class="ts-summary-modal">
         <div class="ts-summary-header">
-          <span>Tracker-Zusammenfassung</span>
+          <span>Wer trackt hier &mdash; Zusammenfassung</span>
           <button class="ts-summary-close" id="ts-summary-close">&#10005;</button>
         </div>
         <textarea class="ts-summary-text" readonly id="ts-summary-textarea">${esc(generateSummaryText(data))}</textarea>
         <div class="ts-summary-actions">
-          <button class="ts-summary-copy" id="ts-summary-copy">&#128203; In Zwischenablage kopieren</button>
-          <span class="ts-summary-copied" id="ts-summary-copied" style="display:none">Kopiert!</span>
+          <button class="ts-summary-copy" id="ts-summary-copy">Kopieren</button>
+          <span class="ts-summary-copied" id="ts-summary-copied" style="display:none">Kopiert</span>
         </div>
       </div>
     `;
@@ -221,28 +221,26 @@
       <div class="ts-header">
         <div class="ts-header-top">
           <div class="ts-title">
-            <span class="ts-title-icon">&#128737;</span>
-            Tracker Sidebar
+            Wer trackt wen warum wozu
           </div>
           <button class="ts-close-btn" id="ts-close">&#10005;</button>
         </div>
         <div class="ts-stats">
           <span class="ts-stat"><span class="ts-stat-number">${data.totalTrackers}</span> Tracker</span>
-          <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Requests</span>
-          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-stealth"><span class="ts-stat-number">${blockedCount}</span> Stealth</span>` : ''}
+          <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Anfragen</span>
+          ${blockedCount > 0 ? `<span class="ts-stat ts-stat-stealth"><span class="ts-stat-number">${blockedCount}</span> gesch&uuml;tzt</span>` : ''}
         </div>
       </div>
 
       <div class="ts-block-all-bar">
-        <button class="ts-block-all-btn block" id="ts-block-all">&#128683; Alle blockieren</button>
-        ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">&#10003; Alle erlauben</button>` : ''}
-        <button class="ts-block-all-btn summary" id="ts-show-summary">&#128203; Zusammenfassung</button>
+        <button class="ts-block-all-btn block" id="ts-block-all">Alle sch&uuml;tzen</button>
+        ${hasBlockedAny ? `<button class="ts-block-all-btn unblock" id="ts-unblock-all">Alle zulassen</button>` : ''}
+        <button class="ts-block-all-btn summary" id="ts-show-summary">Zusammenfassung</button>
       </div>
 
       ${hasBlockedAny ? `
         <div class="ts-stealth-banner">
-          <span class="ts-stealth-icon">&#128373;</span>
-          <span>Stealth-Modus aktiv: ${blockedCount} Tracker erhalten pseudonymisierte Fake-Daten statt echter Informationen</span>
+          <span>Mehr Privatsph&auml;re: ${blockedCount} Tracker k&ouml;nnen dich auf dieser Seite nicht mehr verfolgen</span>
         </div>
       ` : ''}
     `;
@@ -264,7 +262,7 @@
       html += `
         <div class="ts-empty">
           <div class="ts-empty-icon">&#9989;</div>
-          <div class="ts-empty-text">Keine Tracker erkannt</div>
+          <div class="ts-empty-text">Keine Tracker auf dieser Seite</div>
         </div>
       `;
     } else {
@@ -298,7 +296,7 @@
       for (const [name, value] of Object.entries(tracker.allCookies)) {
         rows += `<tr><td title="${esc(name)}">${esc(trunc(name, 30))}</td><td title="${esc(value)}">${esc(trunc(value))}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">&#127850; Gesendete Cookies (${cookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Cookies gesendet (${cookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
     }
 
     if (receivedCookieCount > 0) {
@@ -307,7 +305,7 @@
         const attrs = Object.keys(cookie.attributes || {}).join(', ');
         rows += `<tr><td title="${esc(cookie.name)}">${esc(trunc(cookie.name, 30))}</td><td title="${esc(cookie.value)}">${esc(trunc(cookie.value))}${attrs ? ` <span style="color:#666">(${esc(attrs)})</span>` : ''}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">&#128229; Empfangene Cookies (${receivedCookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Cookies empfangen (${receivedCookieCount})</div><table class="ts-data-table">${rows}</table></div>`);
     }
 
     if (paramCount > 0) {
@@ -315,7 +313,7 @@
       for (const [name, value] of Object.entries(tracker.allParams)) {
         rows += `<tr><td title="${esc(name)}">${esc(trunc(name, 30))}</td><td title="${esc(value)}">${esc(trunc(value))}</td></tr>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">&#128269; URL-Parameter (${paramCount})</div><table class="ts-data-table">${rows}</table></div>`);
+      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Daten in der URL (${paramCount})</div><table class="ts-data-table">${rows}</table></div>`);
     }
 
     if (tracker.requests?.length > 0) {
@@ -325,12 +323,12 @@
       for (const [type, count] of Object.entries(types)) {
         badges += `<span class="ts-request-type">${esc(type)} (${count})</span>`;
       }
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">&#128640; Request-Typen</div><div>${badges}</div></div>`);
+      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Art der Anfragen</div><div>${badges}</div></div>`);
     }
 
     if (tracker.requests?.some(r => r.sentData?.referer)) {
       const referer = tracker.requests.find(r => r.sentData?.referer)?.sentData.referer;
-      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">&#128279; Referer</div><div style="font-size:11px;color:#d0d0e0;word-break:break-all">${esc(referer)}</div></div>`);
+      dataSections.push(`<div class="ts-data-section"><div class="ts-data-section-title">Herkunft mitgeteilt</div><div style="font-size:11px;color:#d0d0e0;word-break:break-all">${esc(referer)}</div></div>`);
     }
 
     const dataHtml = dataSections.join('');
@@ -345,16 +343,16 @@
           <div class="ts-tracker-right">
             <span class="ts-tracker-badge" style="background:${color}">${esc(tracker.category)}</span>
             <span class="ts-tracker-requests">${tracker.requestCount}x</span>
-            <label class="ts-block-toggle" title="${isBlocked ? 'Stealth-blockiert - klicken zum Erlauben' : 'Erlaubt - klicken zum Stealth-Blockieren'}">
+            <label class="ts-block-toggle" title="${isBlocked ? 'Geschuetzt - klicken zum Zulassen' : 'Aktiv - klicken zum Schuetzen'}">
               <input type="checkbox" class="ts-block-input" data-hostname="${esc(tracker.hostname)}" ${isBlocked ? 'checked' : ''}>
               <span class="ts-block-slider"></span>
             </label>
           </div>
         </div>
-        ${isBlocked ? '<div class="ts-blocked-label">&#128373; STEALTH &mdash; erh&auml;lt Fake-Daten</div>' : ''}
+        ${isBlocked ? '<div class="ts-blocked-label">Privatsph&auml;re gesch&uuml;tzt</div>' : ''}
         ${dataHtml ? `
           <div class="ts-sent-data">
-            <button class="ts-data-toggle">&#9654; Gesendete Daten anzeigen</button>
+            <button class="ts-data-toggle">&#9654; Was wird gesendet?</button>
             <div class="ts-data-details">${dataHtml}</div>
           </div>
         ` : ''}
@@ -368,17 +366,17 @@
         <div class="ts-tracker-header">
           <div class="ts-tracker-name-area">
             <div class="ts-tracker-name">${esc(hostname)}</div>
-            <div class="ts-tracker-company">Stealth-blockiert</div>
+            <div class="ts-tracker-company">Geschuetzt</div>
           </div>
           <div class="ts-tracker-right">
-            <span class="ts-tracker-badge" style="background:#e74c3c">Stealth</span>
-            <label class="ts-block-toggle" title="Stealth-blockiert - klicken zum Erlauben">
+            <span class="ts-tracker-badge" style="background:#4caf50">Geschuetzt</span>
+            <label class="ts-block-toggle" title="Geschuetzt - klicken zum Zulassen">
               <input type="checkbox" class="ts-block-input" data-hostname="${esc(hostname)}" checked>
               <span class="ts-block-slider"></span>
             </label>
           </div>
         </div>
-        <div class="ts-blocked-label">&#128373; STEALTH &mdash; erh&auml;lt Fake-Daten statt echter Informationen</div>
+        <div class="ts-blocked-label">Privatsph&auml;re gesch&uuml;tzt &mdash; kann dich nicht verfolgen</div>
       </div>
     `;
   }
@@ -397,7 +395,7 @@
         const details = btn.nextElementSibling;
         if (details) {
           details.classList.toggle('open');
-          btn.textContent = details.classList.contains('open') ? '\u25BE Details ausblenden' : '\u25B8 Gesendete Daten anzeigen';
+          btn.textContent = details.classList.contains('open') ? '\u25BE Ausblenden' : '\u25B8 Was wird gesendet?';
         }
       });
     });
@@ -421,7 +419,7 @@
     }
     if (message.type === 'TRACKER_UPDATE') {
       currentData = message.data;
-      toggleBtn.innerHTML = `<span class="ts-toggle-count">${currentData.totalTrackers}</span> Tracker`;
+      toggleBtn.innerHTML = `<span class="ts-toggle-count">${currentData.totalTrackers}</span>`;
       if (sidebarVisible) requestRender();
     }
   });
@@ -430,7 +428,7 @@
   chrome.runtime.sendMessage({ type: 'GET_TRACKER_DATA' }, (response) => {
     if (response) {
       currentData = response;
-      toggleBtn.innerHTML = `<span class="ts-toggle-count">${response.totalTrackers}</span> Tracker`;
+      toggleBtn.innerHTML = `<span class="ts-toggle-count">${response.totalTrackers}</span>`;
       if (sidebarVisible) renderSidebar(response);
     }
   });

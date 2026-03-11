@@ -47,16 +47,10 @@
 }
 
 .ts-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ts-title-icon {
-  font-size: 20px;
+  letter-spacing: 0.3px;
 }
 
 .ts-close-btn {
@@ -470,10 +464,6 @@
   line-height: 1.4;
 }
 
-.ts-stealth-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
 
 .ts-stat-stealth {
   background: rgba(76, 175, 80, 0.15) !important;

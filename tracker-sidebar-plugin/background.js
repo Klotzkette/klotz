@@ -1,5 +1,5 @@
 /**
- * Tracker Sidebar - Background Service Worker
+ * Wer trackt wen warum wozu - Background Service Worker
  *
  * DATENSCHUTZ-HINWEIS:
  * Dieses Plugin arbeitet zu 100% lokal im Browser.

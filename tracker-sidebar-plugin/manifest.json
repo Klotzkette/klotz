@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Tracker Sidebar",
-  "version": "1.1.0",
-  "description": "Zeigt alle Tracker, Cookies und Datenflüsse auf jeder Website in einer Sidebar an. Stealth-Modus: Tracker erhalten pseudonymisierte Fake-Daten statt echter Informationen.",
+  "name": "Wer trackt wen warum wozu",
+  "version": "1.2.0",
+  "description": "Zeigt transparent, welche Tracker auf jeder Website aktiv sind, welche Daten sie sammeln und warum. Mehr Privatsphaere mit einem Klick.",
   "permissions": [
     "webRequest",
     "declarativeNetRequest",

@@ -17,9 +17,10 @@
       text-align: center;
     }
     .header h1 {
-      font-size: 18px;
+      font-size: 16px;
       color: #fff;
       margin-bottom: 4px;
+      letter-spacing: 0.3px;
     }
     .header p {
       font-size: 11px;
@@ -45,7 +46,6 @@
       color: #8888aa;
       text-transform: uppercase;
     }
-    .stat-number.red { color: #e74c3c; }
     .stat-number.green { color: #4caf50; }
     .info {
       padding: 14px;
@@ -75,11 +75,6 @@
       color: #fff;
     }
     .btn-toggle:hover { background: #1a4f8e; }
-    .btn-block {
-      background: #e74c3c;
-      color: #fff;
-    }
-    .btn-block:hover { background: #c0392b; }
     .privacy {
       padding: 10px 14px 14px;
       text-align: center;
@@ -93,8 +88,8 @@
 </head>
 <body>
   <div class="header">
-    <h1>&#128737; Tracker Sidebar</h1>
-    <p>Tracker &amp; Cookie Monitor</p>
+    <h1>Wer trackt wen warum wozu</h1>
+    <p>Dein Blick hinter die Kulissen</p>
   </div>
   <div class="stats">
     <div class="stat">
@@ -103,22 +98,22 @@
     </div>
     <div class="stat">
       <div class="stat-number" id="request-count">-</div>
-      <div class="stat-label">Requests</div>
+      <div class="stat-label">Anfragen</div>
     </div>
     <div class="stat">
       <div class="stat-number green" id="blocked-count">-</div>
-      <div class="stat-label">Stealth</div>
+      <div class="stat-label">Gesch&uuml;tzt</div>
     </div>
   </div>
   <div class="info">
-    Klicke auf den <strong>Tracker</strong>-Tab am rechten Seitenrand, um die Sidebar zu öffnen und alle Tracker im Detail zu sehen.
+    Am rechten Seitenrand siehst du den <strong>Tracker</strong>-Tab &mdash; dort findest du alle Details.
   </div>
   <div class="actions">
-    <button class="btn btn-toggle" id="toggle-sidebar">Sidebar öffnen</button>
+    <button class="btn btn-toggle" id="toggle-sidebar">&Uuml;bersicht &ouml;ffnen</button>
   </div>
   <div class="privacy">
-    <strong>100% lokal &amp; privat</strong><br>
-    Dieses Plugin sendet keinerlei Daten nach au&szlig;en. Alle Analysen finden ausschlie&szlig;lich in deinem Browser statt. Blockierte Tracker erhalten pseudonymisierte Fake-Daten &mdash; sie merken nicht, dass sie blockiert wurden.
+    <strong>Arbeitet vollst&auml;ndig lokal</strong><br>
+    Keine Daten verlassen deinen Browser. Alles bleibt bei dir.
   </div>
   <script src="popup.js"></script>
 </body>
