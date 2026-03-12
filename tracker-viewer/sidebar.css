@@ -188,6 +188,60 @@
   border-color: rgba(59, 130, 246, 0.35);
 }
 
+/* ---- Schutzschirm button ---- */
+.ts-shield-btn {
+  color: #eab308;
+  border-color: rgba(234, 179, 8, 0.25);
+  background: rgba(234, 179, 8, 0.03);
+}
+
+.ts-shield-btn:hover {
+  background: rgba(234, 179, 8, 0.08);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #ca8a04;
+}
+
+.ts-shield-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  border-color: #ca8a04;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);
+}
+
+.ts-shield-btn.active:hover {
+  background: linear-gradient(135deg, #ca8a04, #a16207);
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ---- Blocked state ---- */
+.ts-stat-blocked {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.2);
+}
+
+.ts-stat-blocked .ts-stat-number {
+  color: #eab308;
+}
+
+.ts-item-blocked {
+  border-left: 3px solid #eab308;
+}
+
+.ts-blocked-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 300;
+  color: #ca8a04;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  padding: 1px 7px;
+  border-radius: 6px;
+  margin-left: 6px;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+}
+
 /* ---- Category badges ---- */
 .ts-categories {
   display: flex;

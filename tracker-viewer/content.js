@@ -14,26 +14,27 @@
   // Farben: nur Blau / Grau / Gelb
   // ============================================================
   const CATEGORY_COLORS = {
-    "Analytics":       "#3b82f6",   // Blau
-    "Werbung":         "#eab308",   // Gelb-Gold
-    "Social Tracking": "#f59e0b",   // Amber
-    "Tag Manager":     "#64748b",   // Grau
-    "Einbettung":      "#6b7280",   // Grau
-    "CDN":             "#94a3b8",   // Hell-Grau
-    "Consent":         "#60a5fa",   // Hell-Blau
-    "Chat/Support":    "#93c5fd",   // Hellblau
-    "Marketing":       "#d97706",   // Dunkel-Gelb
-    "Affiliate":       "#b45309",   // Braun-Gelb
-    "Social Sharing":  "#fbbf24",   // Gelb
-    "Sicherheit":      "#475569",   // Dunkel-Grau
-    "Performance":     "#2563eb",   // Dunkel-Blau
-    "Fehlertracking":  "#1d4ed8",   // Tiefblau
-    "Unbekannt":       "#9ca3af"    // Grau
+    "Analytics":       "#3b82f6",
+    "Werbung":         "#eab308",
+    "Social Tracking": "#f59e0b",
+    "Tag Manager":     "#64748b",
+    "Einbettung":      "#6b7280",
+    "CDN":             "#94a3b8",
+    "Consent":         "#60a5fa",
+    "Chat/Support":    "#93c5fd",
+    "Marketing":       "#d97706",
+    "Affiliate":       "#b45309",
+    "Social Sharing":  "#fbbf24",
+    "Sicherheit":      "#475569",
+    "Performance":     "#2563eb",
+    "Fehlertracking":  "#1d4ed8",
+    "Unbekannt":       "#9ca3af"
   };
 
   let currentData = null;
   let sidebarVisible = false;
   let renderPending = false;
+  let shieldActive = false;
 
   // ============================================================
   // STABILER GLOBALER STATE: Dieses Set wird NIEMALS neu erzeugt.
@@ -77,6 +78,30 @@
   }
 
   // ============================================================
+  // Schutzschirm Toggle
+  // ============================================================
+  function toggleShield() {
+    chrome.runtime.sendMessage({ type: 'TOGGLE_SHIELD' }, (response) => {
+      if (response) {
+        shieldActive = response.active;
+        updateShieldButton();
+      }
+    });
+  }
+
+  function updateShieldButton() {
+    const btn = sidebar.querySelector('#ts-shield-btn');
+    if (!btn) return;
+    if (shieldActive) {
+      btn.classList.add('active');
+      btn.innerHTML = '&#9632; Schutzschirm AUS';
+    } else {
+      btn.classList.remove('active');
+      btn.innerHTML = '&#9654; Schutzschirm AN';
+    }
+  }
+
+  // ============================================================
   // Summary
   // ============================================================
   function generateSummaryText(data) {
@@ -87,6 +112,7 @@
       `Datum: ${date}`,
       `Aktive Tracker: ${data.totalTrackers}`,
       `Anfragen: ${data.totalRequests}`,
+      `Schutzschirm: ${shieldActive ? 'AKTIV' : 'Aus'}`,
       '', '--- Tracker-Liste ---', ''
     ];
 
@@ -181,6 +207,11 @@
   function renderSidebar(data) {
     const pageUrl = location.hostname + location.pathname;
 
+    // Read shield state from data
+    if (data.shieldActive !== undefined) {
+      shieldActive = data.shieldActive;
+    }
+
     let html = `
       <div class="ts-header">
         <div class="ts-header-top">
@@ -190,11 +221,13 @@
         <div class="ts-stats">
           <span class="ts-stat"><span class="ts-stat-number">${data.totalTrackers}</span> Tracker</span>
           <span class="ts-stat"><span class="ts-stat-number">${data.totalRequests}</span> Anfragen</span>
+          ${shieldActive ? `<span class="ts-stat ts-stat-blocked"><span class="ts-stat-number">${data.blockedCount || 0}</span> blockiert</span>` : ''}
         </div>
         <div class="ts-url" title="${esc(location.href)}">${esc(pageUrl)}</div>
       </div>
 
       <div class="ts-action-bar">
+        <button class="ts-action-btn ts-shield-btn${shieldActive ? ' active' : ''}" id="ts-shield-btn">${shieldActive ? '&#9632; Schutzschirm AUS' : '&#9654; Schutzschirm AN'}</button>
         <button class="ts-action-btn ts-action-summary" id="ts-show-summary">Zusammenfassung</button>
       </div>
     `;
@@ -288,10 +321,10 @@
     const trackerUrl = `https://${tracker.hostname}`;
 
     return `
-      <div class="ts-item" data-hostname="${esc(tracker.hostname)}">
+      <div class="ts-item${shieldActive ? ' ts-item-blocked' : ''}" data-hostname="${esc(tracker.hostname)}">
         <div class="ts-item-header">
           <div class="ts-item-info">
-            <div class="ts-item-name">${esc(tracker.name)}</div>
+            <div class="ts-item-name">${esc(tracker.name)}${shieldActive ? ' <span class="ts-blocked-badge">blockiert</span>' : ''}</div>
             <div class="ts-item-meta">
               ${esc(tracker.company)} &mdash;
               <a href="${esc(trackerUrl)}" target="_blank" rel="noopener noreferrer" class="ts-item-link">${esc(tracker.hostname)}</a>
@@ -314,15 +347,11 @@
 
   // ============================================================
   // Event listeners
-  //
-  // Click-Handler: Minimalistisch.
-  // Toggled nur openDetailIds und updated gezielt das eine Panel.
-  // KEIN Re-Render der ganzen Liste.
-  // KEINE Accordion-Logik — mehrere Panels gleichzeitig offen.
   // ============================================================
   function attachEventListeners(data) {
     sidebar.querySelector('#ts-close')?.addEventListener('click', () => toggleSidebar());
     sidebar.querySelector('#ts-show-summary')?.addEventListener('click', () => showSummaryOverlay(data));
+    sidebar.querySelector('#ts-shield-btn')?.addEventListener('click', () => toggleShield());
 
     sidebar.querySelectorAll('.ts-expand-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -333,7 +362,6 @@
         const panel = sidebar.querySelector(`[data-panel="${tid}"]`);
         if (!panel) return;
 
-        // Toggle im globalen Set
         if (openDetailIds.has(tid)) {
           openDetailIds.delete(tid);
           panel.classList.remove('open');
@@ -363,6 +391,15 @@
       toggleSidebar();
       return;
     }
+    if (message.type === 'SHIELD_STATE') {
+      shieldActive = message.active;
+      if (sidebarVisible && currentData) {
+        currentData.shieldActive = shieldActive;
+        currentData.blockedCount = message.blockedCount;
+        requestRender();
+      }
+      return;
+    }
     if (message.type === 'TRACKER_UPDATE') {
       currentData = message.data;
       toggleBtn.innerHTML = `<span class="ts-toggle-count">${currentData.totalTrackers}</span>`;
@@ -374,6 +411,7 @@
   chrome.runtime.sendMessage({ type: 'GET_TRACKER_DATA' }, (response) => {
     if (response) {
       currentData = response;
+      shieldActive = response.shieldActive || false;
       toggleBtn.innerHTML = `<span class="ts-toggle-count">${response.totalTrackers}</span>`;
       if (sidebarVisible) renderSidebar(response);
     }

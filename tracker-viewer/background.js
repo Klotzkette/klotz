@@ -15,6 +15,89 @@ importScripts('trackers.js');
 const tabTrackers = {};   // tabId -> { hostname -> trackerData }
 const tabUrls = {};       // tabId -> pageUrl
 const pendingUpdates = {}; // tabId -> timeoutId
+let shieldActive = false;
+let blockedCount = 0;
+
+// Restore shield state on startup
+chrome.storage.local.get(['shieldActive', 'blockedCount'], (result) => {
+  shieldActive = result.shieldActive || false;
+  blockedCount = result.blockedCount || 0;
+  if (shieldActive) {
+    applyBlockingRules();
+  }
+});
+
+// ============================================================
+// Schutzschirm: Block all tracker domains via declarativeNetRequest
+// ============================================================
+function buildBlockingRules() {
+  const domains = Object.keys(TRACKER_DATABASE);
+  const rules = [];
+  for (let i = 0; i < domains.length; i++) {
+    rules.push({
+      id: i + 1,
+      priority: 1,
+      action: {
+        type: "redirect",
+        redirect: { url: "data:text/plain," }
+      },
+      condition: {
+        requestDomains: [domains[i]],
+        resourceTypes: [
+          "script", "image", "xmlhttprequest", "sub_frame",
+          "stylesheet", "font", "media", "ping", "other"
+        ]
+      }
+    });
+  }
+  return rules;
+}
+
+function applyBlockingRules() {
+  const rules = buildBlockingRules();
+  const ruleIds = rules.map(r => r.id);
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: ruleIds,
+    addRules: rules
+  }, () => {
+    if (chrome.runtime.lastError) {
+      console.warn('Schutzschirm Fehler:', chrome.runtime.lastError.message);
+    }
+  });
+}
+
+function removeBlockingRules() {
+  const domains = Object.keys(TRACKER_DATABASE);
+  const ruleIds = domains.map((_, i) => i + 1);
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: ruleIds
+  }, () => {
+    if (chrome.runtime.lastError) {
+      console.warn('Schutzschirm Fehler:', chrome.runtime.lastError.message);
+    }
+  });
+}
+
+function toggleShield() {
+  shieldActive = !shieldActive;
+  if (shieldActive) {
+    applyBlockingRules();
+  } else {
+    removeBlockingRules();
+  }
+  chrome.storage.local.set({ shieldActive });
+  // Notify all tabs about shield state change
+  chrome.tabs.query({}, (tabs) => {
+    for (const tab of tabs) {
+      chrome.tabs.sendMessage(tab.id, {
+        type: 'SHIELD_STATE',
+        active: shieldActive,
+        blockedCount
+      }).catch(() => {});
+    }
+  });
+  return shieldActive;
+}
 
 // ============================================================
 // Tab URL tracking
@@ -71,6 +154,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 
     if (!tabTrackers[tabId]) tabTrackers[tabId] = {};
 
+    // Count blocked requests when shield is active
+    if (shieldActive && trackerInfo) {
+      blockedCount++;
+      chrome.storage.local.set({ blockedCount });
+    }
+
     const entry = {
       url: requestUrl,
       hostname,
@@ -87,7 +176,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         cookies,
         referer,
         method: details.method
-      }
+      },
+      blocked: shieldActive && !!trackerInfo
     };
 
     const existing = tabTrackers[tabId][hostname];
@@ -208,7 +298,8 @@ function getTabSummary(tabId) {
       type: r.type,
       method: r.sentData.method,
       timestamp: r.timestamp,
-      sentData: r.sentData
+      sentData: r.sentData,
+      blocked: r.blocked
     }))
   }));
 
@@ -230,7 +321,9 @@ function getTabSummary(tabId) {
     totalTrackers: trackerList.length,
     totalRequests,
     trackers: trackerList,
-    categories
+    categories,
+    shieldActive,
+    blockedCount
   };
 }
 
@@ -240,7 +333,18 @@ function getTabSummary(tabId) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_TRACKER_DATA') {
     const tabId = message.tabId || sender.tab?.id;
-    sendResponse(tabId ? getTabSummary(tabId) : { totalTrackers: 0, totalRequests: 0, trackers: [], categories: {} });
+    sendResponse(tabId ? getTabSummary(tabId) : { totalTrackers: 0, totalRequests: 0, trackers: [], categories: {}, shieldActive, blockedCount });
+    return true;
+  }
+
+  if (message.type === 'TOGGLE_SHIELD') {
+    const newState = toggleShield();
+    sendResponse({ active: newState, blockedCount });
+    return true;
+  }
+
+  if (message.type === 'GET_SHIELD_STATE') {
+    sendResponse({ active: shieldActive, blockedCount });
     return true;
   }
 

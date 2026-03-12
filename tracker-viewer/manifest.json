@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Tracker Viewer",
-  "version": "1.0.0",
-  "description": "Zeigt transparent, welche Tracker auf jeder Website aktiv sind, welche Daten sie sammeln und warum. Reine Anzeige, kein Blocking.",
+  "version": "1.1.0",
+  "description": "Zeigt transparent, welche Tracker auf jeder Website aktiv sind. Mit Schutzschirm: blockiert alle Tracker auf Knopfdruck.",
   "permissions": [
     "webRequest",
+    "declarativeNetRequest",
     "cookies",
     "storage",
     "activeTab",
