@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 320px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #2d3748;
+      background: #f0f4f8;
+      transition: background 0.3s ease;
+    }
+
+    .header {
+      text-align: center;
+      padding: 16px 16px 12px;
+      background: linear-gradient(135deg, #e8f0fe 0%, #f7f8e8 100%);
+      border-bottom: 1px solid #d8e2ef;
+    }
+    .header h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a365d;
+      letter-spacing: 0.5px;
+    }
+    .header .subtitle {
+      font-size: 10px;
+      color: #718096;
+      margin-top: 3px;
+      letter-spacing: 0.2px;
+    }
+
+    .mode-list {
+      padding: 8px 10px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .category {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #94a3b8;
+      padding: 6px 6px 2px;
+    }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+      color: #334155;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .mode-btn:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, #dbeafe 0%, #f0fdf4 100%);
+      border-color: #7eb8da;
+      color: #1a365d;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(126, 184, 218, 0.25);
+    }
+    .mode-btn .icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      width: 20px;
+      text-align: center;
+    }
+    .mode-btn .label { flex: 1; }
+    .mode-btn .check {
+      opacity: 0;
+      font-size: 12px;
+      color: #4299a1;
+      font-weight: 700;
+      transition: opacity 0.15s;
+    }
+    .mode-btn.active .check { opacity: 1; }
+
+    .footer {
+      text-align: center;
+      padding: 6px 16px 10px;
+      font-size: 9px;
+      color: #a0aec0;
+      letter-spacing: 0.3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 id="headerTitle">Text-Transformer</h1>
+    <div class="subtitle" id="headerSubtitle">Modus anklicken zum Aktivieren. Nochmal zum Deaktivieren.</div>
+  </div>
+
+  <div class="mode-list" id="modeList">
+    <div class="category">Sprachstile</div>
+    <button class="mode-btn" data-mode="genz">
+      <span class="icon">💀</span>
+      <span class="label">Gen-Z / Gen Alpha</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="formal">
+      <span class="icon">📜</span>
+      <span class="label">Bildungssprache</span>
+      <span class="check">&#10003;</span>
+    </button>
+
+    <div class="category">Dialekte</div>
+    <button class="mode-btn" data-mode="fraenkisch">
+      <span class="icon">🌭</span>
+      <span class="label">Fränkisch</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="berlinerisch">
+      <span class="icon">🐻</span>
+      <span class="label">Berlinerisch</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="schwaebisch">
+      <span class="icon">🏠</span>
+      <span class="label">Schwäbisch</span>
+      <span class="check">&#10003;</span>
+    </button>
+
+    <div class="category">Gendern</div>
+    <button class="mode-btn" data-mode="gender_star">
+      <span class="icon">*</span>
+      <span class="label">Gendern (Stern)</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="gender_colon">
+      <span class="icon">:</span>
+      <span class="label">Gendern (Doppelpunkt)</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="gender_participle">
+      <span class="icon">~</span>
+      <span class="label">Partizip-Form</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="gender_maskulinum">
+      <span class="icon">M</span>
+      <span class="label">Generisches Maskulinum</span>
+      <span class="check">&#10003;</span>
+    </button>
+
+    <div class="category">Text-Werkzeuge</div>
+    <button class="mode-btn" data-mode="adjektivkiller">
+      <span class="icon">&#10006;</span>
+      <span class="label">Adjektivkiller</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="kleinschreibung">
+      <span class="icon">a</span>
+      <span class="label">alles kleinschreiben</span>
+      <span class="check">&#10003;</span>
+    </button>
+    <button class="mode-btn" data-mode="vokalentferner">
+      <span class="icon">&#9676;</span>
+      <span class="label">Vokalentferner</span>
+      <span class="check">&#10003;</span>
+    </button>
+  </div>
+
+  <div class="footer" id="footerText">Text-Transformer v4.2 &mdash; 12 Modi &mdash; 100% lokal</div>
+
+  <script src="js/popup.js"></script>
+</body>
+</html>
