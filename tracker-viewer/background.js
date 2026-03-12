@@ -29,32 +29,89 @@ chrome.storage.local.get(['shieldActive', 'blockedCount'], (result) => {
 
 // ============================================================
 // Schutzschirm: Block all tracker domains via declarativeNetRequest
+// Tracker bekommen generische Fake-Null-Daten zurueck
 // ============================================================
+
+// Verschiedene Fake-Antworten je nach Request-Typ:
+// Scripts bekommen leeres JS, Bilder ein 1x1 Pixel, XHR bekommt Fake-JSON
+const FAKE_RESPONSES = {
+  // Leeres JavaScript — Tracker-Script laeuft ins Leere
+  script: "data:text/javascript;base64," + btoa('void(0);/*N/A*/'),
+  // 1x1 transparentes GIF — Tracking-Pixel sieht "Erfolg", kriegt aber nichts
+  image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+  // Fake JSON mit Null-Daten — Analytics-Endpunkte bekommen "Antwort"
+  xhr: "data:application/json;base64," + btoa(JSON.stringify({
+    status: "ok", data: null, results: [], count: 0, id: "00000000",
+    client_id: "N/A", session_id: "N/A", user_id: "N/A",
+    tracking: false, consent: false, opted_out: true
+  })),
+  // Leeres HTML fuer iframes
+  frame: "data:text/html;base64," + btoa('<html><head></head><body></body></html>'),
+  // Leeres CSS
+  style: "data:text/css;base64," + btoa('/* N/A */'),
+  // Generischer Fallback
+  other: "data:text/plain;base64," + btoa('N/A')
+};
+
 function buildBlockingRules() {
   const domains = Object.keys(TRACKER_DATABASE);
   const rules = [];
-  for (let i = 0; i < domains.length; i++) {
+  let ruleId = 1;
+
+  for (const domain of domains) {
+    // Script-Requests -> leeres JS
     rules.push({
-      id: i + 1,
+      id: ruleId++,
       priority: 1,
-      action: {
-        type: "redirect",
-        redirect: { url: "data:text/plain," }
-      },
-      condition: {
-        requestDomains: [domains[i]],
-        resourceTypes: [
-          "script", "image", "xmlhttprequest", "sub_frame",
-          "stylesheet", "font", "media", "ping", "other"
-        ]
-      }
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.script } },
+      condition: { requestDomains: [domain], resourceTypes: ["script"] }
+    });
+    // Bild-Requests -> 1x1 Pixel
+    rules.push({
+      id: ruleId++,
+      priority: 1,
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.image } },
+      condition: { requestDomains: [domain], resourceTypes: ["image"] }
+    });
+    // XHR/Fetch -> Fake-JSON
+    rules.push({
+      id: ruleId++,
+      priority: 1,
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.xhr } },
+      condition: { requestDomains: [domain], resourceTypes: ["xmlhttprequest"] }
+    });
+    // iframes -> leeres HTML
+    rules.push({
+      id: ruleId++,
+      priority: 1,
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.frame } },
+      condition: { requestDomains: [domain], resourceTypes: ["sub_frame"] }
+    });
+    // CSS -> leeres Stylesheet
+    rules.push({
+      id: ruleId++,
+      priority: 1,
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.style } },
+      condition: { requestDomains: [domain], resourceTypes: ["stylesheet"] }
+    });
+    // Alles andere -> Fallback
+    rules.push({
+      id: ruleId++,
+      priority: 1,
+      action: { type: "redirect", redirect: { url: FAKE_RESPONSES.other } },
+      condition: { requestDomains: [domain], resourceTypes: ["font", "media", "ping", "other"] }
     });
   }
+
   return rules;
 }
 
+// Cache rule IDs for fast removal
+let activeRuleCount = 0;
+
 function applyBlockingRules() {
   const rules = buildBlockingRules();
+  activeRuleCount = rules.length;
   const ruleIds = rules.map(r => r.id);
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: ruleIds,
@@ -67,8 +124,8 @@ function applyBlockingRules() {
 }
 
 function removeBlockingRules() {
-  const domains = Object.keys(TRACKER_DATABASE);
-  const ruleIds = domains.map((_, i) => i + 1);
+  const ruleIds = [];
+  for (let i = 1; i <= activeRuleCount; i++) ruleIds.push(i);
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: ruleIds
   }, () => {

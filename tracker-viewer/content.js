@@ -94,10 +94,10 @@
     if (!btn) return;
     if (shieldActive) {
       btn.classList.add('active');
-      btn.innerHTML = '&#9632; Schutzschirm AUS';
+      btn.textContent = 'Schutzschirm ist jetzt aktiv';
     } else {
       btn.classList.remove('active');
-      btn.innerHTML = '&#9654; Schutzschirm AN';
+      btn.textContent = 'Schutzschirm nicht aktiv';
     }
   }
 
@@ -227,7 +227,7 @@
       </div>
 
       <div class="ts-action-bar">
-        <button class="ts-action-btn ts-shield-btn${shieldActive ? ' active' : ''}" id="ts-shield-btn">${shieldActive ? '&#9632; Schutzschirm AUS' : '&#9654; Schutzschirm AN'}</button>
+        <button class="ts-action-btn ts-shield-btn${shieldActive ? ' active' : ''}" id="ts-shield-btn">${shieldActive ? 'Schutzschirm ist jetzt aktiv' : 'Schutzschirm nicht aktiv'}</button>
         <button class="ts-action-btn ts-action-summary" id="ts-show-summary">Zusammenfassung</button>
       </div>
     `;
