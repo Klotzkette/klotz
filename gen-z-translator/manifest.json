@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Text-Transformer — 12 Modi für deutschen Text",
+  "version": "4.2.0",
+  "description": "Gen-Z-Sprache, Bildungssprache, Fränkisch, Berlinerisch, Schwäbisch (-le), Gendern (*/:/Partizip), Maskulinum, Adjektivkiller, Kleinschreibung, Vokalentferner. 100% lokal — keine Daten werden übertragen.",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "js/grammar.js",
+        "js/dictionary.js",
+        "js/emojis.js",
+        "js/fillers.js",
+        "js/transformer.js",
+        "js/formal-dictionary.js",
+        "js/formal-fillers.js",
+        "js/formal-transformer.js",
+        "js/dialects.js",
+        "js/dialect-transformer.js",
+        "js/special-modes.js",
+        "js/extra-modes.js",
+        "js/content.js"
+      ],
+      "css": ["css/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
