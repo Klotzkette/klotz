@@ -88,6 +88,18 @@ const EMOJI_CHAINS = {
     '🤝🤝', '🤝💯', '✅🤝', '🤝🔥'
   ],
 
+  // Aura / Charisma / Ausstrahlung
+  aura: [
+    '✨✨✨', '👑✨', '😎✨', '⚡✨', '🔮✨', '✨👑✨',
+    'Aura +100 ✨', '✨🫡', '😤✨'
+  ],
+
+  // Cooked / Erledigt / Erschöpft
+  cooked: [
+    '🍳💀', '💀🍳', '😵💀', '🫠🫠', '💀💀💀', '🍳🍳',
+    'cooked 🍳💀', '😵‍💫💀'
+  ],
+
   // Allgemein / Random (für Satzenden)
   general: [
     '💀', '😭', '🔥', '✨', '💯', '👀', '😤', '🫡', '🗿',
@@ -132,6 +144,8 @@ const EMOJI_KEYWORD_MAP = [
   { keywords: ['gewinn', 'sieg', 'champion', 'erst', 'best', 'gold', 'medaille', 'clutch', 'dub'], category: 'win' },
   { keywords: ['deal', 'vertrag', 'abmachung', 'vereinbar', 'partner'], category: 'deal' },
   { keywords: ['selbstbewusst', 'confident', 'stark', 'power', 'energy', 'alpha'], category: 'confident' },
+  { keywords: ['aura', 'ausstrahlung', 'charisma', 'rizz', 'vibe check', 'präsenz'], category: 'aura' },
+  { keywords: ['cooked', 'erledigt', 'erschöpft', 'fertig', 'am ende', 'done', 'kaputt', 'platt'], category: 'cooked' },
 ];
 
 /**

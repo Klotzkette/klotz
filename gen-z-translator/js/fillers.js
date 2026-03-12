@@ -30,6 +30,9 @@ const FILLER_WORDS = {
     'Ahnma, ',
     'Leude, ',
     'Fam, ',
+    'Aura check: ',
+    'Das crazy, ',
+    'Let him cook, ',
   ],
 
   // Füllwörter die in der Mitte eines Satzes stehen können
@@ -56,6 +59,8 @@ const FILLER_WORDS = {
     ' unironisch ',
     ' on god ',
     ' periodt ',
+    ' das crazy ',
+    ' its giving ',
   ],
 
   // Füllwörter die am Satzende stehen können
@@ -85,6 +90,9 @@ const FILLER_WORDS = {
     ' fr fr',
     ', Habibi',
     ', no cap fr',
+    ', das crazy',
+    ', six seven',
+    ', Aura +100',
   ],
 };
 
@@ -112,6 +120,14 @@ const GEN_ALPHA_EXTRAS = [
   'Vibe check: ',
   'No cap fr fr ',
   'POV: ',
+  'Bro is cooked ',
+  'Six seven ',
+  'Aura +100 ',
+  'Canon event: ',
+  'Side quest: ',
+  'Let him cook ',
+  'Das crazy ',
+  'Chopped ',
 ];
 
 // Satz-Einschübe die zwischen Sätzen eingefügt werden (bei hoher Intensität)
@@ -133,6 +149,11 @@ const SENTENCE_INTERJECTIONS = [
   'Vibe.',
   'Das crazy.',
   'Bruh.',
+  'Cooked.',
+  'Six seven.',
+  'Aura.',
+  'Canon.',
+  'Let him cook.',
 ];
 
 /**

@@ -22,7 +22,7 @@ const GermanGrammar = {
     'eine':  { m: 'ein',   f: 'eine',  n: 'ein' },
     'einem': { m: 'einem', f: 'einer', n: 'einem' },
     'einen': { m: 'einen', f: 'eine',  n: 'ein' },
-    'einer': { m: 'eines', f: 'einer', n: 'eines' },
+    'einer': { m: 'einem', f: 'einer', n: 'einem' },
     'eines': { m: 'eines', f: 'einer', n: 'eines' },
     'kein':   { m: 'kein',   f: 'keine',  n: 'kein' },
     'keine':  { m: 'kein',   f: 'keine',  n: 'kein' },
@@ -42,15 +42,17 @@ const GermanGrammar = {
     'bold', 'dead', 'fake', 'real', 'soft', 'hot', 'big', 'low', 'high',
     'top', 'hard', 'slow', 'boring', 'wrong', 'viral', 'hyped', 'clean',
     'dope', 'wack', 'lame', 'thicc', 'goated', 'blessed', 'cursed',
+    'cooked', 'chopped', 'coded', 'canon', 'delulu',
     // English/slang nouns
     'bro', 'bestie', 'homie', 'dude', 'boy', 'girl', 'girlie',
     'king', 'queen', 'bae', 'babo', 'squad', 'fam', 'gang',
     'drip', 'fit', 'vibe', 'hype', 'tea', 'cash', 'bag',
     'grind', 'hustle', 'crib', 'ride', 'whip', 'flex', 'diss',
     'fix', 'move', 'win', 'fail', 'flop', 'scam', 'beef', 'drama',
-    'issue', 'struggle', 'content', 'reel', 'mood', 'energy',
+    'issue', 'struggle', 'content', 'reel', 'mood', 'energy', 'aura',
     'look', 'take', 'facts', 'cap', 'npc', 'goat', 'simp',
-    'snack', 'vlog', 'meme', 'stan', 'clout', 'slay',
+    'snack', 'vlog', 'meme', 'stan', 'clout', 'slay', 'rizz',
+    'talahon', 'clapback',
     // Formal replacements that are already phrases
     'causa', 'remedur', 'divertissement',
   ]),
@@ -183,6 +185,7 @@ const GermanGrammar = {
   /**
    * Grammar-aware replacement for applyDictionary.
    * Erweitert den Match um Flexionsendungen und überträgt sie auf die Ersetzung.
+   * Bei Genus-Wechsel (gender → rGender) wird auch der Artikel angepasst.
    */
   replaceWithGrammar(text, entry, replacement) {
     if (!entry.type) {
@@ -192,23 +195,45 @@ const GermanGrammar = {
       });
     }
 
-    // Erweiterte Pattern mit Endungs-Capture
     const { regex, extended } = this.extendPattern(entry.pattern, entry.type);
+    const fromGender = entry.gender || null;
+    const toGender = entry.rGender || fromGender;
+    const needsArticleAdjust = fromGender && toGender && fromGender !== toGender;
 
-    return text.replace(regex, (match, capturedEnding) => {
-      const ending = extended ? (capturedEnding || '') : '';
-      let result = replacement;
+    if (!needsArticleAdjust) {
+      // Kein Genus-Wechsel → einfache Ersetzung mit Endungs-Übertragung
+      return text.replace(regex, (match, capturedEnding) => {
+        const ending = extended ? (capturedEnding || '') : '';
+        let result = replacement;
+        if (ending) {
+          result = this.applyEnding(replacement, ending, entry.type);
+        }
+        return this._preserveCase(match, result);
+      });
+    }
 
-      // Endung auf Ersetzung anwenden
+    // Genus-Wechsel: Artikel im Text vor dem Match anpassen
+    // Manueller Loop nötig, da wir Text VOR dem Match modifizieren müssen
+    let result = '';
+    let lastIndex = 0;
+    const execRegex = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : regex.flags + 'g');
+    let m;
+    while ((m = execRegex.exec(text)) !== null) {
+      const before = text.substring(lastIndex, m.index);
+      const adjustedBefore = this.adjustArticle(before, fromGender, toGender);
+
+      const ending = extended ? (m[1] || '') : '';
+      let rep = replacement;
       if (ending) {
-        result = this.applyEnding(replacement, ending, entry.type);
+        rep = this.applyEnding(replacement, ending, entry.type);
       }
+      rep = this._preserveCase(m[0], rep);
 
-      // Großschreibung beibehalten
-      result = this._preserveCase(match, result);
-
-      return result;
-    });
+      result += adjustedBefore + rep;
+      lastIndex = m.index + m[0].length;
+    }
+    result += text.substring(lastIndex);
+    return result;
   },
 
   /**
