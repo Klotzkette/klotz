@@ -1,6 +1,6 @@
 /* ============================================================
-   Tracker Viewer — Premium Sidebar Design
-   Modern, refined, with smooth animations and great readability
+   Tracker Viewer — Blau (#3b82f6) / Gelb (#facc15) / Grau
+   Kein font-weight > 400. Hierarchie nur durch Farbe, Groesse, Spacing.
    ============================================================ */
 
 /* ---- Sidebar container ---- */
@@ -16,9 +16,9 @@
   font-size: 13px;
   line-height: 1.55;
   color: #475569;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #f1f5f9 100%);
+  background: #f8fafc;
   border-left: 1px solid rgba(148, 163, 184, 0.15);
-  box-shadow: -8px 0 40px rgba(15, 23, 42, 0.08), -2px 0 8px rgba(15, 23, 42, 0.03);
+  box-shadow: -8px 0 40px rgba(15, 23, 42, 0.08);
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -60,7 +60,7 @@
   left: -10%;
   width: 120%;
   height: 160%;
-  background: radial-gradient(ellipse at 20% 30%, rgba(107, 157, 194, 0.15) 0%, transparent 50%);
+  background: radial-gradient(ellipse at 20% 30%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -74,16 +74,16 @@
 
 .ts-title {
   font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
   letter-spacing: 2.5px;
   text-transform: uppercase;
 }
 
 .ts-close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
   cursor: pointer;
   width: 30px;
@@ -109,26 +109,26 @@
 }
 
 .ts-stat {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 11px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   transition: background 0.2s;
 }
 
 .ts-stat:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .ts-stat-number {
-  font-weight: 600;
-  color: #fff;
+  font-weight: 400;
+  color: #facc15;
   margin-right: 4px;
 }
 
@@ -137,7 +137,7 @@
   position: relative;
   font-size: 10px;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.35);
   margin-top: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -162,7 +162,7 @@
   border-radius: 8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 300;
   cursor: pointer;
   transition: all 0.2s;
   background: #fff;
@@ -172,20 +172,20 @@
 
 .ts-action-btn:hover {
   background: #f8fafc;
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.06);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.06);
 }
 
 .ts-action-summary {
-  color: #6b9dc2;
-  border-color: rgba(107, 157, 194, 0.25);
-  background: rgba(107, 157, 194, 0.03);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.02);
 }
 
 .ts-action-summary:hover {
-  background: rgba(107, 157, 194, 0.08);
-  border-color: rgba(107, 157, 194, 0.4);
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.35);
 }
 
 /* ---- Category badges ---- */
@@ -202,50 +202,37 @@
   padding: 3px 11px;
   border-radius: 12px;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 300;
   color: #fff;
   letter-spacing: 0.3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .ts-cat:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 /* ---- Tracker list ---- */
 .ts-list {
-  padding: 4px 0;
+  padding: 6px 12px;
 }
 
-/* ---- Tracker item ---- */
+/* ---- Tracker item (Card) ---- */
 .ts-item {
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.07);
-  transition: background 0.2s, border-color 0.2s;
+  padding: 14px 16px;
+  margin-bottom: 6px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
   position: relative;
 }
 
 .ts-item:hover {
-  background: rgba(107, 157, 194, 0.03);
-}
-
-.ts-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  background: #6b9dc2;
-  border-radius: 0 2px 2px 0;
-  transition: height 0.2s;
-}
-
-.ts-item:hover::before {
-  height: 24px;
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06);
 }
 
 .ts-item-header {
@@ -261,31 +248,30 @@
 }
 
 .ts-item-name {
-  font-weight: 600;
+  font-weight: 400;
   color: #1e293b;
   font-size: 13px;
   word-break: break-word;
   line-height: 1.3;
-  letter-spacing: -0.1px;
 }
 
 .ts-item-meta {
   font-size: 11px;
   color: #94a3b8;
-  font-weight: 400;
+  font-weight: 300;
   margin-top: 3px;
   line-height: 1.4;
 }
 
 .ts-item-link {
-  color: #6b9dc2;
+  color: #3b82f6;
   text-decoration: none;
   transition: color 0.15s;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .ts-item-link:hover {
-  color: #4a7fa8;
+  color: #2563eb;
   text-decoration: underline;
 }
 
@@ -300,7 +286,7 @@
   padding: 3px 10px;
   border-radius: 10px;
   font-size: 9px;
-  font-weight: 500;
+  font-weight: 300;
   color: #fff;
   white-space: nowrap;
   letter-spacing: 0.3px;
@@ -308,8 +294,8 @@
 
 .ts-item-count {
   font-size: 11px;
-  color: #94a3b8;
-  font-weight: 400;
+  color: #64748b;
+  font-weight: 300;
   white-space: nowrap;
   background: rgba(148, 163, 184, 0.08);
   padding: 2px 8px;
@@ -323,13 +309,13 @@
 
 .ts-expand-btn {
   background: none;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   color: #94a3b8;
   padding: 6px 14px;
   border-radius: 8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 300;
   cursor: pointer;
   transition: all 0.2s;
   width: 100%;
@@ -340,15 +326,15 @@
 }
 
 .ts-expand-btn:hover {
-  background: rgba(107, 157, 194, 0.06);
-  border-color: rgba(107, 157, 194, 0.3);
-  color: #6b9dc2;
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #3b82f6;
 }
 
 .ts-expand-btn.open {
-  background: rgba(107, 157, 194, 0.05);
-  border-color: rgba(107, 157, 194, 0.2);
-  color: #6b9dc2;
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.18);
+  color: #3b82f6;
 }
 
 .ts-expand-arrow {
@@ -364,26 +350,18 @@
 .ts-expand-panel {
   display: none;
   margin-top: 10px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 10px;
-  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
+  padding: 14px;
   max-height: 500px;
   overflow-y: auto;
-  animation: slideDown 0.25s ease-out;
+  animation: slideDown 0.2s ease-out;
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .ts-expand-panel.open {
@@ -395,7 +373,7 @@
 
 /* ---- Detail sections ---- */
 .ts-detail-section {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .ts-detail-section:last-child {
@@ -404,13 +382,13 @@
 
 .ts-detail-label {
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 400;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 1.2px;
   margin-bottom: 6px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -420,7 +398,7 @@
   content: '';
   width: 3px;
   height: 10px;
-  background: #6b9dc2;
+  background: #3b82f6;
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -431,7 +409,7 @@
 }
 
 .ts-detail-table td {
-  padding: 4px 0;
+  padding: 3px 0;
   font-size: 11px;
   font-weight: 300;
   vertical-align: top;
@@ -445,7 +423,7 @@
 
 .ts-detail-table td:first-child {
   color: #475569;
-  font-weight: 500;
+  font-weight: 400;
   padding-right: 12px;
   white-space: nowrap;
   max-width: 120px;
@@ -457,6 +435,7 @@
 
 .ts-detail-table td:last-child {
   color: #64748b;
+  font-weight: 300;
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -469,7 +448,8 @@
 }
 
 .ts-detail-referer {
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 300;
   color: #64748b;
   word-break: break-all;
   line-height: 1.5;
@@ -477,7 +457,6 @@
   padding: 6px 10px;
   border-radius: 6px;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 10px;
 }
 
 .ts-type-badge {
@@ -485,17 +464,17 @@
   padding: 3px 10px;
   border-radius: 6px;
   font-size: 10px;
-  font-weight: 500;
-  background: rgba(107, 157, 194, 0.08);
-  border: 1px solid rgba(107, 157, 194, 0.12);
-  color: #5a8aad;
+  font-weight: 300;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
   margin-right: 5px;
   margin-bottom: 4px;
   transition: background 0.15s;
 }
 
 .ts-type-badge:hover {
-  background: rgba(107, 157, 194, 0.14);
+  background: rgba(59, 130, 246, 0.12);
 }
 
 /* ---- Empty state ---- */
@@ -512,7 +491,7 @@
 
 .ts-empty-text {
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 300;
   color: #94a3b8;
   letter-spacing: 0.3px;
 }
@@ -534,12 +513,12 @@
   background: linear-gradient(135deg, #1e293b, #334155);
   border: none;
   border-radius: 12px 0 0 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   padding: 14px 8px;
   cursor: pointer;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 300;
   box-shadow: -3px 0 16px rgba(15, 23, 42, 0.12);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   writing-mode: vertical-lr;
@@ -559,18 +538,18 @@
 
 .ts-toggle-count {
   display: inline-block;
-  background: linear-gradient(135deg, #6b9dc2, #5a8aad);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   border-radius: 8px;
   min-width: 24px;
   height: 24px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 400;
   text-align: center;
   line-height: 24px;
   writing-mode: horizontal-tb;
   margin-bottom: 6px;
-  box-shadow: 0 2px 6px rgba(107, 157, 194, 0.3);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 /* ---- Summary overlay ---- */
@@ -630,7 +609,7 @@
   padding: 20px 24px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   color: #1e293b;
   letter-spacing: 0.2px;
 }
@@ -665,7 +644,7 @@
   color: #475569;
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.7;
   resize: none;
   min-height: 300px;
@@ -673,7 +652,7 @@
 }
 
 .ts-summary-text:focus {
-  outline: 2px solid rgba(107, 157, 194, 0.3);
+  outline: 2px solid rgba(59, 130, 246, 0.3);
   outline-offset: -1px;
 }
 
@@ -686,30 +665,30 @@
 }
 
 .ts-summary-copy {
-  background: linear-gradient(135deg, #6b9dc2, #5a8aad);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 10px 28px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 300;
   letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(107, 157, 194, 0.25);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 .ts-summary-copy:hover {
-  background: linear-gradient(135deg, #5a8aad, #4a7a9d);
-  box-shadow: 0 4px 14px rgba(107, 157, 194, 0.35);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
   transform: translateY(-1px);
 }
 
 .ts-summary-copied {
-  color: #6aab8e;
+  color: #facc15;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 300;
 }
 
 /* ---- Footer ---- */
@@ -717,7 +696,7 @@
   padding: 20px 24px;
   text-align: center;
   font-size: 10px;
-  font-weight: 400;
+  font-weight: 300;
   color: #94a3b8;
   border-top: 1px solid rgba(148, 163, 184, 0.06);
   letter-spacing: 0.2px;

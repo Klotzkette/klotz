@@ -10,30 +10,36 @@
 
   if (document.getElementById('tracker-sidebar-container')) return;
 
+  // ============================================================
+  // Farben: nur Blau / Grau / Gelb
+  // ============================================================
   const CATEGORY_COLORS = {
-    "Analytics": "#6b9dc2",
-    "Werbung": "#d97556",
-    "Social Tracking": "#7b8fb8",
-    "Tag Manager": "#c9a84c",
-    "Einbettung": "#9b7db8",
-    "CDN": "#8a9baa",
-    "Consent": "#6aab8e",
-    "Chat/Support": "#5ea8b5",
-    "Marketing": "#d4955a",
-    "Affiliate": "#9e8878",
-    "Social Sharing": "#c47a8e",
-    "Sicherheit": "#5a9a6e",
-    "Performance": "#7585b5",
-    "Fehlertracking": "#cd6f55",
-    "Unbekannt": "#a0aab4"
+    "Analytics":       "#3b82f6",   // Blau
+    "Werbung":         "#eab308",   // Gelb-Gold
+    "Social Tracking": "#f59e0b",   // Amber
+    "Tag Manager":     "#64748b",   // Grau
+    "Einbettung":      "#6b7280",   // Grau
+    "CDN":             "#94a3b8",   // Hell-Grau
+    "Consent":         "#60a5fa",   // Hell-Blau
+    "Chat/Support":    "#93c5fd",   // Hellblau
+    "Marketing":       "#d97706",   // Dunkel-Gelb
+    "Affiliate":       "#b45309",   // Braun-Gelb
+    "Social Sharing":  "#fbbf24",   // Gelb
+    "Sicherheit":      "#475569",   // Dunkel-Grau
+    "Performance":     "#2563eb",   // Dunkel-Blau
+    "Fehlertracking":  "#1d4ed8",   // Tiefblau
+    "Unbekannt":       "#9ca3af"    // Grau
   };
 
   let currentData = null;
   let sidebarVisible = false;
   let renderPending = false;
 
-  // IMPORTANT: This Set persists across re-renders so detail panels stay open
-  const openDetails = new Set();
+  // ============================================================
+  // STABILER GLOBALER STATE: Dieses Set wird NIEMALS neu erzeugt.
+  // Nur .add(), .delete(), .has() — kein Reassignment.
+  // ============================================================
+  const openDetailIds = new Set();
 
   // Load sidebar state from storage
   chrome.storage?.local?.get(['sidebarVisible'], (result) => {
@@ -71,7 +77,7 @@
   }
 
   // ============================================================
-  // Summary text generation
+  // Summary
   // ============================================================
   function generateSummaryText(data) {
     const date = new Date().toLocaleString('de-DE');
@@ -159,6 +165,9 @@
 
   // ============================================================
   // Render (throttled via requestAnimationFrame)
+  //
+  // WICHTIG: Die Render-Funktion ist REIN LESEND bezüglich openDetailIds.
+  // Sie liest nur .has() — keine DOM-Abfragen für open/close State.
   // ============================================================
   function requestRender() {
     if (renderPending) return;
@@ -170,17 +179,6 @@
   }
 
   function renderSidebar(data) {
-    // STEP 1: Read which panels are currently open in the DOM and sync to our persistent Set
-    sidebar.querySelectorAll('.ts-expand-panel.open').forEach(el => {
-      const hostname = el.closest('.ts-item')?.dataset?.hostname;
-      if (hostname) openDetails.add(hostname);
-    });
-    sidebar.querySelectorAll('.ts-expand-panel:not(.open)').forEach(el => {
-      const hostname = el.closest('.ts-item')?.dataset?.hostname;
-      if (hostname) openDetails.delete(hostname);
-    });
-
-    // Current page URL for display
     const pageUrl = location.hostname + location.pathname;
 
     let html = `
@@ -205,7 +203,7 @@
     if (data.categories && Object.keys(data.categories).length > 0) {
       html += '<div class="ts-categories">';
       for (const [cat, count] of Object.entries(data.categories)) {
-        const color = CATEGORY_COLORS[cat] || '#a0aab4';
+        const color = CATEGORY_COLORS[cat] || '#9ca3af';
         html += `<span class="ts-cat" style="background:${color}">${esc(cat)} ${count}</span>`;
       }
       html += '</div>';
@@ -229,20 +227,20 @@
     }
 
     html += '</div>';
-    html += '<div class="ts-footer">Tracker Viewer &mdash; arbeitet vollst\u00e4ndig lokal</div>';
+    html += '<div class="ts-footer">Tracker Viewer \u2014 arbeitet vollst\u00e4ndig lokal</div>';
 
     sidebar.innerHTML = html;
     attachEventListeners(data);
   }
 
   function renderTrackerItem(tracker) {
-    const color = CATEGORY_COLORS[tracker.category] || '#a0aab4';
+    const color = CATEGORY_COLORS[tracker.category] || '#9ca3af';
     const cookieCount = Object.keys(tracker.allCookies || {}).length;
     const paramCount = Object.keys(tracker.allParams || {}).length;
     const receivedCookieCount = (tracker.receivedCookies || []).length;
 
-    // Check our persistent Set - this is what keeps details open across re-renders
-    const isOpen = openDetails.has(tracker.hostname);
+    // REIN LESEND: openDetailIds ist die einzige Quelle der Wahrheit
+    const isOpen = openDetailIds.has(tracker.hostname);
 
     const dataSections = [];
 
@@ -306,8 +304,8 @@
         </div>
         ${dataHtml ? `
           <div class="ts-item-data">
-            <button class="ts-expand-btn${isOpen ? ' open' : ''}"><span class="ts-expand-arrow">&#9654;</span> ${isOpen ? 'Ausblenden' : 'Was wird gesendet?'}</button>
-            <div class="ts-expand-panel${isOpen ? ' open' : ''}">${dataHtml}</div>
+            <button class="ts-expand-btn${isOpen ? ' open' : ''}" data-tid="${esc(tracker.hostname)}"><span class="ts-expand-arrow">&#9654;</span> ${isOpen ? 'Ausblenden' : 'Was wird gesendet?'}</button>
+            <div class="ts-expand-panel${isOpen ? ' open' : ''}" data-panel="${esc(tracker.hostname)}">${dataHtml}</div>
           </div>
         ` : ''}
       </div>
@@ -316,6 +314,11 @@
 
   // ============================================================
   // Event listeners
+  //
+  // Click-Handler: Minimalistisch.
+  // Toggled nur openDetailIds und updated gezielt das eine Panel.
+  // KEIN Re-Render der ganzen Liste.
+  // KEINE Accordion-Logik — mehrere Panels gleichzeitig offen.
   // ============================================================
   function attachEventListeners(data) {
     sidebar.querySelector('#ts-close')?.addEventListener('click', () => toggleSidebar());
@@ -324,24 +327,25 @@
     sidebar.querySelectorAll('.ts-expand-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const panel = btn.nextElementSibling;
-        if (panel) {
-          const isOpen = panel.classList.toggle('open');
-          btn.classList.toggle('open', isOpen);
-          // Update button text
-          const arrow = btn.querySelector('.ts-expand-arrow');
-          const arrowHtml = arrow ? arrow.outerHTML : '';
-          btn.innerHTML = `${arrowHtml} ${isOpen ? 'Ausblenden' : 'Was wird gesendet?'}`;
+        const tid = btn.dataset.tid;
+        if (!tid) return;
 
-          // PERSIST the open/close state in our Set so it survives re-renders
-          const hostname = btn.closest('.ts-item')?.dataset?.hostname;
-          if (hostname) {
-            if (isOpen) {
-              openDetails.add(hostname);
-            } else {
-              openDetails.delete(hostname);
-            }
-          }
+        const panel = sidebar.querySelector(`[data-panel="${tid}"]`);
+        if (!panel) return;
+
+        // Toggle im globalen Set
+        if (openDetailIds.has(tid)) {
+          openDetailIds.delete(tid);
+          panel.classList.remove('open');
+          btn.classList.remove('open');
+          const arrow = btn.querySelector('.ts-expand-arrow');
+          btn.innerHTML = `${arrow ? arrow.outerHTML : '<span class="ts-expand-arrow">&#9654;</span>'} Was wird gesendet?`;
+        } else {
+          openDetailIds.add(tid);
+          panel.classList.add('open');
+          btn.classList.add('open');
+          const arrow = btn.querySelector('.ts-expand-arrow');
+          btn.innerHTML = `${arrow ? arrow.outerHTML : '<span class="ts-expand-arrow">&#9654;</span>'} Ausblenden`;
         }
       });
     });
