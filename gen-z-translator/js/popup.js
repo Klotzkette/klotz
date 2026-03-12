@@ -1,69 +1,36 @@
-// Popup Controller — Click-to-Apply
-// Klick auf Modus -> sofort anwenden. Nochmal klicken -> deaktivieren.
+// Gen-Z Translator — Popup: An/Aus Toggle
 
-let activeMode = null;
+const toggle = document.getElementById('mainToggle');
+const status = document.getElementById('status');
 
-// === Mode Button Handling ===
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const mode = btn.dataset.mode;
+toggle.addEventListener('change', async () => {
+  const isOn = toggle.checked;
 
-    if (activeMode === mode) {
-      // Gleichen Modus nochmal geklickt -> deaktivieren
-      await revertCurrentMode();
-      setInactive();
-      return;
-    }
+  if (isOn) {
+    status.textContent = 'Aktiv';
+    status.classList.add('active');
 
-    // Neuen Modus aktivieren
-    activeMode = mode;
-
-    // UI aktualisieren
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Settings zusammenbauen
-    const settings = {
-      mode: mode,
-      replace: true,
-      fillers: true,
-      emojis: true,
-      intensity: 100,
-    };
-
-    if (mode.startsWith('gender_')) {
-      settings.genderMode = mode.replace('gender_', '');
-    }
-
-    // Speichern und an Content-Script senden
+    const settings = { mode: 'genz', replace: true, fillers: true, emojis: true, intensity: 100 };
     chrome.storage.local.set({ genzSettings: settings, genzActive: true });
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.tabs.sendMessage(tab.id, {
-      action: 'transform',
-      settings: settings
-    });
-  });
+    chrome.tabs.sendMessage(tab.id, { action: 'transform', settings });
+  } else {
+    status.textContent = 'Aus';
+    status.classList.remove('active');
+
+    chrome.storage.local.set({ genzActive: false });
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.tabs.sendMessage(tab.id, { action: 'revert' });
+  }
 });
 
-async function revertCurrentMode() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  chrome.tabs.sendMessage(tab.id, { action: 'revert' });
-  chrome.storage.local.set({ genzActive: false });
-}
-
-function setInactive() {
-  activeMode = null;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-}
-
-// === Restore saved state on popup open ===
-chrome.storage.local.get(['genzSettings', 'genzActive'], (data) => {
-  if (data.genzActive && data.genzSettings) {
-    const mode = data.genzSettings.mode;
-    activeMode = mode;
-
-    const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
-    if (btn) btn.classList.add('active');
+// Restore state on popup open
+chrome.storage.local.get(['genzActive'], (data) => {
+  if (data.genzActive) {
+    toggle.checked = true;
+    status.textContent = 'Aktiv';
+    status.classList.add('active');
   }
 });

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text-Transformer — 12 Modi für deutschen Text",
-  "version": "4.2.0",
-  "description": "Gen-Z-Sprache, Bildungssprache, Fränkisch, Berlinerisch, Schwäbisch (-le), Gendern (*/:/Partizip), Maskulinum, Adjektivkiller, Kleinschreibung, Vokalentferner. 100% lokal — keine Daten werden übertragen.",
+  "name": "Gen-Z Translator",
+  "version": "5.0.0",
+  "description": "Verwandelt deutschen Text in Gen-Z-Sprache. An/Aus — fertig. 100% lokal.",
   "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html",
@@ -26,13 +26,6 @@
         "js/emojis.js",
         "js/fillers.js",
         "js/transformer.js",
-        "js/formal-dictionary.js",
-        "js/formal-fillers.js",
-        "js/formal-transformer.js",
-        "js/dialects.js",
-        "js/dialect-transformer.js",
-        "js/special-modes.js",
-        "js/extra-modes.js",
         "js/content.js"
       ],
       "css": ["css/overlay.css"],
