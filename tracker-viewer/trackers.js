@@ -129,21 +129,21 @@ const TRACKER_DATABASE = {
 
 // Category colors for display
 const CATEGORY_COLORS = {
-  "Analytics": "#4285f4",
-  "Werbung": "#ea4335",
-  "Social Tracking": "#1877f2",
-  "Tag Manager": "#f4b400",
-  "Einbettung": "#9c27b0",
-  "CDN": "#607d8b",
-  "Consent": "#4caf50",
-  "Chat/Support": "#00bcd4",
-  "Marketing": "#ff9800",
-  "Affiliate": "#795548",
-  "Social Sharing": "#e91e63",
-  "Sicherheit": "#2e7d32",
-  "Performance": "#3f51b5",
-  "Fehlertracking": "#ff5722",
-  "Unbekannt": "#9e9e9e"
+  "Analytics": "#3b82f6",
+  "Werbung": "#eab308",
+  "Social Tracking": "#f59e0b",
+  "Tag Manager": "#64748b",
+  "Einbettung": "#6b7280",
+  "CDN": "#94a3b8",
+  "Consent": "#60a5fa",
+  "Chat/Support": "#93c5fd",
+  "Marketing": "#d97706",
+  "Affiliate": "#b45309",
+  "Social Sharing": "#fbbf24",
+  "Sicherheit": "#475569",
+  "Performance": "#2563eb",
+  "Fehlertracking": "#1d4ed8",
+  "Unbekannt": "#9ca3af"
 };
 
 // --- Performance: Pre-build a suffix-match lookup table ---
