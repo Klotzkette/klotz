@@ -16,12 +16,10 @@ const tabTrackers = {};   // tabId -> { hostname -> trackerData }
 const tabUrls = {};       // tabId -> pageUrl
 const pendingUpdates = {}; // tabId -> timeoutId
 let shieldActive = false;
-let blockedCount = 0;
 
 // Restore shield state on startup
-chrome.storage.local.get(['shieldActive', 'blockedCount'], (result) => {
+chrome.storage.local.get(['shieldActive'], (result) => {
   shieldActive = result.shieldActive || false;
-  blockedCount = result.blockedCount || 0;
   if (shieldActive) {
     applyBlockingRules();
   }
@@ -33,7 +31,6 @@ chrome.storage.local.get(['shieldActive', 'blockedCount'], (result) => {
 // ============================================================
 
 // Verschiedene Fake-Antworten je nach Request-Typ:
-// Scripts bekommen leeres JS, Bilder ein 1x1 Pixel, XHR bekommt Fake-JSON
 const FAKE_RESPONSES = {
   // Leeres JavaScript — Tracker-Script laeuft ins Leere
   script: "data:text/javascript;base64," + btoa('void(0);/*N/A*/'),
@@ -59,45 +56,33 @@ function buildBlockingRules() {
   let ruleId = 1;
 
   for (const domain of domains) {
-    // Script-Requests -> leeres JS
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.script } },
       condition: { requestDomains: [domain], resourceTypes: ["script"] }
     });
-    // Bild-Requests -> 1x1 Pixel
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.image } },
       condition: { requestDomains: [domain], resourceTypes: ["image"] }
     });
-    // XHR/Fetch -> Fake-JSON
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.xhr } },
       condition: { requestDomains: [domain], resourceTypes: ["xmlhttprequest"] }
     });
-    // iframes -> leeres HTML
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.frame } },
       condition: { requestDomains: [domain], resourceTypes: ["sub_frame"] }
     });
-    // CSS -> leeres Stylesheet
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.style } },
       condition: { requestDomains: [domain], resourceTypes: ["stylesheet"] }
     });
-    // Alles andere -> Fallback
     rules.push({
-      id: ruleId++,
-      priority: 1,
+      id: ruleId++, priority: 1,
       action: { type: "redirect", redirect: { url: FAKE_RESPONSES.other } },
       condition: { requestDomains: [domain], resourceTypes: ["font", "media", "ping", "other"] }
     });
@@ -106,7 +91,6 @@ function buildBlockingRules() {
   return rules;
 }
 
-// Cache rule IDs for fast removal
 let activeRuleCount = 0;
 
 function applyBlockingRules() {
@@ -146,10 +130,11 @@ function toggleShield() {
   // Notify all tabs about shield state change
   chrome.tabs.query({}, (tabs) => {
     for (const tab of tabs) {
+      const summary = getTabSummary(tab.id);
       chrome.tabs.sendMessage(tab.id, {
         type: 'SHIELD_STATE',
         active: shieldActive,
-        blockedCount
+        blockedCount: summary.blockedCount
       }).catch(() => {});
     }
   });
@@ -181,9 +166,10 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 });
 
 // ============================================================
-// Request interception: detect & record third-party trackers
+// Request interception: onBeforeRequest fires BEFORE declarativeNetRequest
+// redirects. This is where we detect tracker requests — even blocked ones.
 // ============================================================
-chrome.webRequest.onBeforeSendHeaders.addListener(
+chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
     const tabId = details.tabId;
     if (tabId < 0) return;
@@ -192,6 +178,9 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     if (!pageUrl) return;
 
     const requestUrl = details.url;
+    // Skip data: URLs (these are our own fake responses)
+    if (requestUrl.startsWith('data:')) return;
+
     if (!isThirdParty(requestUrl, pageUrl)) return;
 
     let hostname;
@@ -200,22 +189,9 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     const trackerInfo = identifyTracker(requestUrl);
     const requestData = parseRequestData(requestUrl);
 
-    const cookieHeader = details.requestHeaders?.find(
-      h => h.name.toLowerCase() === 'cookie'
-    );
-    const cookies = cookieHeader ? parseCookieHeader(cookieHeader.value) : {};
-
-    const referer = details.requestHeaders?.find(
-      h => h.name.toLowerCase() === 'referer'
-    )?.value || null;
-
     if (!tabTrackers[tabId]) tabTrackers[tabId] = {};
 
-    // Count blocked requests when shield is active
-    if (shieldActive && trackerInfo) {
-      blockedCount++;
-      chrome.storage.local.set({ blockedCount });
-    }
+    const isBlocked = shieldActive && !!trackerInfo;
 
     const entry = {
       url: requestUrl,
@@ -230,18 +206,18 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       },
       sentData: {
         urlParams: requestData,
-        cookies,
-        referer,
+        cookies: {},
+        referer: null,
         method: details.method
       },
-      blocked: shieldActive && !!trackerInfo
+      blocked: isBlocked
     };
 
     const existing = tabTrackers[tabId][hostname];
     if (existing) {
       existing.requests.push(entry);
       existing.requestCount++;
-      Object.assign(existing.allCookies, cookies);
+      if (isBlocked) existing.blockedCount = (existing.blockedCount || 0) + 1;
       Object.assign(existing.allParams, requestData);
     } else {
       tabTrackers[tabId][hostname] = {
@@ -249,7 +225,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         trackerInfo: entry.trackerInfo,
         requests: [entry],
         requestCount: 1,
-        allCookies: { ...cookies },
+        blockedCount: isBlocked ? 1 : 0,
+        allCookies: {},
         allParams: { ...requestData },
         receivedCookies: [],
         firstSeen: Date.now()
@@ -257,6 +234,43 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     }
 
     scheduleUIUpdate(tabId);
+  },
+  { urls: ["<all_urls>"] }
+);
+
+// ============================================================
+// onBeforeSendHeaders: Augment with cookie/referer data
+// (Only fires for non-redirected requests — when shield is off)
+// ============================================================
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    const tabId = details.tabId;
+    if (tabId < 0) return;
+
+    let hostname;
+    try { hostname = new URL(details.url).hostname; } catch { return; }
+
+    const tracker = tabTrackers[tabId]?.[hostname];
+    if (!tracker) return;
+
+    const cookieHeader = details.requestHeaders?.find(
+      h => h.name.toLowerCase() === 'cookie'
+    );
+    if (cookieHeader) {
+      const cookies = parseCookieHeader(cookieHeader.value);
+      Object.assign(tracker.allCookies, cookies);
+      // Also update the last request entry with cookie data
+      const lastReq = tracker.requests[tracker.requests.length - 1];
+      if (lastReq) lastReq.sentData.cookies = cookies;
+    }
+
+    const referer = details.requestHeaders?.find(
+      h => h.name.toLowerCase() === 'referer'
+    )?.value || null;
+    if (referer) {
+      const lastReq = tracker.requests[tracker.requests.length - 1];
+      if (lastReq) lastReq.sentData.referer = referer;
+    }
   },
   { urls: ["<all_urls>"] },
   ["requestHeaders"]
@@ -347,6 +361,7 @@ function getTabSummary(tabId) {
     category: t.trackerInfo.category,
     company: t.trackerInfo.company,
     requestCount: t.requestCount,
+    blockedCount: t.blockedCount || 0,
     allCookies: t.allCookies,
     allParams: t.allParams,
     receivedCookies: t.receivedCookies,
@@ -369,18 +384,20 @@ function getTabSummary(tabId) {
 
   const categories = {};
   let totalRequests = 0;
+  let totalBlocked = 0;
   for (const t of trackerList) {
     categories[t.category] = (categories[t.category] || 0) + 1;
     totalRequests += t.requestCount;
+    totalBlocked += t.blockedCount;
   }
 
   return {
     totalTrackers: trackerList.length,
     totalRequests,
+    blockedCount: totalBlocked,
     trackers: trackerList,
     categories,
-    shieldActive,
-    blockedCount
+    shieldActive
   };
 }
 
@@ -390,18 +407,20 @@ function getTabSummary(tabId) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_TRACKER_DATA') {
     const tabId = message.tabId || sender.tab?.id;
-    sendResponse(tabId ? getTabSummary(tabId) : { totalTrackers: 0, totalRequests: 0, trackers: [], categories: {}, shieldActive, blockedCount });
+    sendResponse(tabId ? getTabSummary(tabId) : { totalTrackers: 0, totalRequests: 0, blockedCount: 0, trackers: [], categories: {}, shieldActive });
     return true;
   }
 
   if (message.type === 'TOGGLE_SHIELD') {
     const newState = toggleShield();
-    sendResponse({ active: newState, blockedCount });
+    const tabId = sender.tab?.id;
+    const summary = tabId ? getTabSummary(tabId) : null;
+    sendResponse({ active: newState, blockedCount: summary?.blockedCount || 0 });
     return true;
   }
 
   if (message.type === 'GET_SHIELD_STATE') {
-    sendResponse({ active: shieldActive, blockedCount });
+    sendResponse({ active: shieldActive });
     return true;
   }
 
