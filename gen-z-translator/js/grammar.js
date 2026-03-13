@@ -53,6 +53,12 @@ const GermanGrammar = {
     'look', 'take', 'facts', 'cap', 'npc', 'goat', 'simp',
     'snack', 'vlog', 'meme', 'stan', 'clout', 'slay', 'rizz',
     'talahon', 'clapback',
+    // v6 neue Begriffe
+    'pick', 'glazing', 'yapping', 'mewing', 'ratio', 'cope',
+    'clutch', 'unhinged', 'sketchy', 'wholesome', 'comfy', 'cozy',
+    'elite', 'insane', 'immaculate', 'serving', 'coded', 'maxxing',
+    'diffed', 'gapped', 'griefed', 'carried', 'tilting',
+    'chopped', 'nerfed', 'buffed', 'spawned', 'launched',
     // Formal replacements that are already phrases
     'causa', 'remedur', 'divertissement',
   ]),

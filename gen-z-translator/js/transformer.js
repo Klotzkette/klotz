@@ -18,6 +18,16 @@ const PARENTHETICAL_COMMENTS = {
     ' (das war jetzt sehr Powerpoint-Folie-3)',
     ' (stell dir vor das steht da wirklich)',
     ' (keiner hat danach gefragt aber okay)',
+    ' (ich bin noch wach, keine Sorge)',
+    ' (okay das war Information)',
+    ' (notiert, danke)',
+    ' (cool cool cool)',
+    ' (das stand da einfach so)',
+    ' (der Absatz war eine Wahl)',
+    ' (okay weiter im Programm)',
+    ' (das war ein Satz, er existiert)',
+    ' (file under: things that were said)',
+    ' (moving on)',
   ],
   // Reaktionen auf positive Aussagen
   positive: [
@@ -33,6 +43,16 @@ const PARENTHETICAL_COMMENTS = {
     ' (der Satz hat verstanden)',
     ' (understood the assignment)',
     ' (endlich sagt es jemand)',
+    ' (massive W)',
+    ' (das hat cooked und geslayt)',
+    ' (wir lieben to see it)',
+    ' (goated fr)',
+    ' (Aura +1000)',
+    ' (der Satz hat Main Character Energy)',
+    ' (serving)',
+    ' (this is the content I signed up for)',
+    ' (peak performance right here)',
+    ' (blessed)',
   ],
   // Reaktionen auf negative/problematische Aussagen
   negative: [
@@ -48,6 +68,16 @@ const PARENTHETICAL_COMMENTS = {
     ' (okay DAS war unnötig)',
     ' (ich würde jetzt gerne woanders sein)',
     ' (der Vibe ist jetzt im Keller)',
+    ' (RIP)',
+    ' (we are cooked)',
+    ' (Aura -1000)',
+    ' (das war ein Nerf)',
+    ' (literally niemand wollte das hören)',
+    ' (pain without the S)',
+    ' (cope)',
+    ' (the audacity)',
+    ' (not the flex you think it is)',
+    ' (touch grass bitte)',
   ],
   // Reaktionen auf formelle/steife Sprache — der Reza-Kern
   formal: [
@@ -65,6 +95,17 @@ const PARENTHETICAL_COMMENTS = {
     ' (LinkedIn-Energy)',
     ' (das klingt wie eine E-Mail die mit "Sehr geehrte" anfängt)',
     ' (der Satz läuft auf Lederschuhen)',
+    ' (Business Casual Vibes)',
+    ' (der Satz hat einen Aktenkoffer)',
+    ' (ganz großes Beamtenkino)',
+    ' (dieser Satz zahlt Steuern)',
+    ' (der Satz hat ein Fax geschickt)',
+    ' (Newsletter-Deutsch detected)',
+    ' (CEO-Energy unironisch)',
+    ' (klingt wie jemand der "alsdann" sagt)',
+    ' (der Satz hat einen Dienstwagen)',
+    ' (Outlook-Signatur-Energy)',
+    ' (die Formulierung trägt Hemd)',
   ],
   // Reaktionen auf Zahlen/Statistik-Aussagen
   data: [
@@ -74,6 +115,12 @@ const PARENTHETICAL_COMMENTS = {
     ' (Quelle: trust me bro)',
     ' (der Excel-Satz)',
     ' (klingt wissenschaftlich also stimmt das wohl)',
+    ' (Statistik go brrr)',
+    ' (okay Nerd)',
+    ' (big data energy)',
+    ' (der Satz hat eine Tabellenkalkulation)',
+    ' (Mathe wurde nicht gefragt aber okay)',
+    ' (Quelle: ich hab das gegoogled)',
   ],
   // Meta-Kommentare über die Verwandlung selbst
   meta: [
@@ -86,6 +133,13 @@ const PARENTHETICAL_COMMENTS = {
     ' (der Originalautor würde weinen)',
     ' (der Text hat die Kontrolle verloren und das ist okay)',
     ' (wir sind im Endgame jetzt)',
+    ' (der Text hat einen Glow-Up bekommen)',
+    ' (wir haben den Text geunlocked)',
+    ' (der Vibe hat sich shifted)',
+    ' (character development)',
+    ' (this is canon now)',
+    ' (es gibt kein Undo)',
+    ' (akzeptiere die neue Timeline)',
   ],
 };
 
@@ -239,7 +293,26 @@ class GenZTransformer {
       // Satzanfang
       if (shouldInsertFiller(intensity * 0.7)) {
         const filler = getRandomFiller('start', intensity);
-        modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
+        // Nur kleine Wörter am Satzanfang lowercasen (Artikel, Pronomen, etc.)
+        // Deutsche Nomen bleiben immer großgeschrieben!
+        const firstWord = modified.match(/^(\S+)/);
+        const lowercaseWords = new Set([
+          'der','die','das','den','dem','des','ein','eine','einem','einen','einer','eines',
+          'er','sie','es','wir','ihr','ich','du','man','sein','seine','seinem','seinen','seiner',
+          'ihr','ihre','ihrem','ihren','ihrer','mein','meine','meinem','meinen','meiner',
+          'kein','keine','keinem','keinen','keiner','und','oder','aber','denn','wenn','weil',
+          'dass','ob','als','wie','so','da','hier','dort','nun','noch','schon','auch','nur',
+          'nicht','sehr','viel','mehr','bei','mit','von','zu','nach','aus','auf','an','in',
+          'über','unter','vor','hinter','neben','zwischen','bis','für','gegen','ohne','um',
+          'durch','während','wegen','trotz','seit','ab','außer','jeder','jede','jedes','jedem',
+          'jeden','jener','jene','jenes','dieser','diese','dieses','diesem','diesen',
+          'alle','viele','einige','manche','welche','solche',
+        ]);
+        if (firstWord && lowercaseWords.has(firstWord[1].toLowerCase())) {
+          modified = filler + modified.charAt(0).toLowerCase() + modified.slice(1);
+        } else {
+          modified = filler + modified;
+        }
       }
 
       // Satzende
