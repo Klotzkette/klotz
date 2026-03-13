@@ -63,6 +63,9 @@ const FILLER_WORDS = {
     'Okay krass, ',
     'Also hört mal, ',
     'W Aussage: ',
+    'Mois, ',
+    'Yalla, ',
+    'Pookie, ',
   ],
 
   // Füllwörter die in der Mitte eines Satzes stehen können
@@ -173,6 +176,11 @@ const FILLER_WORDS = {
     ', wer\'s nicht glaubt',
     ', swear down',
     ', rede!',
+    ', mois',
+    ', pookie',
+    ', yalla',
+    ', Aura +1000',
+    ', iykyk',
   ],
 };
 

@@ -12,6 +12,23 @@ const GENZ_DICTIONARY = [
   // ==========================================================================
   // PHRASEN & REDEWENDUNGEN (Längere zuerst für korrekte Priorität)
   // ==========================================================================
+  // v6.1: Recherche-basierte Ergänzungen (crash out, lock in, Pookie, Unc, Yalla etc.)
+  { pattern: /\bdie Kontrolle verlieren\b/gi, replacements: ['crashen', 'crash outen'] },
+  { pattern: /\bausrasten\b/gi, replacements: ['crash outen 😤', 'crashen', 'tilten'] },
+  { pattern: /\bsich konzentrieren\b/gi, replacements: ['lock in 🔒', 'sich focussen'] },
+  { pattern: /\bLiebling\b/gi, replacements: ['Pookie 🥰', 'Bae', 'Boo'], type: 'noun', gender: 'm', rGender: 'm' },
+  { pattern: /\bLos geht\'s\b/gi, replacements: ['Yalla', 'Let\'s go', 'Auf geht\'s'] },
+  { pattern: /\bkomm schon\b/gi, replacements: ['yalla', 'come on', 'let\'s go'] },
+  { pattern: /\bälterer Mann\b/gi, replacements: ['Unc', 'Boomer'] },
+  { pattern: /\bältere Person\b/gi, replacements: ['Unc', 'Boomer'] },
+  { pattern: /\bhilfsbereit\b/gi, replacements: ['real one', 'supportive fr', 'clutch'], type: 'adj' },
+  { pattern: /\baufmerksam\b/gi, replacements: ['woke', 'mindful', 'aware fr'], type: 'adj' },
+  { pattern: /\bbescheiden\b/gi, replacements: ['demure', 'very demure, very mindful 💅'], type: 'adj' },
+  { pattern: /\brebellisch\b/gi, replacements: ['brat 💚', 'rebellisch fr'], type: 'adj' },
+  { pattern: /\bunvermeidlich\b/gi, replacements: ['ein Canon Event', 'unvermeidbar fr'], type: 'adj' },
+  { pattern: /\bSchicksal\b/gi, replacements: ['Canon Event', 'Destiny', 'Schicksal fr'], type: 'noun', gender: 'n', rGender: 'n' },
+  { pattern: /\bProvokation\b/gi, replacements: ['Ragebait', 'Bait'], type: 'noun', gender: 'f', rGender: 'm' },
+  { pattern: /\bmühelos\b/gi, replacements: ['effortless', 'steez', 'smooth'], type: 'adj' },
   { pattern: /\bOh mein Gott\b/gi, replacements: ['OMG', 'Sheesh', 'Alter'] },
   { pattern: /\bAngst etwas zu verpassen\b/gi, replacements: ['FOMO'] },
   { pattern: /\bFreude allein zu sein\b/gi, replacements: ['JOMO'] },
